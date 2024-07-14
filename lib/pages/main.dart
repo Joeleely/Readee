@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:readee_app/pages/login.dart';
 import 'package:readee_app/pages/logo.dart';
+import 'package:readee_app/pages/register.dart';
 
 void main() {
   runApp(const MyApp());

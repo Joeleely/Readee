@@ -1,15 +1,21 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:readee_app/pages/register.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({Key? key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({Key? key}) : super(key: key);
+
+  @override
+  _RegisterPageState createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  bool agreedToTerms = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login Page'),
+        title: const Text('Register'),
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 140, 226, 255),
       ),
@@ -28,23 +34,38 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               const Text(
-                'Please enter your details.',
+                'Create your account to get started.',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey,
                 ),
               ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 30),
               const Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Email/Username'),
+                child: Text('Username'),
+              ),
+              const SizedBox(height: 5),
+              TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Enter your username',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 25),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Email'),
               ),
               const SizedBox(height: 5),
               TextFormField(
                 decoration: const InputDecoration(
                   hintText: 'hello@email.com',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  ),
                 ),
               ),
               const SizedBox(height: 25),
@@ -54,23 +75,61 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 5),
               const PasswordFormField(),
-              const SizedBox(height: 10),
-              Align(
+              const SizedBox(height: 25),
+              const Align(
                 alignment: Alignment.centerLeft,
-                child: InkWell(
-                  onTap: () {
-                    // Add function here
-                    print('Forgot password? tapped');
-                  },
-                  child: const Text(
-                    'Forgot password?',
-                    style: TextStyle(
-                      color: Colors.blue,
+                child: Text('Confirm Password'),
+              ),
+              const SizedBox(height: 5),
+              const PasswordFormField(),
+              const SizedBox(height: 20),
+               Row(
+                children: [
+                  Checkbox(
+                    value: agreedToTerms,
+                    onChanged: (bool? value) {
+                      if (value != null) {
+                        setState(() {
+                          agreedToTerms = value;
+                        });
+                      }
+                    },
+                  ),
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        text: 'By registering, you are agreeing with our ',
+                        children: [
+                          TextSpan(
+                            text: 'Terms of Use',
+                            style: const TextStyle(
+                              decoration: TextDecoration.underline,
+                              color: Color(0xFF28A9D1),
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                // Navigate to Terms of Use
+                              },
+                          ),
+                          const TextSpan(text: ' and '),
+                          TextSpan(
+                            text: 'Privacy Policy',
+                            style: const TextStyle(
+                              decoration: TextDecoration.underline,
+                              color: Color(0xFF28A9D1),
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                // Navigate to Privacy Policy
+                              },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   // Add function here
@@ -80,9 +139,9 @@ class LoginPage extends StatelessWidget {
                   backgroundColor: const Color(0xFF28A9D1),
                   minimumSize: const Size(double.infinity, 48),
                 ),
-                child: const Text('Login'),
+                child: const Text('Create Account'),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
               const Row(
                 children: [
                   Expanded(
@@ -93,7 +152,7 @@ class LoginPage extends StatelessWidget {
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('or login with'),
+                    child: Text('or connect via'),
                   ),
                   Expanded(
                     child: Divider(
@@ -103,7 +162,7 @@ class LoginPage extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
               ElevatedButton.icon(
                 onPressed: () {
                   // Add function here
@@ -122,35 +181,6 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              Align(
-                alignment: Alignment.center,
-                child: RichText(
-                  text: TextSpan(
-                    text: "You don't have an account? ",
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                    ),
-                    children: <TextSpan>[
-                      TextSpan(
-                        text: 'Sign Up',
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const RegisterPage()),
-                            );
-                          },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -176,7 +206,8 @@ class _PasswordFormFieldState extends State<PasswordFormField> {
       decoration: InputDecoration(
         hintText: '********',
         border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(5.0))),
+          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+        ),
         suffixIcon: IconButton(
           icon: Icon(
             _obscureText ? Icons.visibility_off : Icons.visibility,
