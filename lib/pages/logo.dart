@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:readee_app/pages/login.dart';
+import 'package:readee_app/features/authen/login.dart';
 
 class LogoPage extends StatelessWidget {
   const LogoPage({super.key});

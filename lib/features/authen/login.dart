@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:readee_app/pages/register.dart';
+import 'package:readee_app/features/authen/register.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key});
