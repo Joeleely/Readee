@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:readee_app/typography.dart';
 
 class SwipeCard extends StatefulWidget {
   const SwipeCard({super.key});
@@ -47,27 +48,36 @@ class _SwipeCardState extends State<SwipeCard> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            const Text(
-                              'The seven husbands',
-                              style: TextStyle(color: Colors.white),
+                            SizedBox(
+                              width: 200,
+                              child: Text(
+                                'The Seven Husbands of Evelyn Hugo',
+                                maxLines: 2,
+                                style: TypographyText.h2(Colors.white),
+                              ),
                             ),
-                            const SizedBox(
-                              width: 10,
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.5),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(10))),
+                                  child: Text(
+                                    '95%',
+                                    style: TypographyText.h4(Colors.white),
+                                  )),
                             ),
-                            Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                child: const Text('95%')),
                           ],
                         ),
                         IconButton(
@@ -78,15 +88,17 @@ class _SwipeCardState extends State<SwipeCard> {
                             ))
                       ],
                     ),
-                    const Text(
+                    Text(
                       'Taylor',
-                      style: TextStyle(color: Colors.white),
+                      style: TypographyText.b4(Colors.grey),
                     ),
-                    const Text(
+                    const SizedBox(height: 5),
+                    Text(
                       'description this is mock to check love you the seven husbands of evelyn hugo',
-                      style: TextStyle(color: Colors.white),
+                      style: TypographyText.b3(Colors.white),
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 10,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
