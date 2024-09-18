@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:readee_app/features/auth/persona.dart';
 import 'package:readee_app/features/match/match.dart';
 
 class HomePage extends StatelessWidget {
@@ -15,7 +16,7 @@ class HomePage extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: const Color.fromARGB(255, 243, 252, 255),
       ),
-      home: const MatchPage(),
+      home: PersonaPage(),
     );
   }
 }
