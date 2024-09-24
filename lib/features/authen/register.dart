@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  const RegisterPage({super.key});
 
   @override
   _RegisterPageState createState() => _RegisterPageState();
@@ -190,7 +190,7 @@ class _RegisterPageState extends State<RegisterPage> {
 }
 
 class PasswordFormField extends StatefulWidget {
-  const PasswordFormField({Key? key}) : super(key: key);
+  const PasswordFormField({super.key});
 
   @override
   _PasswordFormFieldState createState() => _PasswordFormFieldState();

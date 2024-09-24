@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:readee_app/features/match/match.dart';
+import 'package:get/get.dart';
+import 'package:readee_app/features/profile/editProfileScreen.dart';
+import 'package:readee_app/features/profile/profile.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -15,7 +17,7 @@ class HomePage extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: const Color.fromARGB(255, 243, 252, 255),
       ),
-      home: const MatchPage(),
+      home: const EditProfileScreen(),
     );
   }
 }
