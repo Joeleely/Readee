@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:readee_app/features/auth/register.dart';
 
 class LoginPage extends StatelessWidget {
-  const LoginPage({Key? key});
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +157,7 @@ class LoginPage extends StatelessWidget {
 }
 
 class PasswordFormField extends StatefulWidget {
-  const PasswordFormField({Key? key}) : super(key: key);
+  const PasswordFormField({super.key});
 
   @override
   _PasswordFormFieldState createState() => _PasswordFormFieldState();
