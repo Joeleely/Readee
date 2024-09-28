@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:readee_app/features/profile/profileScreen.dart';
-import 'package:readee_app/features/profile/widget/profileMenuWidget.dart';
+import 'package:readee_app/features/profile/editProfileScreen.dart';
+import 'package:readee_app/widget/profile_menu.dart';
 import 'package:get/get.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -61,7 +61,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ProfileMenuWidget(
                     title: 'Profile',
                     icon: Icons.person,
-                    onClicked: () => Get.to(() => const ProfileScreen()),),
+                    onClicked: () => Get.to(() => const EditProfileScreen()),),
                 ProfileMenuWidget(
                     title: 'Genres', icon: Icons.book, onClicked: () {}),
                 ProfileMenuWidget(
