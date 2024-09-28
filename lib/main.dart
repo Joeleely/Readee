@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:readee_app/features/profile/profile.dart';
+import 'package:readee_app/home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: const Color.fromARGB(255, 243, 252, 255),
       ),
-      home: ProfilePage(),
+      home: HomePage(),
     );
   }
 }

@@ -113,16 +113,15 @@ class _PersonaPageState extends State<PersonaPage> {
                   },
                 ),
               ),
-              // Done button
               const SizedBox(height: 20,),
               Align(
                 alignment: Alignment.center,
                 child: ElevatedButton(
                   onPressed: selectedGenres.isNotEmpty
                       ? () {
-                          // Do something when "Done" is pressed
+                          // Do something
                         }
-                      : null, // Disable the button if no genre is selected
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF28A9D1),
                     minimumSize: const Size(200, 50),
@@ -138,7 +137,6 @@ class _PersonaPageState extends State<PersonaPage> {
           ),
         ),
       ),
-      bottomNavigationBar: const ReadeeNavigationBar(),
     );
   }
 }

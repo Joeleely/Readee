@@ -1,4 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:readee_app/features/auth/persona.dart';
+import 'package:readee_app/features/auth/test_api/genres.dart';
+import 'package:readee_app/features/chat/chat.dart';
+import 'package:readee_app/features/match_list/match_list.dart';
+import 'package:readee_app/features/profile/profile.dart';
+import 'package:readee_app/home.dart';
+import 'package:readee_app/pages/logo.dart';
 
 class ReadeeNavigationBar extends StatefulWidget {
   const ReadeeNavigationBar({super.key});
@@ -8,34 +16,70 @@ class ReadeeNavigationBar extends StatefulWidget {
 }
 
 class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
+  int currentTab = 0;
+  final List<Widget> screens = [
+    const LogoPage(),
+    const ChatPage(),
+    const ProfilePage(),
+    const MatchListPage(),
+  ];
+
+  final PageStorageBucket bucket = PageStorageBucket();
+  Widget currentScreen = const LogoPage(); // chage here to home page
+
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: Colors.cyan,
-      unselectedItemColor: Colors.grey,
-      items: const [
-      BottomNavigationBarItem(
-        icon: Icon(Icons.bookmark_add),
-        label: '',
+    return Scaffold(
+      body: PageStorage(
+        bucket: bucket,
+        child: currentScreen,
       ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.format_list_bulleted),
-        label: '',
-      ),
-      BottomNavigationBarItem(
-          icon: Icon(Icons.add_circle), // Use add_circle for a more visually similar icon
-          label: '',
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 10,
+        child: SizedBox(
+          height: 60,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                _buildNavButton(Icons.swap_horiz, 0, const LogoPage()), // also change here
+                _buildNavButton(Icons.list, 1, const MatchListPage()),
+                FloatingActionButton(
+                  child: const Icon(Icons.add),
+                  onPressed: () {
+                    // Define the action for the floating action button here
+                  },
+                ),
+                _buildNavButton(Icons.textsms, 2, const ChatPage()),
+                _buildNavButton(Icons.person, 3, const ProfilePage()),
+              ],
+            ),
+          ),
         ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.textsms),
-        label: ''
       ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.account_circle),
-        label: ''
+    );
+  }
+
+  Widget _buildNavButton(IconData icon, int tabIndex, Widget page) {
+    return MaterialButton(
+      minWidth: 40,
+      onPressed: () {
+        setState(() {
+          currentScreen = page;
+          currentTab = tabIndex;
+        });
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: currentTab == tabIndex ? Colors.cyan : Colors.grey,
+          ),
+        ],
       ),
-    ],
     );
   }
 }
