@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:readee_app/typography.dart';
 
-class SwipeCard extends StatefulWidget {
-  const SwipeCard({super.key});
+class BookCard extends StatefulWidget {
+  const BookCard({super.key});
 
   @override
-  State<SwipeCard> createState() => _SwipeCardState();
+  State<BookCard> createState() => _BookCardState();
 }
 
-class _SwipeCardState extends State<SwipeCard> {
+class _BookCardState extends State<BookCard> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -38,7 +38,7 @@ class _SwipeCardState extends State<SwipeCard> {
                 gradient: const LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black54],
+                  colors: [Colors.transparent, Colors.black87],
                 ),
               ),
               child: Padding(
@@ -89,16 +89,18 @@ class _SwipeCardState extends State<SwipeCard> {
                       ],
                     ),
                     Text(
-                      'Taylor',
+                      'Taylor Jenkins Reid',
                       style: TypographyText.b4(Colors.grey),
                     ),
                     const SizedBox(height: 5),
                     Text(
                       'description this is mock to check love you the seven husbands of evelyn hugo',
-                      style: TypographyText.b3(Colors.white),
+                      style: TypographyText.b3(Colors.white.withOpacity(0.8)),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 10,),
+                    const SizedBox(
+                      height: 10,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -121,9 +123,9 @@ class _SwipeCardState extends State<SwipeCard> {
                               shape: const CircleBorder(),
                               padding: const EdgeInsets.all(15),
                               backgroundColor: Colors.white),
-                          child: const Icon(
+                          child: Icon(
                             Icons.favorite,
-                            color: Colors.green,
+                            color: Colors.greenAccent[400],
                             size: 40,
                           ),
                         ),
