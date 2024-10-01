@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:readee_app/features/match/match.dart';
+import 'package:readee_app/features/match/pages/book_info.dart';
+import 'package:readee_app/features/match/pages/match.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

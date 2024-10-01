@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:readee_app/features/match/pages/book_info.dart';
 import 'package:readee_app/typography.dart';
 
 class BookCard extends StatefulWidget {
@@ -81,7 +82,9 @@ class _BookCardState extends State<BookCard> {
                           ],
                         ),
                         IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.of(context).push(_createRoute());
+                            },
                             icon: const Icon(
                               Icons.info_rounded,
                               color: Colors.white,
@@ -140,4 +143,23 @@ class _BookCardState extends State<BookCard> {
       ),
     );
   }
+}
+
+Route _createRoute() {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) =>
+        const BookInfoPage(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(0.0, 1.0);
+      const end = Offset.zero;
+      const curve = Curves.ease;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
 }
