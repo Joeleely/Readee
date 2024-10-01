@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:readee_app/features/auth/persona.dart';
-import 'package:readee_app/features/auth/test_api/genres.dart';
 import 'package:readee_app/features/chat/chat.dart';
 import 'package:readee_app/features/match_list/match_list.dart';
 import 'package:readee_app/features/profile/profile.dart';
