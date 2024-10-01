@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:readee_app/features/profile/editProfileScreen.dart';
-import 'package:readee_app/features/profile/profile.dart';
+import 'package:readee_app/features/auth/persona.dart';
+import 'package:readee_app/features/match/pages/match.dart';
+import 'package:readee_app/widget/bottomNav.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -17,7 +17,7 @@ class HomePage extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: const Color.fromARGB(255, 243, 252, 255),
       ),
-      home: const EditProfileScreen(),
+      home: ReadeeNavigationBar(),
     );
   }
 }

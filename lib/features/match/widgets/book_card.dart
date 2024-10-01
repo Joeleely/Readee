@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:readee_app/features/match/pages/book_info.dart';
+import 'package:readee_app/typography.dart';
 
-class SwipeCard extends StatefulWidget {
-  const SwipeCard({super.key});
+class BookCard extends StatefulWidget {
+  const BookCard({super.key});
 
   @override
-  State<SwipeCard> createState() => _SwipeCardState();
+  State<BookCard> createState() => _BookCardState();
 }
 
-class _SwipeCardState extends State<SwipeCard> {
+class _BookCardState extends State<BookCard> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -37,7 +39,7 @@ class _SwipeCardState extends State<SwipeCard> {
                 gradient: const LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black54],
+                  colors: [Colors.transparent, Colors.black87],
                 ),
               ),
               child: Padding(
@@ -47,45 +49,60 @@ class _SwipeCardState extends State<SwipeCard> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            const Text(
-                              'The seven husbands',
-                              style: TextStyle(color: Colors.white),
+                            SizedBox(
+                              width: 200,
+                              child: Text(
+                                'The Seven Husbands of Evelyn Hugo',
+                                maxLines: 2,
+                                style: TypographyText.h2(Colors.white),
+                              ),
                             ),
-                            const SizedBox(
-                              width: 10,
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.5),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(10))),
+                                  child: Text(
+                                    '95%',
+                                    style: TypographyText.h4(Colors.white),
+                                  )),
                             ),
-                            Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                child: const Text('95%')),
                           ],
                         ),
                         IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.of(context).push(_createRoute());
+                            },
                             icon: const Icon(
                               Icons.info_rounded,
                               color: Colors.white,
                             ))
                       ],
                     ),
-                    const Text(
-                      'Taylor',
-                      style: TextStyle(color: Colors.white),
+                    Text(
+                      'Taylor Jenkins Reid',
+                      style: TypographyText.b4(Colors.grey),
                     ),
-                    const Text(
+                    const SizedBox(height: 5),
+                    Text(
                       'description this is mock to check love you the seven husbands of evelyn hugo',
-                      style: TextStyle(color: Colors.white),
+                      style: TypographyText.b3(Colors.white.withOpacity(0.8)),
                       overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(
+                      height: 10,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -109,9 +126,9 @@ class _SwipeCardState extends State<SwipeCard> {
                               shape: const CircleBorder(),
                               padding: const EdgeInsets.all(15),
                               backgroundColor: Colors.white),
-                          child: const Icon(
+                          child: Icon(
                             Icons.favorite,
-                            color: Colors.green,
+                            color: Colors.greenAccent[400],
                             size: 40,
                           ),
                         ),
@@ -126,4 +143,23 @@ class _SwipeCardState extends State<SwipeCard> {
       ),
     );
   }
+}
+
+Route _createRoute() {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) =>
+        const BookInfoPage(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(0.0, 1.0);
+      const end = Offset.zero;
+      const curve = Curves.ease;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
 }

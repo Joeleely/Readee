@@ -31,6 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   line_awesome_flutter: ^2.0.0
+  http: any
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -64,6 +65,7 @@ flutter:
   assets:
     - assets/book.png
     - assets/Google_logo.png
+    - assets/atomic-habit.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

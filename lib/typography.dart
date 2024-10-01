@@ -36,7 +36,7 @@ extension TypographyText on TextTheme {
     return TextStyle(
         color: color,
         fontFamily: 'Roboto',
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: FontWeight.w600);
   }
 
