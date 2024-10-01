@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:readee_app/features/auth/persona.dart';
 import 'package:readee_app/features/chat/chat.dart';
+import 'package:readee_app/features/match/pages/match.dart';
 import 'package:readee_app/features/match_list/match_list.dart';
 import 'package:readee_app/features/profile/profile.dart';
 import 'package:readee_app/home.dart';
@@ -17,7 +18,7 @@ class ReadeeNavigationBar extends StatefulWidget {
 class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
   int currentTab = 0;
   final List<Widget> screens = [
-    const LogoPage(),
+    const MatchPage(),
     const ChatPage(),
     const ProfilePage(),
     const MatchListPage(),
@@ -43,7 +44,7 @@ class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _buildNavButton(Icons.swap_horiz, 0, const LogoPage()), // also change here
+                _buildNavButton(Icons.swap_horiz, 0, const MatchPage()), // also change here
                 _buildNavButton(Icons.list, 1, const MatchListPage()),
                 FloatingActionButton(
                   child: const Icon(Icons.add),
