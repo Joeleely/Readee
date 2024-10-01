@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:readee_app/features/profile/editProfileScreen.dart';
 import 'package:readee_app/widget/profile_menu.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -11,6 +13,38 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  String username = '';
+  String email = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUsername(1);
+  }
+
+  Future<void> fetchUsername(int userId) async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/users/$userId'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        setState(() {
+          username = data['Username'] ?? 'ThisIsNull';
+          email = data['Email'] ?? 'ThisIsNull';
+        });
+      } else {
+        throw Exception('Failed to load user data');
+      }
+    } catch (error) {
+      print('Error fetching username: $error');
+      setState(() {
+        username = 'Error fetching data';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,14 +70,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 Align(
                   alignment: Alignment.center,
                   child: Text(
-                    'username',
+                    username,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
                 Align(
                   alignment: Alignment.center,
                   child: Text(
-                    'email',
+                    email,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
@@ -59,9 +93,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 25),
                 // Profile details
                 ProfileMenuWidget(
-                    title: 'Profile',
-                    icon: Icons.person,
-                    onClicked: () => Get.to(() => const EditProfileScreen()),),
+                  title: 'Profile',
+                  icon: Icons.person,
+                  onClicked: () => Get.to(() => const EditProfileScreen()),
+                ),
                 ProfileMenuWidget(
                     title: 'Genres', icon: Icons.book, onClicked: () {}),
                 ProfileMenuWidget(
@@ -91,4 +126,3 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 }
-
