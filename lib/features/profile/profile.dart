@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:readee_app/features/profile/editProfileScreen.dart';
+import 'package:readee_app/features/profile/review/reviewMain.dart';
 import 'package:readee_app/widget/profile_menu.dart';
 import 'package:get/get.dart';
 
@@ -32,7 +33,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         'https://content.api.news/v3/images/bin/76239ca855744661be0454d51f9b9fa2?width=1024'),
                   ),
                 ),
-                const SizedBox(height: 25),
+                const SizedBox(height: 15),
                 Align(
                   alignment: Alignment.center,
                   child: Text(
@@ -48,7 +49,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 15),
                 const Divider(
                   color: Colors.grey,
                   height: 20,
@@ -56,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   indent: 0,
                   endIndent: 0,
                 ),
-                const SizedBox(height: 25),
+                const SizedBox(height: 10),
                 // Profile details
                 ProfileMenuWidget(
                     title: 'Profile',
@@ -65,12 +66,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 ProfileMenuWidget(
                     title: 'Genres', icon: Icons.book, onClicked: () {}),
                 ProfileMenuWidget(
-                    title: 'Reviews', icon: Icons.star, onClicked: () {}),
+                    title: 'Reviews', icon: Icons.star, onClicked: () => Get.to(() => const ReviewMainPage()),),
                 ProfileMenuWidget(
                     title: 'My Books', icon: Icons.menu_book, onClicked: () {}),
                 ProfileMenuWidget(
                     title: 'History', icon: Icons.history, onClicked: () {}),
-                const SizedBox(height: 25),
+                const SizedBox(height: 15),
                 SizedBox(
                     width: 200,
                     child: ElevatedButton(
