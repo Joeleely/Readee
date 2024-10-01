@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:readee_app/features/match/widgets/swipe_card.dart';
-//import 'package:readee_app/widget/navbar.dart';
+import 'package:readee_app/features/match/widgets/book_card.dart';
 
 class MatchPage extends StatefulWidget {
   const MatchPage({super.key});
@@ -18,7 +17,7 @@ class _MatchPageState extends State<MatchPage> {
         leading:
             IconButton(onPressed: () {}, icon: const Icon(Icons.notifications)),
       ),
-      body: const Center(child: SwipeCard()),
+      body: const Center(child: BookCard()),
       //mock navbar
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
