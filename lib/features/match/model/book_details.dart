@@ -8,7 +8,7 @@ class Book {
       required this.description});
   final String title;
   final String author;
-  final String img;
+  final List<String> img;
   final String genre;
   final String quality;
   final String description;
