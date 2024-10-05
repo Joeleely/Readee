@@ -35,6 +35,7 @@ class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
         child: currentScreen,
       ),
       bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
         shape: const CircularNotchedRectangle(),
         notchMargin: 10,
         child: SizedBox(
@@ -47,6 +48,7 @@ class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
                 _buildNavButton(Icons.swap_horiz, 0, const MatchPage()), // also change here
                 _buildNavButton(Icons.list, 1, const MatchListPage()),
                 FloatingActionButton(
+                  elevation: 0,
                   child: const Icon(Icons.add),
                   onPressed: () {
                     // Define the action for the floating action button here
