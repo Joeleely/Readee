@@ -21,10 +21,9 @@ class _PersonaPageState extends State<PersonaPage> {
   ];
 
   List<String> genres = [];
-  // To store selected genres
-  List<String> selectedGenres = [];
+  List<int> selectedGenreIds = [];
 
- @override
+  @override
   void initState() {
     super.initState();
     fetchGenres();
@@ -43,6 +42,52 @@ class _PersonaPageState extends State<PersonaPage> {
     }
   }
 
+  int _getGenreId(String genre) {
+    switch (genre) {
+      case 'Sport':
+        return 1;
+      case 'Fiction':
+        return 2;
+      case 'Self-improve':
+        return 3;
+      case 'History':
+        return 4;
+      case 'Horror':
+        return 5;
+      case 'Love':
+        return 6;
+      case 'Psychology':
+        return 7;
+      case 'Fantasy':
+        return 8;
+      default:
+        return 0;
+    }
+  }
+
+  Future<void> submitSelectedGenres() async {
+    int userId = 7;
+
+    print(selectedGenreIds);
+
+    Map<String, dynamic> postData = {
+      "Genre_genre_id": selectedGenreIds,
+      "User_user_id": userId,
+    };
+
+    final response = await http.post(
+      Uri.parse('http://localhost:3000/createUserGenres'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(postData),
+    );
+
+    if (response.statusCode == 200) {
+      print('Data submitted successfully');
+    } else {
+      throw Exception('Failed to submit data');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,54 +97,51 @@ class _PersonaPageState extends State<PersonaPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title text and selection count in the same row
               const Text(
                 'Let us know your interested genre!',
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
-              Text('${selectedGenres.length} of 5',
+              Text('${selectedGenreIds.length} of 5',
                   style: const TextStyle(fontSize: 16)),
               const SizedBox(height: 30),
               Expanded(
                 child: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 2.5, // Width to height ratio
+                    childAspectRatio: 2.5,
                     crossAxisSpacing: 20,
                     mainAxisSpacing: 20,
                   ),
                   itemCount: genres.length,
                   itemBuilder: (context, index) {
                     final genre = genres[index];
-                    final isSelected = selectedGenres.contains(genre);
+                    final genreId = _getGenreId(genre);
+                    final isSelected = selectedGenreIds.contains(genreId);
                     final imageOfBook = images[index];
-        
+
                     return GestureDetector(
                       onTap: () {
                         setState(() {
                           if (isSelected) {
-                            selectedGenres.remove(genre);
-                          } else if (selectedGenres.length < 5) {
-                            selectedGenres.add(genre);
+                            selectedGenreIds.remove(genreId);
+                          } else if (selectedGenreIds.length < 5) {
+                            selectedGenreIds.add(genreId);
                           }
                         });
                       },
                       child: AnimatedContainer(
-                        duration: const Duration(
-                            milliseconds: 300), // Animation duration
-                        curve: Curves.easeInOut, // Animation curve
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
-                          color:
-                              isSelected ? Colors.cyan[200] : Colors.grey[200],
+                          color: isSelected ? Colors.cyan[200] : Colors.grey[200],
                         ),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 8.0, horizontal: 30.0),
                           child: Center(
                             child: Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   genre,
@@ -109,8 +151,8 @@ class _PersonaPageState extends State<PersonaPage> {
                                       overflow: TextOverflow.ellipsis),
                                 ),
                                 const Spacer(),
-                                const Image(
-                                  image: AssetImage("assets/atomic-habit.jpg"),
+                                Image(
+                                  image: AssetImage(imageOfBook),
                                   width: 55,
                                   height: 100,
                                   fit: BoxFit.cover,
@@ -119,18 +161,18 @@ class _PersonaPageState extends State<PersonaPage> {
                             ),
                           ),
                         ),
-                        ),
+                      ),
                     );
                   },
                 ),
               ),
-              const SizedBox(height: 20,),
+              const SizedBox(height: 20),
               Align(
                 alignment: Alignment.center,
                 child: ElevatedButton(
-                  onPressed: selectedGenres.isNotEmpty
+                  onPressed: selectedGenreIds.isNotEmpty
                       ? () {
-                          // Do something
+                          submitSelectedGenres();
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
