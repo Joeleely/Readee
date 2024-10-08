@@ -1,7 +1,6 @@
 import 'dart:io';
-
 import 'dart:convert';
-import 'dart:math';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,35 +26,46 @@ class _CreateBookPageState extends State<CreateBookPage> {
 
   double _quality = 95;
   int _descriptionLength = 0;
-  XFile? _selectedImage;
+  File? _selectedImage;
   String? _selectedGenre;
 
   final ImagePicker _picker = ImagePicker();
+  bool _isTitleEmpty = false;
+  bool _isGenreEmpty = false;
 
-  Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    setState(() {
-      _selectedImage = image;
-    });
+  Future _pickImage() async {
+    try {
+      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (image == null) return;
+      final imageTemp = File(image.path);
+      setState(() => _selectedImage = imageTemp);
+    } on PlatformException catch (e) {
+      print('Failed to pick image: $e');
+    }
   }
 
   Future<void> _postBook() async {
+    setState(() {
+      _isTitleEmpty = _titleController.text.isEmpty;
+      _isGenreEmpty = _selectedGenre == null;
+    });
+
     // Validate input
-    if (_titleController.text.isEmpty || _selectedGenre == null) {
-      Get.snackbar('Error', 'Please fill all required fields');
+    if (_isTitleEmpty || _isGenreEmpty) {
+      print('Error '+ 'Please fill all required fields');
       return;
     }
 
     try {
       // Prepare the data for the POST request
       final Map<String, dynamic> bookData = {
-        'OwnerId': 2,
+        'OwnerId': 7,
         'BookName': _titleController.text,
         'BookPicture': _selectedImage != null ? _selectedImage!.path : '??',
         'BookDescription': _descriptionController.text,
         'GenreId': _getGenreId(_selectedGenre!),
         'Quality': _quality.toInt(),
-        'IsTraded': false
+        'IsTraded': false,
       };
 
       print(bookData);
@@ -68,14 +78,15 @@ class _CreateBookPageState extends State<CreateBookPage> {
         },
         body: jsonEncode(bookData),
       );
-      //print(response.statusCode);
 
       if (response.statusCode == 201) {
         print("Book created successfully");
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BookCard(),
+            builder: (context) => const BookCard(
+              books: [],
+            ),
           ),
         );
       } else {
@@ -136,10 +147,20 @@ class _CreateBookPageState extends State<CreateBookPage> {
           children: [
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Title',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: _isTitleEmpty ? Colors.red : Colors.grey,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: _isTitleEmpty ? Colors.red : Colors.cyan,
+                  ),
+                ),
+                errorText: _isTitleEmpty ? 'Title is required' : null,
               ),
             ),
             const SizedBox(height: 16),
@@ -153,26 +174,41 @@ class _CreateBookPageState extends State<CreateBookPage> {
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _selectedGenre,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Genre',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: _isGenreEmpty ? Colors.red : Colors.grey,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: _isGenreEmpty ? Colors.red : Colors.cyan,
+                  ),
+                ),
+                errorText: _isGenreEmpty ? 'Title is required' : null,
               ),
               items: const [
                 DropdownMenuItem(value: 'Sport', child: Text('Sport')),
                 DropdownMenuItem(value: 'Fiction', child: Text('Fiction')),
-                DropdownMenuItem(
-                    value: 'Self-improve', child: Text('Self-improve')),
+                DropdownMenuItem(value: 'Self-improve', child: Text('Self-improve')),
                 DropdownMenuItem(value: 'History', child: Text('History')),
                 DropdownMenuItem(value: 'Horror', child: Text('Horror')),
                 DropdownMenuItem(value: 'Love', child: Text('Love')),
-                DropdownMenuItem(
-                    value: 'Psychology', child: Text('Psychology')),
+                DropdownMenuItem(value: 'Psychology', child: Text('Psychology')),
                 DropdownMenuItem(value: 'Fantasy', child: Text('Fantasy')),
               ],
               onChanged: (String? newValue) {
                 setState(() {
-                  _selectedGenre = newValue!;
+                  _selectedGenre = newValue;
+                  _isGenreEmpty = false;
                 });
+              },
+              validator: (value) {
+                if (value == null) {
+                  return 'Genre is required';
+                }
+                return null;
               },
             ),
             const SizedBox(height: 16),
@@ -223,19 +259,6 @@ class _CreateBookPageState extends State<CreateBookPage> {
                 ),
               ],
             ),
-            // const SizedBox(height: 16),
-            // TextField(
-            //   controller: _isbnController,
-            //   decoration: const InputDecoration(
-            //     labelText: 'ISBN 13',
-            //     border: OutlineInputBorder(),
-            //   ),
-            //   keyboardType: TextInputType.number,
-            //   inputFormatters: [
-            //     LengthLimitingTextInputFormatter(13),
-            //     FilteringTextInputFormatter.digitsOnly,
-            //   ],
-            // ),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -267,8 +290,7 @@ class _CreateBookPageState extends State<CreateBookPage> {
                                     height: 80,
                                     fit: BoxFit.cover,
                                   )
-                                : const Icon(Icons.cloud_upload,
-                                    color: Colors.cyan),
+                                : const Icon(Icons.cloud_upload, color: Colors.cyan),
                           ),
                         ),
                       ),
