@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:readee_app/widget/bottomNav.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class PersonaPage extends StatefulWidget {
   @override
@@ -7,17 +9,6 @@ class PersonaPage extends StatefulWidget {
 }
 
 class _PersonaPageState extends State<PersonaPage> {
-  final List<String> genres = [
-    "Sport",
-    "Fiction",
-    "Self-improve",
-    "History",
-    "Horror",
-    "Love",
-    "Psychology",
-    "Fantasy",
-  ];
-
   final List<String> images = [
     "assets/atomic-habit.jpg",
     "assets/atomic-habit.jpg",
@@ -29,8 +20,28 @@ class _PersonaPageState extends State<PersonaPage> {
     "assets/atomic-habit.jpg",
   ];
 
+  List<String> genres = [];
   // To store selected genres
   List<String> selectedGenres = [];
+
+ @override
+  void initState() {
+    super.initState();
+    fetchGenres();
+  }
+
+  Future<void> fetchGenres() async {
+    final response = await http.get(Uri.parse('http://localhost:3000/genres'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> jsonData = json.decode(response.body);
+      setState(() {
+        genres = jsonData.map((genre) => genre['Name'] as String).toList();
+      });
+    } else {
+      throw Exception('Failed to load genres');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +143,7 @@ class _PersonaPageState extends State<PersonaPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 150),
+              const SizedBox(height: 130),
             ],
           ),
         ),
