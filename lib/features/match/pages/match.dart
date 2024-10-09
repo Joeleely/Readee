@@ -50,7 +50,6 @@ class _MatchPageState extends State<MatchPage> {
         if (bookResponse.statusCode == 200) {
           List<dynamic> booksData = jsonDecode(bookResponse.body);
 
-          // Filter books by genre and conditions
           List<Book> matchingBooks = booksData.where((book) {
             return userGenreIDs.contains(book['GenreId']) &&
                    book['OwnerId'] != userID &&
