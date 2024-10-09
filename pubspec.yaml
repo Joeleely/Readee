@@ -68,7 +68,14 @@ flutter:
   assets:
     - assets/book.png
     - assets/Google_logo.png
+    - assets/sport-book.jpg
+    - assets/fiction-book.jpg
     - assets/atomic-habit.jpg
+    - assets/history-book.jpg
+    - assets/horror-book.jpg
+    - assets/love-book.jpg
+    - assets/psychology-book.jpg
+    - assets/fantasy-book.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

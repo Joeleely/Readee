@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:readee_app/features/match/pages/match.dart';
 import 'package:readee_app/widget/bottomNav.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -10,14 +11,14 @@ class PersonaPage extends StatefulWidget {
 
 class _PersonaPageState extends State<PersonaPage> {
   final List<String> images = [
+    "assets/sport-book.jpg",
+    "assets/fiction-book.jpg",
     "assets/atomic-habit.jpg",
-    "assets/atomic-habit.jpg",
-    "assets/atomic-habit.jpg",
-    "assets/atomic-habit.jpg",
-    "assets/atomic-habit.jpg",
-    "assets/atomic-habit.jpg",
-    "assets/atomic-habit.jpg",
-    "assets/atomic-habit.jpg",
+    "assets/history-book.jpg",
+    "assets/horror-book.jpg",
+    "assets/love-book.jpg",
+    "assets/psychology-book.jpg",
+    "assets/fantasy-book.jpg",
   ];
 
   List<String> genres = [];
@@ -81,8 +82,12 @@ class _PersonaPageState extends State<PersonaPage> {
       body: jsonEncode(postData),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       print('Data submitted successfully');
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MatchPage()),
+      );
     } else {
       throw Exception('Failed to submit data');
     }
@@ -134,7 +139,8 @@ class _PersonaPageState extends State<PersonaPage> {
                         curve: Curves.easeInOut,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
-                          color: isSelected ? Colors.cyan[200] : Colors.grey[200],
+                          color:
+                              isSelected ? Colors.cyan[200] : Colors.grey[200],
                         ),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
