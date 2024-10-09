@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:readee_app/features/profile/editGenres.dart';
 import 'package:readee_app/features/profile/editProfileScreen.dart';
+import 'package:readee_app/features/profile/widget/pageRoute.dart';
 import 'package:readee_app/widget/profile_menu.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -15,11 +17,15 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   String username = '';
   String email = '';
+  String firstName = '';
+  String lastName = '';
+  String gender = '';
+  final int userID = 7;
 
   @override
   void initState() {
     super.initState();
-    fetchUsername(1);
+    fetchUsername(userID);
   }
 
   Future<void> fetchUsername(int userId) async {
@@ -33,6 +39,9 @@ class _ProfilePageState extends State<ProfilePage> {
         setState(() {
           username = data['Username'] ?? 'ThisIsNull';
           email = data['Email'] ?? 'ThisIsNull';
+          firstName = data['Firstname'] ?? 'ThisIsNull';
+          lastName = data['Lastname'] ?? 'ThisIsNull';
+          gender = data['Gender'] ?? 'ThisIsNull';
         });
       } else {
         throw Exception('Failed to load user data');
@@ -82,7 +91,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ),
-        
+
                   const SizedBox(height: 25),
                   const Divider(
                     color: Colors.grey,
@@ -94,16 +103,32 @@ class _ProfilePageState extends State<ProfilePage> {
                   const SizedBox(height: 25),
                   // Profile details
                   ProfileMenuWidget(
-                    title: 'Profile',
-                    icon: Icons.person,
-                    onClicked: () => Get.to(() => const EditProfileScreen()),
-                  ),
+                      title: 'Profile',
+                      icon: Icons.person,
+                      onClicked: () => Navigator.push(
+                          context,
+                          CustomPageRoute(
+                            page: EditProfileScreen(
+                              firstName: firstName,
+                              lastName: lastName,
+                              username: username,
+                              email: email,
+                              gender: gender,
+                              userID: userID,
+                            ),
+                          ))),
                   ProfileMenuWidget(
-                      title: 'Genres', icon: Icons.book, onClicked: () {}),
+                      title: 'Genres', icon: Icons.book, onClicked: () => Navigator.push(
+                          context,
+                          CustomPageRoute(
+                            page: EditGenrePage(userID: userID,)
+                          ))),
                   ProfileMenuWidget(
                       title: 'Reviews', icon: Icons.star, onClicked: () {}),
                   ProfileMenuWidget(
-                      title: 'My Books', icon: Icons.menu_book, onClicked: () {}),
+                      title: 'My Books',
+                      icon: Icons.menu_book,
+                      onClicked: () {}),
                   ProfileMenuWidget(
                       title: 'History', icon: Icons.history, onClicked: () {}),
                   const SizedBox(height: 25),
