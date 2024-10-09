@@ -12,7 +12,7 @@ class LogoPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             // Replace this with your logo
-            const Image(image: AssetImage('assets/book.png')),
+            const Image(image: AssetImage('assets/logo.png')),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {

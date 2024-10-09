@@ -50,7 +50,7 @@ class _MatchPageState extends State<MatchPage> {
           }).map((book) {
             return Book(
               title: book['BookName'],
-              author: '', // Add author info if available in your DB
+              author: book['Author'],
               description: book['BookDescription'],
               img: [book['BookPicture']],
               quality: '${book['Quality']}%',
@@ -65,7 +65,7 @@ class _MatchPageState extends State<MatchPage> {
           }).map((book) {
             return Book(
               title: book['BookName'],
-              author: '', // Add author info if available in your DB
+              author: book['Author'],
               description: book['BookDescription'],
               img: [book['BookPicture']],
               quality: '${book['Quality']}%',
@@ -148,11 +148,23 @@ class _MatchPageState extends State<MatchPage> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(onPressed: () {}, icon: const Icon(Icons.notifications)),
+    leading: IconButton(
+      onPressed: () {},
+      icon: const Icon(Icons.notifications),
+    ),
+    actions: const [
+      Padding(
+        padding: EdgeInsets.only(right: 16.0),
+        child: Image(
+          image: AssetImage('assets/logo.png'),
+          height: 40,
+        ),
       ),
+    ],
+  ),
       body: Center(
         child: books.isNotEmpty 
-          ? BookCard(books: books)  // Display filtered books
+          ? BookCard(books: books)
           : const CircularProgressIndicator(), // Show loading indicator while data is fetched
       ),
     );
