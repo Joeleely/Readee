@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:readee_app/features/auth/persona.dart';
 import 'package:readee_app/features/chat/chat.dart';
+import 'package:readee_app/features/create_book/create_book.dart';
 import 'package:readee_app/features/match/pages/match.dart';
 import 'package:readee_app/features/match_list/match_list.dart';
 import 'package:readee_app/features/profile/profile.dart';
@@ -20,12 +21,13 @@ class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
   final List<Widget> screens = [
     const MatchPage(),
     const ChatPage(),
+    const CreateBookPage(),
     const ProfilePage(),
     const MatchListPage(),
   ];
 
   final PageStorageBucket bucket = PageStorageBucket();
-  Widget currentScreen = const LogoPage(); // chage here to home page
+  Widget currentScreen = const MatchPage();
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +47,17 @@ class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _buildNavButton(Icons.swap_horiz, 0, const MatchPage()), // also change here
+                _buildNavButton(Icons.swap_horiz, 0, const MatchPage()),
                 _buildNavButton(Icons.list, 1, const MatchListPage()),
                 FloatingActionButton(
                   elevation: 0,
                   child: const Icon(Icons.add),
                   onPressed: () {
-                    // Define the action for the floating action button here
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const CreateBookPage()),
+                    );
                   },
                 ),
                 _buildNavButton(Icons.textsms, 2, const ChatPage()),
