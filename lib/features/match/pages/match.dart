@@ -167,11 +167,15 @@ class _MatchPageState extends State<MatchPage> {
 
     return Scaffold(
       appBar: AppBar(
-        // leading: IconButton(
-        //   onPressed: () {},
-        //   icon: const Icon(Icons.notifications),
-        // ),
-        title: const Image(
+    leading: IconButton(
+      onPressed: () {},
+      icon: const Icon(Icons.notifications),
+    ),
+    backgroundColor: const Color.fromARGB(255, 243, 252, 255),
+    actions: const [
+      Padding(
+        padding: EdgeInsets.only(right: 16.0),
+        child: Image(
           image: AssetImage('assets/logo.png'),
           height: 50,
         ),
@@ -182,8 +186,8 @@ class _MatchPageState extends State<MatchPage> {
         //       image: AssetImage('assets/logo.png'),
         //       height: 40,
         //     ),
-        //   ),
-        // ],
+        ),
+        ],
       ),
       body: Center(
         child: books.isNotEmpty
