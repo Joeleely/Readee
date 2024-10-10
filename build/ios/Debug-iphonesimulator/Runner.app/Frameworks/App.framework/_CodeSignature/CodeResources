@@ -10,11 +10,11 @@
 		</data>
 		<key>flutter_assets/AssetManifest.bin</key>
 		<data>
-		/jciWdq/S2DEp4DzmyBBTMi22kg=
+		fKf5VJzrpaE3H4gYbSAjBCoK1kI=
 		</data>
 		<key>flutter_assets/AssetManifest.json</key>
 		<data>
-		0jZgS8jOapgtBf2mTQWOiX8lP08=
+		03aDkF1I3e6+T5XdPl9Rn0c0SmE=
 		</data>
 		<key>flutter_assets/FontManifest.json</key>
 		<data>
@@ -22,15 +22,23 @@
 		</data>
 		<key>flutter_assets/NOTICES.Z</key>
 		<data>
-		dl44z4vtbHfdjStEPiwKhSrocC0=
+		ZCgUMcYPaejUBSovbuUxFeHJdZc=
 		</data>
 		<key>flutter_assets/assets/Google_logo.png</key>
 		<data>
 		GH0s5RIk0T9QlR/tO90K7E7S/5U=
 		</data>
-		<key>flutter_assets/assets/book.png</key>
+		<key>flutter_assets/assets/atomic-habit.jpg</key>
 		<data>
-		felSRkxnKV9CSGNHVhrmq1c3aCE=
+		HIsCVDDjGZxsp4t21a6wEPsAL8c=
+		</data>
+		<key>flutter_assets/assets/fantasy-book.jpg</key>
+		<data>
+		0GzRjUWXGd/L29I42YK8+yZ9rr4=
+		</data>
+		<key>flutter_assets/assets/fiction-book.jpg</key>
+		<data>
+		CQfj+jv9Z+A0a67lZ55G8AlCqT4=
 		</data>
 		<key>flutter_assets/assets/fonts/Roboto-Bold.ttf</key>
 		<data>
@@ -44,6 +52,30 @@
 		<data>
 		zlf8bGcFyyBmGsMl+sXUWYtu+8o=
 		</data>
+		<key>flutter_assets/assets/history-book.jpg</key>
+		<data>
+		HbCKC/RYcE4EJPdyMiD2wiFqcI4=
+		</data>
+		<key>flutter_assets/assets/horror-book.jpg</key>
+		<data>
+		LWtG15iT5W7UM2xymAH7w54Se8o=
+		</data>
+		<key>flutter_assets/assets/logo.png</key>
+		<data>
+		XHeCnZHIM1yeEKXH7PczY6KBG8s=
+		</data>
+		<key>flutter_assets/assets/love-book.jpg</key>
+		<data>
+		bDgrQSADtP5l03frgimJgMRhVXw=
+		</data>
+		<key>flutter_assets/assets/psychology-book.jpg</key>
+		<data>
+		4TELrdikJL3cT2KzCiDNCP3TeBI=
+		</data>
+		<key>flutter_assets/assets/sport-book.jpg</key>
+		<data>
+		6PBDg3JBIP+jHBRUUZSh/p0ISP8=
+		</data>
 		<key>flutter_assets/fonts/MaterialIcons-Regular.otf</key>
 		<data>
 		/CUoTuPQqqdexfyOT9lpJhV+2MQ=
@@ -54,7 +86,7 @@
 		</data>
 		<key>flutter_assets/kernel_blob.bin</key>
 		<data>
-		p4RIvVdB8biM9LEsRTJbIV4Z2ZM=
+		U0gGW4y83h8irA0VuI/ujyAIEME=
 		</data>
 		<key>flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
 		<data>
@@ -79,14 +111,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			M2SJ8Ei1bcCmQ2bKBrzM47Uc+GRB3FofD7GuLF09qSg=
+			n65lp6AohcNUP72hlpJ58DxSRd0L6zf2ApYRl29f2bM=
 			</data>
 		</dict>
 		<key>flutter_assets/AssetManifest.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			spfplVr/1jSGw2fdrwC1VeaPtWhdLJF25cGukWdga9c=
+			PipByu8ppt9rJ7MWyvrGokRal4dfjEswYglaSqrtC3g=
 			</data>
 		</dict>
 		<key>flutter_assets/FontManifest.json</key>
@@ -100,7 +132,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			FmWjeyqc+WrJV3ATNNRDCJkjfyoiUrFn6nngtXiW/jY=
+			r2hTRZ/veicuO5BuVnWhzzqGmhCuO5EFnRJijBSCqig=
 			</data>
 		</dict>
 		<key>flutter_assets/assets/Google_logo.png</key>
@@ -110,11 +142,25 @@
 			k/mxPKpRR08je5qGNwBBzQZD47cb7qtcWFUjR6/B7V8=
 			</data>
 		</dict>
-		<key>flutter_assets/assets/book.png</key>
+		<key>flutter_assets/assets/atomic-habit.jpg</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			tziOez8gYYnNN4Rm1c74OI1LH8EWcjm5oKa67cdk88k=
+			27mehwrZdc4Jkj23+vHrUUF9cos7pHJYye8AacwGFdM=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/fantasy-book.jpg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			jCa6i2DlwoPWBMD1POq1wMTLMQop3TKogqYuv80/Z04=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/fiction-book.jpg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Ih3V13dAaUNoSJlEDm2iDaoKFYv/slkgic0e7w7kfko=
 			</data>
 		</dict>
 		<key>flutter_assets/assets/fonts/Roboto-Bold.ttf</key>
@@ -138,6 +184,48 @@
 			kqYnZjMRQMpbyLulIChCLSdgYa1XF8GsUIoRi2Gcauw=
 			</data>
 		</dict>
+		<key>flutter_assets/assets/history-book.jpg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			LbNlkuPn0+wUbEvXcj6B8ZY5Tvb3J3vlj5qUFPXWn2o=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/horror-book.jpg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ghlDO0RmVEG1T241b4lEs2ZoXysg5JouKzY4fiO7JyU=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/logo.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			jjWpQfQJxFeZGbjxLnToNSvZz9W49oSi1z/1m1f9/zs=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/love-book.jpg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			OfJTm9x6/08fYNvOiL3wWp2aEnNV1oKU9iE9dlMns9M=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/psychology-book.jpg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			mpMUH3c7IOidr3a5vdlg6giqAx0rdBW5a6TTAlaHrBg=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/sport-book.jpg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			pWm3taI9zfnLf3dXpxJoGZDlHFZQvipwke87U8MCMXc=
+			</data>
+		</dict>
 		<key>flutter_assets/fonts/MaterialIcons-Regular.otf</key>
 		<dict>
 			<key>hash2</key>
@@ -156,7 +244,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			H/kpyAPhzVUCRAQSRRfZuTFk3YVUKtCcv0jE9qCz3Q8=
+			GUuszqrlyeEgra/hJwrxl1kQfMW5n73GqWrJbn+0q2U=
 			</data>
 		</dict>
 		<key>flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>

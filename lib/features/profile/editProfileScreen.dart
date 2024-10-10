@@ -1,40 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:readee_app/features/profile/widget/constant.dart';
-//dropdown
-import 'package:flutter/src/material/dropdown.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({super.key});
+  final String firstName;
+  final String lastName;
+  final String username;
+  final String email;
+  final String gender;
+  final int userID;
+
+  const EditProfileScreen({
+    super.key,
+    required this.firstName,
+    required this.lastName,
+    required this.username,
+    required this.email,
+    required this.gender,
+    required this.userID,
+  });
 
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  _EditProfileScreenState createState() => _EditProfileScreenState();
 }
 
-class _ProfilePageState extends State<EditProfileScreen> {
+class _EditProfileScreenState extends State<EditProfileScreen> {
   bool isEditing = false;
-  String firstName = 'Mark';
-  String lastName = 'Lee';
-  String username = 'onyourmark';
-  String email = 'mockup@gmail.com';
-  String gender = 'male';
 
-  TextEditingController firstNameController = TextEditingController();
-  TextEditingController lastNameController = TextEditingController();
-  TextEditingController usernameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController genderController = TextEditingController();
+  late TextEditingController firstNameController;
+  late TextEditingController lastNameController;
+  late TextEditingController usernameController;
+  late TextEditingController emailController;
+  late TextEditingController genderController;
+
+  // Local variables to hold the editable values
+  late String editableFirstName;
+  late String editableLastName;
+  late String editableUsername;
+  late String editableEmail;
+  late String editableGender;
 
   @override
   void initState() {
     super.initState();
-    firstNameController.text = firstName;
-    lastNameController.text = lastName;
-    usernameController.text = username;
-    emailController.text = email;
-    genderController.text = gender;
+
+    firstNameController = TextEditingController(text: widget.firstName);
+    lastNameController = TextEditingController(text: widget.lastName);
+    usernameController = TextEditingController(text: widget.username);
+    emailController = TextEditingController(text: widget.email);
+    genderController = TextEditingController(text: widget.gender);
+
+    editableFirstName = widget.firstName;
+    editableLastName = widget.lastName;
+    editableUsername = widget.username;
+    editableEmail = widget.email;
+    editableGender = widget.gender;
   }
 
   void toggleEdit() {
@@ -45,22 +68,23 @@ class _ProfilePageState extends State<EditProfileScreen> {
 
   void saveProfile() {
     setState(() {
-      firstName = firstNameController.text;
-      lastName = lastNameController.text;
-      username = usernameController.text;
-      email = emailController.text;
-      gender = genderController.text;
+      // Update the local variables with the edited values
+      editableFirstName = firstNameController.text;
+      editableLastName = lastNameController.text;
+      editableUsername = usernameController.text;
+      editableEmail = emailController.text;
+      editableGender = genderController.text;
       isEditing = false;
     });
   }
 
   void cancelEdit() {
     setState(() {
-      firstNameController.text = firstName;
-      lastNameController.text = lastName;
-      usernameController.text = username;
-      emailController.text = email;
-      genderController.text = gender;
+      firstNameController.text = editableFirstName;
+      lastNameController.text = editableLastName;
+      usernameController.text = editableUsername;
+      emailController.text = editableEmail;
+      genderController.text = editableGender;
       isEditing = false;
     });
   }
@@ -69,26 +93,28 @@ class _ProfilePageState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 243, 252, 255),
         leading: IconButton(
-          onPressed: () => Get.back(),
-          icon: const Icon(LineAwesomeIcons.arrow_left), // Use const
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(LineAwesomeIcons.arrow_left),
         ),
-        title: const Text('Edit Profile',
-            style: TextStyle(fontSize: 20)), // Use const
+        title: const Text('Edit Profile', style: TextStyle(fontSize: 20)),
         actions: isEditing
             ? null
             : [
-                IconButton(
-                  onPressed: toggleEdit,
-                  icon: const Icon(
-                      LineAwesomeIcons.alternate_pencil), // Use const
+                Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: IconButton(
+                    onPressed: toggleEdit,
+                    icon: const Icon(LineAwesomeIcons.alternate_pencil),
+                  ),
                 ),
               ],
       ),
       body: SafeArea(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(20.0), // Use const
+            padding: const EdgeInsets.all(20.0),
             child: GestureDetector(
               onTap: () {
                 FocusScope.of(context).unfocus();
@@ -97,16 +123,16 @@ class _ProfilePageState extends State<EditProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 10), // Use const
+                  const SizedBox(height: 10),
                   const Align(
                     alignment: Alignment.center,
                     child: CircleAvatar(
                       radius: 100,
                       backgroundImage: NetworkImage(
-                          'https://content.api.news/v3/images/bin/76239ca855744661be0454d51f9b9fa2?width=1024'), // Use const
+                          'https://content.api.news/v3/images/bin/76239ca855744661be0454d51f9b9fa2?width=1024'),
                     ),
                   ),
-                  const SizedBox(height: 40), // Use const
+                  const SizedBox(height: 40),
 
                   // First Name and Last Name in one line
                   Row(
@@ -124,12 +150,10 @@ class _ProfilePageState extends State<EditProfileScreen> {
                               )
                             : ListTile(
                                 title: const Text(tFirstName),
-                                subtitle: Text(firstName),
+                                subtitle: Text(editableFirstName),
                               ),
                       ),
-
-                      const SizedBox(width: 20), // Use const
-
+                      const SizedBox(width: 20),
                       Flexible(
                         child: isEditing
                             ? TextField(
@@ -143,13 +167,13 @@ class _ProfilePageState extends State<EditProfileScreen> {
                               )
                             : ListTile(
                                 title: const Text(tLastName),
-                                subtitle: Text(lastName),
+                                subtitle: Text(editableLastName),
                               ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 10), // Space between rows
+                  const SizedBox(height: 10),
 
                   // Username
                   Flexible(
@@ -165,12 +189,10 @@ class _ProfilePageState extends State<EditProfileScreen> {
                           )
                         : ListTile(
                             title: const Text(tUsername),
-                            subtitle: Text(username),
+                            subtitle: Text(editableUsername),
                           ),
                   ),
-
                   const SizedBox(height: 10),
-
                   Flexible(
                     child: isEditing
                         ? TextField(
@@ -184,20 +206,19 @@ class _ProfilePageState extends State<EditProfileScreen> {
                           )
                         : ListTile(
                             title: const Text(tEmail),
-                            subtitle: Text(email),
+                            subtitle: Text(editableEmail),
                           ),
                   ),
-
-                  const SizedBox(height: 10), // Space between rows
+                  const SizedBox(height: 10),
 
                   Flexible(
                     child: isEditing
                         ? DropdownButtonFormField<String>(
-                            value: genderController.text.isNotEmpty &&
+                            value: editableGender.isNotEmpty &&
                                     ['Male', 'Female', 'Other']
-                                        .contains(genderController.text)
-                                ? genderController.text
-                                : null, // Set to null if value is not valid
+                                        .contains(editableGender)
+                                ? editableGender
+                                : null,
                             decoration: const InputDecoration(
                               labelText: tGender,
                               contentPadding: EdgeInsets.only(bottom: 3),
@@ -206,15 +227,11 @@ class _ProfilePageState extends State<EditProfileScreen> {
                             ),
                             onChanged: (String? newValue) {
                               setState(() {
-                                genderController.text =
-                                    newValue!; // Update the selected value
+                                editableGender = newValue!;
+                                genderController.text = newValue;
                               });
                             },
-                            items: <String>[
-                              'Male',
-                              'Female',
-                              'Other'
-                            ] // Dropdown options
+                            items: <String>['Male', 'Female', 'Other']
                                 .map<DropdownMenuItem<String>>((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
@@ -224,20 +241,32 @@ class _ProfilePageState extends State<EditProfileScreen> {
                           )
                         : ListTile(
                             title: const Text(tGender),
-                            subtitle: Text(gender),
+                            subtitle: Text(editableGender),
                           ),
                   ),
-
-                  const SizedBox(height: 10), // Use const
-
+                  const SizedBox(height: 30),
                   if (isEditing) ...[
-                    ElevatedButton(
-                      onPressed: saveProfile,
-                      child: const Text('Save'),
-                    ),
-                    ElevatedButton(
-                      onPressed: cancelEdit,
-                      child: const Text('Cancel'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: saveProfile,
+                          style: const ButtonStyle(
+                              backgroundColor:
+                                  MaterialStatePropertyAll(Colors.cyan)),
+                          child: const Text(
+                            'Save',
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 30),
+                        ElevatedButton(
+                          onPressed: cancelEdit,
+                          child: const Text('Cancel'),
+                        ),
+                      ],
                     ),
                   ],
                 ],

@@ -32,6 +32,7 @@ class _CreateBookPageState extends State<CreateBookPage> {
   final ImagePicker _picker = ImagePicker();
   bool _isTitleEmpty = false;
   bool _isGenreEmpty = false;
+  bool _isAuthorEmpty = false;
 
   Future _pickImage() async {
     try {
@@ -47,6 +48,7 @@ class _CreateBookPageState extends State<CreateBookPage> {
   Future<void> _postBook() async {
     setState(() {
       _isTitleEmpty = _titleController.text.isEmpty;
+      _isAuthorEmpty = _authorController.text.isEmpty;
       _isGenreEmpty = _selectedGenre == null;
     });
 
@@ -59,8 +61,9 @@ class _CreateBookPageState extends State<CreateBookPage> {
     try {
       // Prepare the data for the POST request
       final Map<String, dynamic> bookData = {
-        'OwnerId': 7,
+        'OwnerId': 2,
         'BookName': _titleController.text,
+        'Author': _authorController.text,
         'BookPicture': _selectedImage != null ? _selectedImage!.path : '??',
         'BookDescription': _descriptionController.text,
         'GenreId': _getGenreId(_selectedGenre!),
@@ -85,7 +88,7 @@ class _CreateBookPageState extends State<CreateBookPage> {
           context,
           MaterialPageRoute(
             builder: (context) => const BookCard(
-              books: [],
+              books: [], userID: 2,
             ),
           ),
         );
@@ -166,9 +169,19 @@ class _CreateBookPageState extends State<CreateBookPage> {
             const SizedBox(height: 16),
             TextField(
               controller: _authorController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Author',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: _isAuthorEmpty ? Colors.red : Colors.grey,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: _isAuthorEmpty ? Colors.red : Colors.cyan,
+                  ),
+                ),
+                errorText: _isGenreEmpty ? 'Title is required' : null,
               ),
             ),
             const SizedBox(height: 16),

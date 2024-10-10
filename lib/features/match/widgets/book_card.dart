@@ -3,10 +3,13 @@ import 'package:readee_app/features/match/model/book_details.dart';
 import 'package:readee_app/features/match/pages/book_info.dart';
 import 'package:readee_app/typography.dart';
 import 'package:swipe_cards/swipe_cards.dart';
+import 'package:http/http.dart' as http;
+
 
 class BookCard extends StatefulWidget {
-  const BookCard({super.key, required this.books});
+  const BookCard({super.key, required this.books, required this.userID});
   final List<Book> books;
+  final int userID;
 
   @override
   State<BookCard> createState() => _BookCardState();
@@ -25,17 +28,19 @@ class _BookCardState extends State<BookCard> {
     for (var book in widget.books) {
       _swipeItems.add(SwipeItem(
         content: book,
-        likeAction: () {
+        likeAction: () async{
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Liked ${book.title}"),
             duration: const Duration(milliseconds: 500),
           ));
+          await _likeBook(widget.userID, book.BookId);
         },
-        nopeAction: () {
+        nopeAction: () async {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Nope ${book.title}"),
             duration: const Duration(milliseconds: 500),
           ));
+           await _unlikeBook(widget.userID, book.BookId);
         },
       ));
       // Initialize currentPhoto for each book to 0
@@ -43,6 +48,34 @@ class _BookCardState extends State<BookCard> {
     }
 
     _matchEngine = MatchEngine(swipeItems: _swipeItems);
+  }
+
+  Future<void> _likeBook(int userId, int bookId) async {
+    final url = Uri.parse('http://localhost:3000/books/$bookId/like/$userId');
+    try {
+      final response = await http.post(url);
+      if (response.statusCode == 201) {
+        print("Successfully liked the book!");
+      } else {
+        print("Failed to like the book: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error liking the book: $e");
+    }
+  }
+
+  Future<void> _unlikeBook(int userId, int bookId) async {
+    final url = Uri.parse('http://localhost:3000/books/$bookId/unlike/$userId');
+    try {
+      final response = await http.post(url);
+      if (response.statusCode == 201) {
+        print("Successfully unliked the book!");
+      } else {
+        print("Failed to unlike the book: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error unliking the book: $e");
+    }
   }
 
   @override

@@ -1,15 +1,17 @@
 class Book {
   const Book(
-      {required this.title,
+      { required this.BookId,
+        required this.title,
       required this.author,
       required this.img,
-      required this.genre,
+      required this.genreID,
       required this.quality,
       required this.description});
+      final int BookId;
   final String title;
   final String author;
   final List<String> img;
-  final String genre;
+  final int genreID;
   final String quality;
   final String description;
 }
