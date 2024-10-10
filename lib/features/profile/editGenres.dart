@@ -7,10 +7,7 @@ import 'dart:convert';
 class EditGenrePage extends StatefulWidget {
   final int userID;
 
-  const EditGenrePage({
-    super.key,
-    required this.userID
-  });
+  const EditGenrePage({super.key, required this.userID});
 
   @override
   _EditGenrePageState createState() => _EditGenrePageState();
@@ -52,12 +49,14 @@ class _EditGenrePageState extends State<EditGenrePage> {
   }
 
   Future<void> fetchUserGenres() async {
-    final response = await http.get(Uri.parse('http://localhost:3000/userGenres/${widget.userID}'));
+    final response = await http
+        .get(Uri.parse('http://localhost:3000/userGenres/${widget.userID}'));
 
     if (response.statusCode == 200) {
       List<dynamic> jsonData = json.decode(response.body);
       setState(() {
-        selectedGenreIds = jsonData.map((genre) => genre['Genre_genre_id'] as int).toList();
+        selectedGenreIds =
+            jsonData.map((genre) => genre['Genre_genre_id'] as int).toList();
       });
       //print(selectedGenreIds);
     } else {
@@ -78,14 +77,12 @@ class _EditGenrePageState extends State<EditGenrePage> {
     if (response.statusCode == 200) {
       // Success, you could display a message or navigate away
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Genres updated successfully!'))
-      );
+          const SnackBar(content: Text('Genres updated successfully!')));
       Navigator.pop(context);
     } else {
       // Handle error
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to update genres'))
-      );
+          const SnackBar(content: Text('Failed to update genres')));
     }
   }
 
@@ -161,29 +158,13 @@ class _EditGenrePageState extends State<EditGenrePage> {
                           color:
                               isSelected ? Colors.cyan[200] : Colors.grey[200],
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 30.0),
-                          child: Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  genre,
-                                  style: const TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      overflow: TextOverflow.ellipsis),
-                                ),
-                                const Spacer(),
-                                Image(
-                                  image: AssetImage(imageOfBook),
-                                  width: 55,
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                ),
-                              ],
-                            ),
+                        child: Center(
+                          child: Text(
+                            genre,
+                            style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                overflow: TextOverflow.ellipsis),
                           ),
                         ),
                       ),
@@ -216,9 +197,7 @@ class _EditGenrePageState extends State<EditGenrePage> {
                   ),
                   const SizedBox(width: 30),
                   ElevatedButton(
-                    onPressed: () => {
-                      Navigator.pop(context)
-                    },
+                    onPressed: () => {Navigator.pop(context)},
                     child: const Text('Cancel'),
                   ),
                 ],
