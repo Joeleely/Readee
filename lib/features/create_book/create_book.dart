@@ -4,11 +4,13 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:readee_app/features/match/widgets/book_card.dart';
+import 'package:readee_app/widget/bottomNav.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class CreateBookPage extends StatefulWidget {
   const CreateBookPage({super.key});
@@ -26,7 +28,7 @@ class _CreateBookPageState extends State<CreateBookPage> {
 
   double _quality = 95;
   int _descriptionLength = 0;
-  File? _selectedImage;
+  XFile? _selectedImage;
   String? _selectedGenre;
 
   final ImagePicker _picker = ImagePicker();
@@ -34,18 +36,96 @@ class _CreateBookPageState extends State<CreateBookPage> {
   bool _isGenreEmpty = false;
   bool _isAuthorEmpty = false;
 
-  Future _pickImage() async {
+  Future<void> _pickImage() async {
     try {
-      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+      final image = await _picker.pickImage(source: ImageSource.gallery);
       if (image == null) return;
-      final imageTemp = File(image.path);
-      setState(() => _selectedImage = imageTemp);
+
+      // Compress the image
+      final compressedImage = await FlutterImageCompress.compressWithFile(
+        image.path,
+        minWidth: 500, // Adjust as needed for smaller size
+        minHeight: 500,
+        quality: 25, // Adjust the quality level
+      );
+
+      // If the compression is successful, create a new XFile from the compressed bytes
+      if (compressedImage != null) {
+        final tempDir = Directory.systemTemp;
+        final tempFile = File('${tempDir.path}/temp_image.jpg')
+          ..writeAsBytesSync(compressedImage);
+        final imageTemp = XFile(tempFile.path);
+
+        setState(() => _selectedImage = imageTemp);
+      } else {
+        print('Image compression failed');
+      }
     } on PlatformException catch (e) {
       print('Failed to pick image: $e');
     }
   }
 
-  Future<void> _postBook() async {
+  // Future<void> _postBook() async {
+  //   setState(() {
+  //     _isTitleEmpty = _titleController.text.isEmpty;
+  //     _isGenreEmpty = _selectedGenre == null;
+  //   });
+
+  //   // Validate input
+  //   if (_isTitleEmpty || _isGenreEmpty) {
+  //     print('Error: Please fill all required fields');
+  //     return;
+  //   }
+
+  //   try {
+  //     String? base64Image;
+  //     // Convert the image file to Base64 string if an image is selected
+  //     if (_selectedImage != null) {
+  //       final bytes = await File(_selectedImage!.path).readAsBytes();
+  //       base64Image = base64Encode(bytes);
+  //     }
+
+  //     // Prepare the data for the POST request
+  //     final Map<String, dynamic> bookData = {
+  //       'OwnerId': 7,
+  //       'BookName': _titleController.text,
+  //       'BookPicture': base64Image ?? '??', // Use Base64 string or a placeholder
+  //       'BookDescription': _descriptionController.text,
+  //       'GenreId': _getGenreId(_selectedGenre!),
+  //       'Quality': _quality.toInt(),
+  //       'IsTraded': false,
+  //     };
+
+  //     print(bookData);
+
+  //     // Make the POST request
+  //     final response = await http.post(
+  //       Uri.parse('http://localhost:3000/createBook'),
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: jsonEncode(bookData),
+  //     );
+
+  //     if (response.statusCode == 201) {
+  //       print("Book created successfully");
+  //       Navigator.push(
+  //         context,
+  //         MaterialPageRoute(
+  //           builder: (context) => const BookCard(
+  //             books: [],
+  //           ),
+  //         ),
+  //       );
+  //     } else {
+  //       print('Failed to create book: ${response.body}');
+  //     }
+  //   } catch (e) {
+  //     print('Something went wrong: $e');
+  //   }
+  // }
+
+  Future<void> _postBook({bool isMock = false}) async {
     setState(() {
       _isTitleEmpty = _titleController.text.isEmpty;
       _isAuthorEmpty = _authorController.text.isEmpty;
@@ -54,17 +134,24 @@ class _CreateBookPageState extends State<CreateBookPage> {
 
     // Validate input
     if (_isTitleEmpty || _isGenreEmpty) {
-      print('Error '+ 'Please fill all required fields');
+      print('Error: Please fill all required fields');
       return;
     }
 
     try {
+      String? base64Image;
+      // Convert the resized image file to Base64 string if an image is selected
+      if (_selectedImage != null) {
+        final bytes = await _selectedImage!.readAsBytes();
+        base64Image = base64Encode(bytes);
+      }
+
       // Prepare the data for the POST request
       final Map<String, dynamic> bookData = {
-        'OwnerId': 2,
+        'OwnerId': 7,
         'BookName': _titleController.text,
+        'BookPicture': base64Image ?? '??',
         'Author': _authorController.text,
-        'BookPicture': _selectedImage != null ? _selectedImage!.path : '??',
         'BookDescription': _descriptionController.text,
         'GenreId': _getGenreId(_selectedGenre!),
         'Quality': _quality.toInt(),
@@ -73,27 +160,35 @@ class _CreateBookPageState extends State<CreateBookPage> {
 
       print(bookData);
 
-      // Make the POST request
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/createBook'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(bookData),
-      );
-
-      if (response.statusCode == 201) {
-        print("Book created successfully");
+      // Use mock response if the flag is true
+      if (isMock) {
+        print("Mock: Book created successfully");
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const BookCard(
-              books: [], userID: 2,
-            ),
+            builder: (context) => const ReadeeNavigationBar(),
           ),
         );
       } else {
-        print('Failed to create book');
+        // Make the POST request
+        final response = await http.post(
+          Uri.parse('http://localhost:3000/createBook'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode(bookData),
+        );
+
+        if (response.statusCode == 201) {
+          print("Book created successfully");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const ReadeeNavigationBar()),
+          );
+        } else {
+          print('Failed to create book: ${response.body}');
+        }
       }
     } catch (e) {
       print('Something went wrong: $e');
@@ -181,7 +276,7 @@ class _CreateBookPageState extends State<CreateBookPage> {
                     color: _isAuthorEmpty ? Colors.red : Colors.cyan,
                   ),
                 ),
-                errorText: _isGenreEmpty ? 'Title is required' : null,
+                errorText: _isAuthorEmpty ? 'Author is required' : null,
               ),
             ),
             const SizedBox(height: 16),
@@ -199,16 +294,18 @@ class _CreateBookPageState extends State<CreateBookPage> {
                     color: _isGenreEmpty ? Colors.red : Colors.cyan,
                   ),
                 ),
-                errorText: _isGenreEmpty ? 'Title is required' : null,
+                errorText: _isGenreEmpty ? 'Genre is required' : null,
               ),
               items: const [
                 DropdownMenuItem(value: 'Sport', child: Text('Sport')),
                 DropdownMenuItem(value: 'Fiction', child: Text('Fiction')),
-                DropdownMenuItem(value: 'Self-improve', child: Text('Self-improve')),
+                DropdownMenuItem(
+                    value: 'Self-improve', child: Text('Self-improve')),
                 DropdownMenuItem(value: 'History', child: Text('History')),
                 DropdownMenuItem(value: 'Horror', child: Text('Horror')),
                 DropdownMenuItem(value: 'Love', child: Text('Love')),
-                DropdownMenuItem(value: 'Psychology', child: Text('Psychology')),
+                DropdownMenuItem(
+                    value: 'Psychology', child: Text('Psychology')),
                 DropdownMenuItem(value: 'Fantasy', child: Text('Fantasy')),
               ],
               onChanged: (String? newValue) {
@@ -303,7 +400,8 @@ class _CreateBookPageState extends State<CreateBookPage> {
                                     height: 80,
                                     fit: BoxFit.cover,
                                   )
-                                : const Icon(Icons.cloud_upload, color: Colors.cyan),
+                                : const Icon(Icons.cloud_upload,
+                                    color: Colors.cyan),
                           ),
                         ),
                       ),
@@ -319,10 +417,10 @@ class _CreateBookPageState extends State<CreateBookPage> {
           children: [
             ElevatedButton(
               onPressed: () {
-                _postBook(); // Call the function
+                _postBook(isMock: false); // Call the function
               },
               style: const ButtonStyle(
-                backgroundColor: MaterialStatePropertyAll(Colors.cyan),
+                backgroundColor: WidgetStatePropertyAll(Colors.cyan),
               ),
               child: const Text(
                 'Post',
