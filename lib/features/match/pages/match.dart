@@ -16,7 +16,7 @@ class MatchPage extends StatefulWidget {
 class _MatchPageState extends State<MatchPage> {
   List<Book> books = [];
   final int userID = 7; // Set your userID here
-   final Random random = Random();
+  final Random random = Random();
 
   @override
   void initState() {
@@ -27,34 +27,39 @@ class _MatchPageState extends State<MatchPage> {
   Future<void> fetchBooks() async {
     try {
       // Step 1: Get user genres
-      final genreResponse = await http.get(Uri.parse('http://localhost:3000/userGenres?userID=$userID'));
+      final genreResponse = await http
+          .get(Uri.parse('http://localhost:3000/userGenres?userID=$userID'));
       if (genreResponse.statusCode == 200) {
         List<dynamic> genresData = jsonDecode(genreResponse.body);
 
-        List<int> userGenreIDs = genresData.map((genre) => genre['Genre_genre_id'] as int).toList();
+        List<int> userGenreIDs =
+            genresData.map((genre) => genre['Genre_genre_id'] as int).toList();
         // print("this is user GenreIDs");
         // print(userGenreIDs);
 
         // Step 2: Get user logs to filter out liked books
-        final logsResponse = await http.get(Uri.parse('http://localhost:3000/getLogs/$userID'));
+        final logsResponse =
+            await http.get(Uri.parse('http://localhost:3000/getLogs/$userID'));
         List<int> likedBookIDs = [];
         if (logsResponse.statusCode == 200) {
           List<dynamic> logsData = jsonDecode(logsResponse.body);
-          likedBookIDs = logsData.map((log) => log['BookLikeId'] as int).toList();
+          likedBookIDs =
+              logsData.map((log) => log['BookLikeId'] as int).toList();
           print("This is likedBookIDs");
           print(likedBookIDs);
         }
 
         // Step 3: Get books
-        final bookResponse = await http.get(Uri.parse('http://localhost:3000/getBooks'));
+        final bookResponse =
+            await http.get(Uri.parse('http://localhost:3000/getBooks'));
         if (bookResponse.statusCode == 200) {
           List<dynamic> booksData = jsonDecode(bookResponse.body);
 
           List<Book> matchingBooks = booksData.where((book) {
             return userGenreIDs.contains(book['GenreId']) &&
-                   book['OwnerId'] != userID &&
-                   book['IsTraded'] == false &&
-                   !likedBookIDs.contains(book['BookId']);
+                book['OwnerId'] != userID &&
+                book['IsTraded'] == false &&
+                !likedBookIDs.contains(book['BookId']);
           }).map((book) {
             return Book(
               title: book['BookName'],
@@ -68,9 +73,9 @@ class _MatchPageState extends State<MatchPage> {
 
           List<Book> nonMatchingBooks = booksData.where((book) {
             return !userGenreIDs.contains(book['GenreId']) &&
-                   book['OwnerId'] != userID &&
-                   book['IsTraded'] == false &&
-                   !likedBookIDs.contains(book['BookId']);
+                book['OwnerId'] != userID &&
+                book['IsTraded'] == false &&
+                !likedBookIDs.contains(book['BookId']);
           }).map((book) {
             return Book(
               title: book['BookName'],
@@ -82,21 +87,26 @@ class _MatchPageState extends State<MatchPage> {
             );
           }).toList();
 
-        // Step 4: Randomly select 70% matching and 30% non-matching books
+          // Step 4: Randomly select 70% matching and 30% non-matching books
           int matchingBooksCount = (booksData.length * 0.7).toInt();
           int nonMatchingBooksCount = booksData.length - matchingBooksCount;
 
-          List<Book> selectedMatchingBooks = _getRandomBooks(matchingBooks, matchingBooksCount);
-          List<Book> selectedNonMatchingBooks = _getRandomBooks(nonMatchingBooks, nonMatchingBooksCount);
+          List<Book> selectedMatchingBooks =
+              _getRandomBooks(matchingBooks, matchingBooksCount);
+          List<Book> selectedNonMatchingBooks =
+              _getRandomBooks(nonMatchingBooks, nonMatchingBooksCount);
 
-        // Step 5: Combine the selected books
-          List<Book> combinedBooks  = [...selectedMatchingBooks, ...selectedNonMatchingBooks];
+          // Step 5: Combine the selected books
+          List<Book> combinedBooks = [
+            ...selectedMatchingBooks,
+            ...selectedNonMatchingBooks
+          ];
 
-        // Step 6: Shuffle the combined list to randomize the order
+          // Step 6: Shuffle the combined list to randomize the order
           combinedBooks.shuffle(random);
 
           setState(() {
-            books = combinedBooks ;
+            books = combinedBooks;
           });
 
           // print("this is book that get from filter");
@@ -157,24 +167,28 @@ class _MatchPageState extends State<MatchPage> {
 
     return Scaffold(
       appBar: AppBar(
-    leading: IconButton(
-      onPressed: () {},
-      icon: const Icon(Icons.notifications),
-    ),
-    actions: const [
-      Padding(
-        padding: EdgeInsets.only(right: 16.0),
-        child: Image(
+        // leading: IconButton(
+        //   onPressed: () {},
+        //   icon: const Icon(Icons.notifications),
+        // ),
+        title: const Image(
           image: AssetImage('assets/logo.png'),
-          height: 40,
+          height: 50,
         ),
+        // actions: const [
+        //   Padding(
+        //     padding: EdgeInsets.only(right: 16.0),
+        //     child: Image(
+        //       image: AssetImage('assets/logo.png'),
+        //       height: 40,
+        //     ),
+        //   ),
+        // ],
       ),
-    ],
-  ),
       body: Center(
-        child: books.isNotEmpty 
-          ? BookCard(books: books)
-          : const CircularProgressIndicator(), // Show loading indicator while data is fetched
+        child: books.isNotEmpty
+            ? BookCard(books: books)
+            : const CircularProgressIndicator(), // Show loading indicator while data is fetched
       ),
     );
   }
