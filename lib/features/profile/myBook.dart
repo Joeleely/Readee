@@ -123,6 +123,7 @@ Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
       centerTitle: true,
+      backgroundColor: const Color.fromARGB(255, 243, 252, 255),
       leading: IconButton(
         onPressed: () => Navigator.pop(context),
         icon: const Icon(LineAwesomeIcons.arrow_left),
