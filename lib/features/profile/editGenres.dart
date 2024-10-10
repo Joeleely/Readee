@@ -59,7 +59,7 @@ class _EditGenrePageState extends State<EditGenrePage> {
       setState(() {
         selectedGenreIds = jsonData.map((genre) => genre['Genre_genre_id'] as int).toList();
       });
-      print(selectedGenreIds);
+      //print(selectedGenreIds);
     } else {
       throw Exception('Failed to load user genres');
     }
@@ -196,11 +196,17 @@ class _EditGenrePageState extends State<EditGenrePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed: () {
-                      saveUserGenres();
-                    },
-                    style: const ButtonStyle(
-                        backgroundColor: MaterialStatePropertyAll(Colors.cyan)),
+                    onPressed:
+                      selectedGenreIds.isNotEmpty
+                      ? () {
+                          saveUserGenres();
+                        }
+                      : null,
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStatePropertyAll(
+                          selectedGenreIds.isNotEmpty ? Colors.cyan : Colors.grey,
+                          ),
+                        ),
                     child: const Text(
                       'Save',
                       style: TextStyle(
