@@ -165,6 +165,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 243, 252, 255),
         leading: IconButton(
         onPressed: () => Navigator.pop(context),
         icon: const Icon(LineAwesomeIcons.arrow_left),
@@ -278,7 +279,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
               ],
             ),
           ),
-          if (widget.userId != book.ownerId)
+          if (widget.userId != int.parse(book.ownerId))
             Positioned(
               bottom: 20,
               left: 0,
