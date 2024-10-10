@@ -1,3 +1,5 @@
+import 'dart:typed_data'; // Import for Uint8List
+import 'dart:convert'; // Import for base64Decode
 import 'package:flutter/material.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
 import 'package:readee_app/typography.dart';
@@ -12,6 +14,11 @@ class BookInfoPage extends StatefulWidget {
 
 class _BookInfoPageState extends State<BookInfoPage> {
   int _currentImageIndex = 0;
+
+  // Method to convert Base64 string to Uint8List
+  Uint8List _convertBase64Image(String base64String) {
+    return base64Decode(base64String);
+  }
 
   void _nextImage() {
     setState(() {
@@ -44,7 +51,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
                 Text(
                   widget.book.author,
                   style: TypographyText.b3(Colors.grey),
-                )
+                ),
               ],
             ),
             IconButton(
@@ -70,7 +77,9 @@ class _BookInfoPageState extends State<BookInfoPage> {
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         fit: BoxFit.cover,
-                        image: NetworkImage(widget.book.img[_currentImageIndex]),
+                        image: widget.book.img[_currentImageIndex].startsWith('http')
+                            ? NetworkImage(widget.book.img[_currentImageIndex]) // Network image
+                            : MemoryImage(_convertBase64Image(widget.book.img[_currentImageIndex])) as ImageProvider<Object>, // Base64 image
                       ),
                     ),
                   ),
@@ -87,9 +96,12 @@ class _BookInfoPageState extends State<BookInfoPage> {
                       style: TypographyText.h3(Colors.blueAccent),
                     ),
                     const SizedBox(height: 20),
-                    Text(
-                      widget.book.description,
-                      style: TypographyText.b2(Colors.black),
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        widget.book.description,
+                        style: TypographyText.b3(Colors.black),
+                      ),
                     ),
                   ],
                 ),
