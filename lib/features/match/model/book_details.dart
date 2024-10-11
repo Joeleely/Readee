@@ -1,5 +1,5 @@
-class Book {
-  const Book(
+class BookDetails {
+  const BookDetails(
       {required this.bookId,
       required this.title,
       required this.author,

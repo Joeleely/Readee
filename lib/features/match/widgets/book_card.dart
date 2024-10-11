@@ -8,7 +8,7 @@ import 'package:swipe_cards/swipe_cards.dart';
 
 class BookCard extends StatefulWidget {
   const BookCard({super.key, required this.books});
-  final List<Book> books;
+  final List<BookDetails> books;
 
   @override
   State<BookCard> createState() => _BookCardState();
@@ -17,7 +17,7 @@ class BookCard extends StatefulWidget {
 class _BookCardState extends State<BookCard> {
   final List<SwipeItem> _swipeItems = <SwipeItem>[];
   MatchEngine? _matchEngine;
-  Map<Book, int> currentPhotoMap = {}; // Track currentPhoto for each book
+  Map<BookDetails, int> currentPhotoMap = {}; // Track currentPhoto for each book
 
   @override
   void initState() {
@@ -61,7 +61,7 @@ class _BookCardState extends State<BookCard> {
       body: SwipeCards(
         matchEngine: _matchEngine!,
         itemBuilder: (context, i) {
-          Book book = _swipeItems[i].content;
+          BookDetails book = _swipeItems[i].content;
           int numberPhoto = book.img.length;
 
           // Get current photo for this specific book
@@ -289,7 +289,7 @@ class _BookCardState extends State<BookCard> {
   }
 }
 
-Route _createRoute(Book book) {
+Route _createRoute(BookDetails book) {
   return PageRouteBuilder(
     pageBuilder: (context, animation, secondaryAnimation) =>
         BookInfoPage(book: book),

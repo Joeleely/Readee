@@ -14,8 +14,8 @@ class MatchPage extends StatefulWidget {
 }
 
 class _MatchPageState extends State<MatchPage> {
-  List<Book> books = [];
-  final int userID = 2; // Set your userID here
+  List<BookDetails> books = [];
+  final int userID = 1; // Set your userID here
   final Random random = Random();
 
   @override
@@ -55,35 +55,37 @@ class _MatchPageState extends State<MatchPage> {
         if (bookResponse.statusCode == 200) {
           List<dynamic> booksData = jsonDecode(bookResponse.body);
 
-          List<Book> matchingBooks = booksData.where((book) {
+          List<BookDetails> matchingBooks = booksData.where((book) {
             return userGenreIDs.contains(book['GenreId']) &&
                 book['OwnerId'] != userID &&
                 book['IsTraded'] == false &&
                 !likedBookIDs.contains(book['BookId']);
           }).map((book) {
-            return Book(
+            return BookDetails(
               title: book['BookName'],
               author: book['Author'],
               description: book['BookDescription'],
               img: [book['BookPicture']],
               quality: '${book['Quality']}%',
-              genre: '', bookId: book['BookId'],
+              genre: '',
+              bookId: book['BookId'],
             );
           }).toList();
 
-          List<Book> nonMatchingBooks = booksData.where((book) {
+          List<BookDetails> nonMatchingBooks = booksData.where((book) {
             return !userGenreIDs.contains(book['GenreId']) &&
                 book['OwnerId'] != userID &&
                 book['IsTraded'] == false &&
                 !likedBookIDs.contains(book['BookId']);
           }).map((book) {
-            return Book(
+            return BookDetails(
               title: book['BookName'],
               author: book['Author'],
               description: book['BookDescription'],
               img: [book['BookPicture']],
               quality: '${book['Quality']}%',
-              genre: '', bookId: book['BookId'],
+              genre: '',
+              bookId: book['BookId'],
             );
           }).toList();
 
@@ -91,13 +93,13 @@ class _MatchPageState extends State<MatchPage> {
           int matchingBooksCount = (booksData.length * 0.7).toInt();
           int nonMatchingBooksCount = booksData.length - matchingBooksCount;
 
-          List<Book> selectedMatchingBooks =
+          List<BookDetails> selectedMatchingBooks =
               _getRandomBooks(matchingBooks, matchingBooksCount);
-          List<Book> selectedNonMatchingBooks =
+          List<BookDetails> selectedNonMatchingBooks =
               _getRandomBooks(nonMatchingBooks, nonMatchingBooksCount);
 
           // Step 5: Combine the selected books
-          List<Book> combinedBooks = [
+          List<BookDetails> combinedBooks = [
             ...selectedMatchingBooks,
             ...selectedNonMatchingBooks
           ];
@@ -122,7 +124,7 @@ class _MatchPageState extends State<MatchPage> {
     }
   }
 
-  List<Book> _getRandomBooks(List<Book> booksList, int count) {
+  List<BookDetails> _getRandomBooks(List<BookDetails> booksList, int count) {
     if (booksList.length <= count) {
       return booksList;
     }
@@ -132,62 +134,13 @@ class _MatchPageState extends State<MatchPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Sample book data
-    // List<Book> books = const [
-    //   Book(
-    //     title: 'The Seven Husbands of Evelyn Hugo',
-    //     author: 'Taylor Jenkins Reid',
-    //     description: 'A book about all the lives you could have lived.',
-    //     img: ['https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGG0NQOwrLEgU67POJ7SZvy2TPC91PsnBfxw&s', 'https://down-th.img.susercontent.com/file/sg-11134201-23010-1qmyzsxyshmv73'],
-    //     quality: '95%', genre: '',
-    //   ),
-    //   Book(
-    //     title: 'Atomic Habits',
-    //     author: 'James Clear',
-    //     description: 'An easy and proven way to build good habits and break bad ones.',
-    //     img: ['https://m.media-amazon.com/images/I/51-uspgqWIL.jpg' ],
-    //     quality: '80%', genre: '',
-    //   ),
-    //   Book(
-    //     title: 'November 9',
-    //     author: 'Colleen Hoover',
-    //     description: 'Fallon meets Ben, an aspiring novelist, the day before her scheduled cross-country move. Their untimely attraction leads them to spend Fallon’s last day in L.A. together, and her eventful life becomes the creative inspiration Ben has always sought for his novel.',
-    //     img: ['https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1447138036i/25111004.jpg'],
-    //     quality: '80%', genre: '',
-    //   ),
-    //   Book(
-    //     title: 'Daisy Jones & The Six',
-    //     author: 'Taylor Jenkins Reid',
-    //     description: 'Daisy is a girl coming of age in L.A. in the late sixties, sneaking into clubs on the Sunset Strip, sleeping with rock stars, and dreaming of singing at the Whisky a Go Go. The sex and drugs are thrilling, but it’s the rock ’n’ roll she loves most.',
-    //     img: ['https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1580255154i/40597810.jpg'],
-    //     quality: '70%', genre: '',
-    //   ),
-    //   // Add more book entries here
-    // ];
-
     return Scaffold(
       appBar: AppBar(
-    leading: IconButton(
-      onPressed: () {},
-      icon: const Icon(Icons.notifications),
-    ),
-    backgroundColor: const Color.fromARGB(255, 243, 252, 255),
-    actions: const [
-      Padding(
-        padding: EdgeInsets.only(right: 16.0),
-        child: Image(
+        title: const Image(
           image: AssetImage('assets/logo.png'),
           height: 50,
         ),
-        // actions: const [
-        //   Padding(
-        //     padding: EdgeInsets.only(right: 16.0),
-        //     child: Image(
-        //       image: AssetImage('assets/logo.png'),
-        //       height: 40,
-        //     ),
-        ),
-        ],
+        backgroundColor: const Color.fromARGB(255, 243, 252, 255),
       ),
       body: Center(
         child: books.isNotEmpty
