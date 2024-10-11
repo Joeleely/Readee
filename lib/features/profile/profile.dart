@@ -22,7 +22,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String firstName = '';
   String lastName = '';
   String gender = '';
-  final int userID = 2;
+  final int userID = 1;
 
   @override
   void initState() {

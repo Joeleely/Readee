@@ -2,6 +2,12 @@
   "configVersion": 2,
   "packages": [
     {
+      "name": "archive",
+      "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/archive-3.6.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "async",
       "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/async-2.11.0",
       "packageUri": "lib/",
@@ -36,6 +42,12 @@
       "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/cross_file-0.3.4+2",
       "packageUri": "lib/",
       "languageVersion": "3.3"
+    },
+    {
+      "name": "crypto",
+      "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/crypto-3.0.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
     },
     {
       "name": "cupertino_icons",
@@ -86,6 +98,42 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "flutter_image_compress",
+      "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/flutter_image_compress-2.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_image_compress_common",
+      "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/flutter_image_compress_common-1.0.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_image_compress_macos",
+      "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/flutter_image_compress_macos-1.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_image_compress_ohos",
+      "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/flutter_image_compress_ohos-0.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_image_compress_platform_interface",
+      "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/flutter_image_compress_platform_interface-1.0.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_image_compress_web",
+      "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/flutter_image_compress_web-0.1.4+1",
+      "packageUri": "lib/",
+      "languageVersion": "2.16"
+    },
+    {
       "name": "flutter_lints",
       "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/flutter_lints-3.0.2",
       "packageUri": "lib/",
@@ -126,6 +174,12 @@
       "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/http_parser-4.0.2",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "image",
+      "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/image-4.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
     },
     {
       "name": "image_picker",
@@ -174,6 +228,12 @@
       "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/image_picker_windows-0.2.1+1",
       "packageUri": "lib/",
       "languageVersion": "2.19"
+    },
+    {
+      "name": "js",
+      "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/js-0.7.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
     },
     {
       "name": "leak_tracker",
@@ -246,6 +306,12 @@
       "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/path_parsing-1.0.1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "petitparser",
+      "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/petitparser-6.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
     },
     {
       "name": "plugin_platform_interface",
@@ -326,13 +392,19 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "xml",
+      "rootUri": "file:///Users/parnlees/.pub-cache/hosted/pub.dev/xml-6.5.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
       "name": "readee_app",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "3.3"
     }
   ],
-  "generated": "2024-10-10T02:10:19.792592Z",
+  "generated": "2024-10-11T07:59:43.151801Z",
   "generator": "pub",
   "generatorVersion": "3.5.1",
   "flutterRoot": "file:///Users/parnlees/flutter",

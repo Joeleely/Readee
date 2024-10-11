@@ -170,7 +170,7 @@ Widget build(BuildContext context) {
                           CustomPageRoute(
                             page: BookDetailPage(
                                 userId: widget.userId,
-                                bookId: books[index].bookId,
+                                bookId: books[index].bookId, matchId: 0,
                             )
                           ));
                     },

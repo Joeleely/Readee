@@ -10,11 +10,11 @@
 		</data>
 		<key>flutter_assets/AssetManifest.bin</key>
 		<data>
-		fKf5VJzrpaE3H4gYbSAjBCoK1kI=
+		T2NLfE3WdNj8+bHN6GhuhhK+IfQ=
 		</data>
 		<key>flutter_assets/AssetManifest.json</key>
 		<data>
-		03aDkF1I3e6+T5XdPl9Rn0c0SmE=
+		90vre8X8WqQkwmsv9d76DuQ6y/s=
 		</data>
 		<key>flutter_assets/FontManifest.json</key>
 		<data>
@@ -22,7 +22,7 @@
 		</data>
 		<key>flutter_assets/NOTICES.Z</key>
 		<data>
-		ZCgUMcYPaejUBSovbuUxFeHJdZc=
+		ggcVMPJPty7LTJJL97oiS17y2Yg=
 		</data>
 		<key>flutter_assets/assets/Google_logo.png</key>
 		<data>
@@ -86,11 +86,15 @@
 		</data>
 		<key>flutter_assets/kernel_blob.bin</key>
 		<data>
-		U0gGW4y83h8irA0VuI/ujyAIEME=
+		GeTYY9y+sBgDwYBux03/DtDRPfc=
 		</data>
 		<key>flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
 		<data>
 		Bvk+P1ykE1PGRdktwgwDyz6AOqM=
+		</data>
+		<key>flutter_assets/packages/flutter_image_compress_web/assets/pica.min.js</key>
+		<data>
+		Mo0xQmdAumhf5KoeUg6A8AWGnHw=
 		</data>
 		<key>flutter_assets/packages/line_awesome_flutter/lib/fonts/LineAwesome.ttf</key>
 		<data>
@@ -111,14 +115,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			n65lp6AohcNUP72hlpJ58DxSRd0L6zf2ApYRl29f2bM=
+			oRKBZAEUOyD0YOOn4NX9JLhkDFreeehyGLBu+HL0yyY=
 			</data>
 		</dict>
 		<key>flutter_assets/AssetManifest.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			PipByu8ppt9rJ7MWyvrGokRal4dfjEswYglaSqrtC3g=
+			kkBDD9dnUzE4w/xGU+Du3igLYJsyj9b8E2oG1RNNlE8=
 			</data>
 		</dict>
 		<key>flutter_assets/FontManifest.json</key>
@@ -132,7 +136,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			r2hTRZ/veicuO5BuVnWhzzqGmhCuO5EFnRJijBSCqig=
+			urYbkZ0POCbbse5xoBd8ZYV3OqccthDfkArSsQ7VwVk=
 			</data>
 		</dict>
 		<key>flutter_assets/assets/Google_logo.png</key>
@@ -244,7 +248,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			GUuszqrlyeEgra/hJwrxl1kQfMW5n73GqWrJbn+0q2U=
+			8y+gNolSjYbwklOzwCOiyX8qhKB6xJz+YghTPWv2wpQ=
 			</data>
 		</dict>
 		<key>flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
@@ -252,6 +256,13 @@
 			<key>hash2</key>
 			<data>
 			Z8RP6Rg7AC553ef2l34piGYcmj5KPF/OloeH79vtgjw=
+			</data>
+		</dict>
+		<key>flutter_assets/packages/flutter_image_compress_web/assets/pica.min.js</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Chn6pGY+MG8wbFljM1nwrFZDT4pAa4TH/oRx9FLNmgM=
 			</data>
 		</dict>
 		<key>flutter_assets/packages/line_awesome_flutter/lib/fonts/LineAwesome.ttf</key>

@@ -12,8 +12,10 @@ import 'package:readee_app/features/profile/widget/pageRoute.dart';
 class BookDetailPage extends StatefulWidget {
   final int userId;
   final int bookId;
+  final int matchId;
 
-  BookDetailPage({required this.bookId, required this.userId});
+  BookDetailPage(
+      {required this.bookId, required this.userId, required this.matchId});
 
   @override
   _BookDetailPageState createState() => _BookDetailPageState();
@@ -25,9 +27,14 @@ class _BookDetailPageState extends State<BookDetailPage> {
   late int timesSwap;
   late double rating;
   late String profile;
+  late String ownerUserName = '';
+  late int ownerTimesSwap;
+  late double ownerRating;
+  late String ownerProfile;
   bool isExpanded = false;
   bool showToggle = false;
   bool isLoading = true;
+  bool isTradeRequestPending = false;
 
   @override
   void initState() {
@@ -77,6 +84,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
             ownerId: bookData['OwnerId']?.toString() ?? 'ThisIsNull',
             bookId: bookData['BookId']?.toString() ?? 'ThisIsNull',
           );
+          _fetchOwnerData(book.ownerId);
           _checkDescriptionLength();
           isLoading = false;
         });
@@ -85,6 +93,50 @@ class _BookDetailPageState extends State<BookDetailPage> {
       }
     } catch (e) {
       _logError('Error fetching book data: $e');
+    }
+  }
+
+  Future<void> _fetchMatchData() async {
+    if (widget.userId == int.parse(book.ownerId)) {
+      return; // Exit the function if the user is the owner
+    }
+
+    try {
+      final response = await http.get(
+          Uri.parse('http://localhost:3000/getAllMatches/${widget.matchId}'));
+
+      if (response.statusCode == 200) {
+        final matchData = json.decode(response.body);
+        setState(() {
+          if (matchData['TradeRequestStatus'] == 'pending') {
+            isTradeRequestPending = true;
+          }
+        });
+      } else {
+        _logError('Failed to fetch match data: ${response.statusCode}');
+      }
+    } catch (e) {
+      _logError('Error fetching match data: $e');
+    }
+  }
+
+  Future<void> _fetchOwnerData(String ownerId) async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/users/$ownerId'));
+      if (response.statusCode == 200) {
+        final ownerData = json.decode(response.body);
+        setState(() {
+          ownerUserName = ownerData['Username'] ?? 'Unknown Owner';
+          ownerTimesSwap = ownerData['timesSwap'] ?? 0;
+          ownerRating = ownerData['rating'] ?? 0.0;
+          ownerProfile = ownerData['ProfileUrl'] ?? 'ThisIsNull';
+        });
+      } else {
+        _logError('Failed to fetch owner data: ${response.statusCode}');
+      }
+    } catch (e) {
+      _logError('Error fetching owner data: $e');
     }
   }
 
@@ -131,8 +183,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
               children: [
                 TextButton(
                   style: const ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(Colors.green),
-                    minimumSize: MaterialStatePropertyAll(Size(100, 50)),
+                    backgroundColor: WidgetStatePropertyAll(Colors.green),
+                    minimumSize: WidgetStatePropertyAll(Size(100, 50)),
                   ),
                   onPressed: () {
                     // Handle the trade request here
@@ -144,8 +196,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
                 ),
                 TextButton(
                   style: const ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(Colors.grey),
-                    minimumSize: MaterialStatePropertyAll(Size(100, 50)),
+                    backgroundColor: WidgetStatePropertyAll(Colors.grey),
+                    minimumSize: WidgetStatePropertyAll(Size(100, 50)),
                   ),
                   child:
                       const Text('No', style: TextStyle(color: Colors.white)),
@@ -239,7 +291,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(userName),
+                        Text(
+                            ownerUserName.isNotEmpty ? ownerUserName : 'Owner'),
                         Row(
                           children: [
                             Text(
@@ -258,7 +311,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
                       ],
                     ),
                     const Spacer(),
-                    const Icon(Icons.sms),
+                    if (widget.userId != int.parse(book.ownerId))
+                      const Icon(Icons.sms),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -315,20 +369,25 @@ class _BookDetailPageState extends State<BookDetailPage> {
               left: 0,
               right: 0,
               child: Center(
-                child: ElevatedButton(
-                  onPressed: _showConfirmationDialog,
-                  style: ElevatedButton.styleFrom(
-                    elevation: 5,
-                    backgroundColor: Colors.cyan,
-                  ),
-                  child: const Text(
-                    'Request to trade',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
+                  child: ElevatedButton(
+                onPressed: isTradeRequestPending
+                    ? null
+                    : _showConfirmationDialog, // Disable if pending
+                style: ElevatedButton.styleFrom(
+                  elevation: 5,
+                  backgroundColor: isTradeRequestPending
+                      ? Colors.grey
+                      : Colors.cyan, // Grey if pending
+                ),
+                child: Text(
+                  isTradeRequestPending
+                      ? 'Waiting for response'
+                      : 'Request to trade', // Change text if pending
+                  style: const TextStyle(
+                    color: Colors.white,
                   ),
                 ),
-              ),
+              )),
             ),
         ],
       ),

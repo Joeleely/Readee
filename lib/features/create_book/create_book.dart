@@ -82,7 +82,7 @@ class _CreateBookPageState extends State<CreateBookPage> {
 
       // Prepare the data for the POST request
       final Map<String, dynamic> bookData = {
-        'OwnerId': 7,
+        'OwnerId': 1,
         'BookName': _titleController.text,
         'BookPicture': base64Image ?? '??',
         'Author': _authorController.text,

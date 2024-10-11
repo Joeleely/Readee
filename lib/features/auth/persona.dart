@@ -67,7 +67,7 @@ class _PersonaPageState extends State<PersonaPage> {
   }
 
   Future<void> submitSelectedGenres() async {
-    int userId = 2;
+    int userId = 1;
 
     print(selectedGenreIds);
 
