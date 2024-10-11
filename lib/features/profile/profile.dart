@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:readee_app/features/profile/editGenres.dart';
 import 'package:readee_app/features/profile/editProfileScreen.dart';
+import 'package:readee_app/features/profile/myBook.dart';
 import 'package:readee_app/features/profile/widget/pageRoute.dart';
 import 'package:readee_app/features/profile/review/reviewMain.dart';
 import 'package:readee_app/widget/profile_menu.dart';
@@ -58,7 +59,8 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Expanded(
+      body: Padding(
+        padding: const EdgeInsets.only(top: 50),
         child: SingleChildScrollView(
           child: Center(
             child: Padding(
@@ -92,7 +94,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ),
-
+        
                   const SizedBox(height: 25),
                   const Divider(
                     color: Colors.grey,
@@ -119,17 +121,24 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ))),
                   ProfileMenuWidget(
-                      title: 'Genres', icon: Icons.book, onClicked: () => Navigator.push(
+                      title: 'Genres',
+                      icon: Icons.book,
+                      onClicked: () => Navigator.push(
                           context,
                           CustomPageRoute(
-                            page: EditGenrePage(userID: userID,)
-                          ))),
+                              page: EditGenrePage(
+                            userID: userID,
+                          )))),
                   ProfileMenuWidget(
                       title: 'Reviews', icon: Icons.star, onClicked: () {}),
                   ProfileMenuWidget(
                       title: 'My Books',
                       icon: Icons.menu_book,
-                      onClicked: () {}),
+                      onClicked: () => Navigator.push(
+                          context,
+                          CustomPageRoute(
+                            page: MyBooksPage(userId: userID,)
+                          ))),
                   ProfileMenuWidget(
                       title: 'History', icon: Icons.history, onClicked: () {}),
                   const SizedBox(height: 25),

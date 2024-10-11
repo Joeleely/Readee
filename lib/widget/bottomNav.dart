@@ -48,7 +48,7 @@ class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 _buildNavButton(Icons.swap_horiz, 0, const MatchPage()),
-                _buildNavButton(Icons.list, 1, const MatchListPage()),
+                _buildNavButton(Icons.list, 1, MatchListPage()),
                 FloatingActionButton(
                   elevation: 0,
                   child: const Icon(Icons.add),

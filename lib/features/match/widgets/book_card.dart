@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
 import 'package:readee_app/features/match/pages/book_info.dart';
@@ -48,6 +50,14 @@ class _BookCardState extends State<BookCard> {
     }
 
     _matchEngine = MatchEngine(swipeItems: _swipeItems);
+  }
+
+  Uint8List _convertBase64Image(String base64String) {
+    // Remove the prefix if it exists
+    String base64Data = base64String.contains(',')
+        ? base64String.split(',').last
+        : base64String;
+    return base64Decode(base64Data);
   }
 
   Future<void> _likeBook(int userId, int bookId) async {
@@ -101,7 +111,12 @@ class _BookCardState extends State<BookCard> {
                       borderRadius: BorderRadius.circular(10),
                       image: DecorationImage(
                         fit: BoxFit.cover,
-                        image: NetworkImage(book.img[currentPhoto]),
+                        // Check if the image is a URL or base64
+                        image: book.img[currentPhoto].startsWith('http')
+                            ? NetworkImage(book.img[currentPhoto])
+                            : MemoryImage(
+                                    _convertBase64Image(book.img[currentPhoto]))
+                                as ImageProvider<Object>,
                       ),
                     ),
                   ),
@@ -120,12 +135,9 @@ class _BookCardState extends State<BookCard> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-                            print('Left Tapped');
                             if (book.img.length > 1 && currentPhoto > 0) {
                               setState(() {
                                 currentPhotoMap[book] = currentPhoto - 1;
-                                print(
-                                    'numberPhoto: $numberPhoto, currentPhoto: $currentPhoto');
                               });
                             }
                           },
@@ -138,14 +150,10 @@ class _BookCardState extends State<BookCard> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-                            print('current photo index $currentPhoto');
-                            print('Right Tapped');
                             if (book.img.length > 1) {
                               setState(() {
                                 currentPhotoMap[book] =
                                     (currentPhoto + 1) % numberPhoto;
-                                print(
-                                    'numberPhoto: $numberPhoto, currentPhoto: ${currentPhotoMap[book]}');
                               });
                             }
                           },
@@ -184,7 +192,7 @@ class _BookCardState extends State<BookCard> {
                                       : Theme.of(context)
                                           .colorScheme
                                           .secondary
-                                          .withOpacity(0.5),
+                                          .withOpacity(0.8),
                                 ),
                               ),
                             );
@@ -206,16 +214,16 @@ class _BookCardState extends State<BookCard> {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  width: 200,
-                                  child: Text(
-                                    book.title,
-                                    style: TypographyText.h2(Colors.white),
-                                    maxLines: 2,
-                                  ),
+                                Text(
+                                  book.title,
+                                  style: TypographyText.h2(Colors.white),
+                                  maxLines: 2,
+                                ),
+                                const SizedBox(
+                                  width: 10,
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 6),
+                                  padding: const EdgeInsets.only(top: 5),
                                   child: Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 8,
@@ -231,15 +239,18 @@ class _BookCardState extends State<BookCard> {
                                 ),
                               ],
                             ),
-                            IconButton(
-                              padding: EdgeInsets.zero,
-                              constraints: BoxConstraints(),
-                              onPressed: () {
-                                Navigator.of(context).push(_createRoute(book));
-                              },
-                              icon: const Icon(
-                                Icons.info_rounded,
-                                color: Colors.white,
+                            Container(
+                              padding: const EdgeInsets.all(0.0),
+                              height: 30,
+                              child: IconButton(
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .push(_createRoute(book));
+                                },
+                                icon: const Icon(
+                                  Icons.info,
+                                  color: Colors.white,
+                                ),
                               ),
                             )
                           ],

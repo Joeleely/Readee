@@ -12,14 +12,16 @@ import 'package:readee_app/features/match/widgets/book_card.dart';
 import 'package:readee_app/widget/bottomNav.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
-class CreateBookPage extends StatefulWidget {
-  const CreateBookPage({super.key});
+class EditBookPage extends StatefulWidget {
+  final int bookId;
+
+  const EditBookPage({super.key, required this.bookId});
 
   @override
-  _CreateBookPageState createState() => _CreateBookPageState();
+  _EditBookPageState createState() => _EditBookPageState();
 }
 
-class _CreateBookPageState extends State<CreateBookPage> {
+class _EditBookPageState extends State<EditBookPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _authorController = TextEditingController();
   final TextEditingController _genreController = TextEditingController();
@@ -36,6 +38,50 @@ class _CreateBookPageState extends State<CreateBookPage> {
   bool _isGenreEmpty = false;
   bool _isAuthorEmpty = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Fetch the book data when the page is initialized
+    _fetchBookData();
+    // Listen to description controller to update the counter
+    _descriptionController.addListener(() {
+      setState(() {
+        _descriptionLength = _descriptionController.text.length;
+      });
+    });
+  }
+
+  Future<void> _fetchBookData() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/getBook/${widget.bookId}'),
+      );
+
+      if (response.statusCode == 200) {
+        final bookData = jsonDecode(response.body);
+
+        // Pre-fill the form fields with fetched data
+        _titleController.text = bookData['BookName'];
+        _authorController.text = bookData['Author'];
+        _descriptionController.text = bookData['BookDescription'];
+        _selectedGenre = _getGenreName(bookData['GenreId']);
+        _quality = bookData['Quality'].toDouble();
+
+        // Optionally, load the existing image if needed
+        if (bookData['BookPicture'] != null) {
+          // Handle loading the existing book picture if applicable
+          // e.g. Convert Base64 string to image and show it
+        }
+
+        setState(() {}); // Update the UI after loading data
+      } else {
+        print('Failed to fetch book data: ${response.body}');
+      }
+    } catch (e) {
+      print('Error fetching book data: $e');
+    }
+  }
+
   Future<void> _pickImage() async {
     try {
       final image = await _picker.pickImage(source: ImageSource.gallery);
@@ -44,12 +90,11 @@ class _CreateBookPageState extends State<CreateBookPage> {
       // Compress the image
       final compressedImage = await FlutterImageCompress.compressWithFile(
         image.path,
-        minWidth: 500, // Adjust as needed for smaller size
+        minWidth: 500,
         minHeight: 500,
-        quality: 25, // Adjust the quality level
+        quality: 25,
       );
 
-      // If the compression is successful, create a new XFile from the compressed bytes
       if (compressedImage != null) {
         final tempDir = Directory.systemTemp;
         final tempFile = File('${tempDir.path}/temp_image.jpg')
@@ -65,64 +110,48 @@ class _CreateBookPageState extends State<CreateBookPage> {
     }
   }
 
-  Future<void> _postBook({bool isMock = false}) async {
+  Future<void> _saveBook() async {
     setState(() {
       _isTitleEmpty = _titleController.text.isEmpty;
       _isAuthorEmpty = _authorController.text.isEmpty;
       _isGenreEmpty = _selectedGenre == null;
     });
 
+    if (_isTitleEmpty || _isAuthorEmpty || _isGenreEmpty) {
+      print('Error: Please fill all required fields');
+      return;
+    }
+
     try {
       String? base64Image;
-      // Convert the resized image file to Base64 string if an image is selected
       if (_selectedImage != null) {
         final bytes = await _selectedImage!.readAsBytes();
         base64Image = base64Encode(bytes);
       }
 
-      // Prepare the data for the POST request
       final Map<String, dynamic> bookData = {
-        'OwnerId': 7,
         'BookName': _titleController.text,
         'BookPicture': base64Image ?? '??',
         'Author': _authorController.text,
         'BookDescription': _descriptionController.text,
         'GenreId': _getGenreId(_selectedGenre!),
         'Quality': _quality.toInt(),
-        'IsTraded': false,
       };
 
-      //print(bookData);
+      // Make the PUT request to update the book
+      final response = await http.patch(
+        Uri.parse('http://localhost:3000/editBook/${widget.bookId}'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(bookData),
+      );
 
-      // Use mock response if the flag is true
-      if (isMock) {
-        print("Mock: Book created successfully");
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const ReadeeNavigationBar(),
-          ),
-        );
+      if (response.statusCode == 200) {
+        print("Book updated successfully");
+        Navigator.pop(context, true);
       } else {
-        // Make the POST request
-        final response = await http.post(
-          Uri.parse('http://localhost:3000/createBook'),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode(bookData),
-        );
-
-        if (response.statusCode == 201) {
-          print("Book created successfully");
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const ReadeeNavigationBar()),
-          );
-        } else {
-          print('Failed to create book: ${response.body}');
-        }
+        print('Failed to update book: ${response.body}');
       }
     } catch (e) {
       print('Something went wrong: $e');
@@ -152,15 +181,27 @@ class _CreateBookPageState extends State<CreateBookPage> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // Listen to description controller to update the counter
-    _descriptionController.addListener(() {
-      setState(() {
-        _descriptionLength = _descriptionController.text.length;
-      });
-    });
+  String _getGenreName(int genreId) {
+    switch (genreId) {
+      case 1:
+        return 'Sport';
+      case 2:
+        return 'Fiction';
+      case 3:
+        return 'Self-improve';
+      case 4:
+        return 'History';
+      case 5:
+        return 'Horror';
+      case 6:
+        return 'Love';
+      case 7:
+        return 'Psychology';
+      case 8:
+        return 'Fantasy';
+      default:
+        return '';
+    }
   }
 
   @override
@@ -168,8 +209,9 @@ class _CreateBookPageState extends State<CreateBookPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        centerTitle: true,
         title: const Text(
-          'Create your book',
+          'Edit your book',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
@@ -242,17 +284,10 @@ class _CreateBookPageState extends State<CreateBookPage> {
                     value: 'Psychology', child: Text('Psychology')),
                 DropdownMenuItem(value: 'Fantasy', child: Text('Fantasy')),
               ],
-              onChanged: (String? newValue) {
+              onChanged: (value) {
                 setState(() {
-                  _selectedGenre = newValue;
-                  _isGenreEmpty = false;
+                  _selectedGenre = value;
                 });
-              },
-              validator: (value) {
-                if (value == null) {
-                  return 'Genre is required';
-                }
-                return null;
               },
             ),
             const SizedBox(height: 16),
@@ -342,35 +377,30 @@ class _CreateBookPageState extends State<CreateBookPage> {
                 const SizedBox(width: 16),
               ],
             ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                _postBook(isMock: false); // Call the function
-              },
-              style: const ButtonStyle(
-                backgroundColor: MaterialStatePropertyAll(Colors.cyan),
-              ),
-              child: const Text(
-                'Post',
-                style: TextStyle(
-                  color: Colors.white,
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: _saveBook,
+                  style: const ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll(
+                      Colors.cyan,
+                    ),
+                  ),
+                  child: const Text(
+                    'Save',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(
-              width: 20,
-            ),
-            OutlinedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
+                const SizedBox(width: 30),
+                ElevatedButton(
+                  onPressed: () => {Navigator.pop(context)},
+                  child: const Text('Cancel'),
+                ),
+              ],
             ),
           ],
         ),
