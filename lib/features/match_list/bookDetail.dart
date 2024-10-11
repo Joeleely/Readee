@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:readee_app/features/create_book/edit_book.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
 import 'package:readee_app/features/match/pages/book_info.dart';
+import 'package:readee_app/features/profile/widget/pageRoute.dart';
 
 class BookDetailPage extends StatefulWidget {
   final int userId;
@@ -36,7 +38,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
   Future<void> _fetchUserData() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:3000/users/${widget.userId}'));
+      final response = await http
+          .get(Uri.parse('http://localhost:3000/users/${widget.userId}'));
 
       if (response.statusCode == 200) {
         final userData = json.decode(response.body);
@@ -55,34 +58,35 @@ class _BookDetailPageState extends State<BookDetailPage> {
   }
 
   Future<void> _fetchBookData() async {
-  try {
-    final response = await http.get(Uri.parse('http://localhost:3000/getBook/${widget.bookId}'));
+    try {
+      final response = await http
+          .get(Uri.parse('http://localhost:3000/getBook/${widget.bookId}'));
 
-    if (response.statusCode == 200) {
-      final bookData = json.decode(response.body);
-      setState(() {
-        book = Book2(
-          title: bookData['BookName'] ?? 'ThisIsNull',
-          author: bookData['Author'] ?? 'ThisIsNull',
-          img: bookData['BookPicture'] is String
-              ? [bookData['BookPicture']]
-              : List<String>.from(bookData['BookPicture'] ?? []),
-          genre: bookData['GenreId']?.toString() ?? 'ThisIsNull',
-          quality: bookData['Quality']?.toString() ?? 'ThisIsNull',
-          description: bookData['BookDescription'] ?? 'ThisIsNull',
-          ownerId: bookData['OwnerId']?.toString() ?? 'ThisIsNull',
-        );
-        _checkDescriptionLength();
-        isLoading = false;
-      });
-    } else {
-      _logError('Failed to fetch book data: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final bookData = json.decode(response.body);
+        setState(() {
+          book = Book2(
+            title: bookData['BookName'] ?? 'ThisIsNull',
+            author: bookData['Author'] ?? 'ThisIsNull',
+            img: bookData['BookPicture'] is String
+                ? [bookData['BookPicture']]
+                : List<String>.from(bookData['BookPicture'] ?? []),
+            genre: bookData['GenreId']?.toString() ?? 'ThisIsNull',
+            quality: bookData['Quality']?.toString() ?? 'ThisIsNull',
+            description: bookData['BookDescription'] ?? 'ThisIsNull',
+            ownerId: bookData['OwnerId']?.toString() ?? 'ThisIsNull',
+            bookId: bookData['BookId']?.toString() ?? 'ThisIsNull',
+          );
+          _checkDescriptionLength();
+          isLoading = false;
+        });
+      } else {
+        _logError('Failed to fetch book data: ${response.statusCode}');
+      }
+    } catch (e) {
+      _logError('Error fetching book data: $e');
     }
-  } catch (e) {
-    _logError('Error fetching book data: $e');
   }
-}
-
 
   void _logError(String message) {
     // You can use your preferred logging package or service here
@@ -90,7 +94,9 @@ class _BookDetailPageState extends State<BookDetailPage> {
   }
 
   Uint8List _convertBase64Image(String base64String) {
-    String base64Data = base64String.contains(',') ? base64String.split(',').last : base64String;
+    String base64Data = base64String.contains(',')
+        ? base64String.split(',').last
+        : base64String;
     return base64Decode(base64Data);
   }
 
@@ -141,7 +147,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
                     backgroundColor: MaterialStatePropertyAll(Colors.grey),
                     minimumSize: MaterialStatePropertyAll(Size(100, 50)),
                   ),
-                  child: const Text('No', style: TextStyle(color: Colors.white)),
+                  child:
+                      const Text('No', style: TextStyle(color: Colors.white)),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -152,6 +159,15 @@ class _BookDetailPageState extends State<BookDetailPage> {
         );
       },
     );
+  }
+
+  Future<void> _navigateToEditBookPage() async {
+    final result = await Navigator.push(context,
+        CustomPageRoute(page: EditBookPage(bookId: int.parse(book.bookId))));
+
+    if (result == true) {
+      _fetchBookData();
+    }
   }
 
   @override
@@ -167,13 +183,25 @@ class _BookDetailPageState extends State<BookDetailPage> {
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 243, 252, 255),
         leading: IconButton(
-        onPressed: () => Navigator.pop(context),
-        icon: const Icon(LineAwesomeIcons.arrow_left),
-      ),
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(LineAwesomeIcons.arrow_left),
+        ),
         title: Text(
           book.title,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
+        actions: [
+          if (widget.userId == int.parse(book.ownerId))
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: IconButton(
+                icon: const Icon(Icons.edit), // Edit icon
+                onPressed: () {
+                  _navigateToEditBookPage();
+                },
+              ),
+            ),
+        ],
       ),
       body: Stack(
         children: [
@@ -189,7 +217,9 @@ class _BookDetailPageState extends State<BookDetailPage> {
                     child: Image(
                       image: book.img[currentPhoto].startsWith('http')
                           ? NetworkImage(book.img[currentPhoto])
-                          : MemoryImage(_convertBase64Image(book.img[currentPhoto])) as ImageProvider<Object>,
+                          : MemoryImage(
+                                  _convertBase64Image(book.img[currentPhoto]))
+                              as ImageProvider<Object>,
                     ),
                   ),
                 ),
@@ -314,6 +344,7 @@ class Book2 {
       required this.genre,
       required this.quality,
       required this.ownerId,
+      required this.bookId,
       required this.description});
   final String title;
   final String author;
@@ -322,4 +353,5 @@ class Book2 {
   final String quality;
   final String description;
   final String ownerId;
+  final String bookId;
 }
