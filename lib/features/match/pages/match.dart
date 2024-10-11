@@ -5,6 +5,7 @@ import 'package:readee_app/features/match/widgets/book_card.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:readee_app/features/match_list/match_list.dart';
 
 class MatchPage extends StatefulWidget {
   const MatchPage({super.key});
@@ -14,7 +15,7 @@ class MatchPage extends StatefulWidget {
 }
 
 class _MatchPageState extends State<MatchPage> {
-  List<Book> books = [];
+  List<BookDetails> books = [];
   final int userID = 1; // Set your userID here
    final Random random = Random();
 
@@ -55,35 +56,36 @@ class _MatchPageState extends State<MatchPage> {
         if (bookResponse.statusCode == 200) {
           List<dynamic> booksData = jsonDecode(bookResponse.body);
 
-          List<Book> matchingBooks = booksData.where((book) {
+          List<BookDetails> matchingBooks = booksData.where((book) {
             return userGenreIDs.contains(book['GenreId']) &&
                 book['OwnerId'] != userID &&
                 book['IsTraded'] == false &&
                 !likedBookIDs.contains(book['BookId']);
           }).map((book) {
-            return Book(
+            return BookDetails(
               title: book['BookName'],
               author: book['Author'],
               description: book['BookDescription'],
               img: [book['BookPicture']],
               quality: '${book['Quality']}%',
-              genreID: book['GenreId'], BookId: book['BookId'],
+              genre: '', 
+              bookId: book['BookId'],
             );
           }).toList();
 
-          List<Book> nonMatchingBooks = booksData.where((book) {
+          List<BookDetails> nonMatchingBooks = booksData.where((book) {
             return !userGenreIDs.contains(book['GenreId']) &&
                 book['OwnerId'] != userID &&
                 book['IsTraded'] == false &&
                 !likedBookIDs.contains(book['BookId']);
           }).map((book) {
-            return Book(
+            return BookDetails(
               title: book['BookName'],
               author: book['Author'],
               description: book['BookDescription'],
               img: [book['BookPicture']],
               quality: '${book['Quality']}%',
-              genreID: book['GenreId'], BookId: book['BookId'],
+              genre: book['GenreId'], bookId: book['BookId'],
             );
           }).toList();
 
@@ -91,13 +93,13 @@ class _MatchPageState extends State<MatchPage> {
           int matchingBooksCount = (booksData.length * 0.7).toInt();
           int nonMatchingBooksCount = booksData.length - matchingBooksCount;
 
-          List<Book> selectedMatchingBooks =
+          List<BookDetails> selectedMatchingBooks =
               _getRandomBooks(matchingBooks, matchingBooksCount);
-          List<Book> selectedNonMatchingBooks =
+          List<BookDetails> selectedNonMatchingBooks =
               _getRandomBooks(nonMatchingBooks, nonMatchingBooksCount);
 
           // Step 5: Combine the selected books
-          List<Book> combinedBooks = [
+          List<BookDetails> combinedBooks = [
             ...selectedMatchingBooks,
             ...selectedNonMatchingBooks
           ];
@@ -123,7 +125,7 @@ class _MatchPageState extends State<MatchPage> {
     }
   }
 
-  List<Book> _getRandomBooks(List<Book> booksList, int count) {
+  List<BookDetails> _getRandomBooks(List<BookDetails> booksList, int count) {
     if (booksList.length <= count) {
       return booksList;
     }

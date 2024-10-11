@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
 import 'package:readee_app/features/match/pages/book_info.dart';
@@ -7,10 +8,9 @@ import 'package:readee_app/typography.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'package:http/http.dart' as http;
 
-
 class BookCard extends StatefulWidget {
   const BookCard({super.key, required this.books, required this.userID});
-  final List<Book> books;
+  final List<BookDetails> books;
   final int userID;
 
   @override
@@ -20,7 +20,8 @@ class BookCard extends StatefulWidget {
 class _BookCardState extends State<BookCard> {
   final List<SwipeItem> _swipeItems = <SwipeItem>[];
   MatchEngine? _matchEngine;
-  Map<Book, int> currentPhotoMap = {}; // Track currentPhoto for each book
+  Map<BookDetails, int> currentPhotoMap =
+      {}; // Track currentPhoto for each book
 
   @override
   void initState() {
@@ -30,19 +31,19 @@ class _BookCardState extends State<BookCard> {
     for (var book in widget.books) {
       _swipeItems.add(SwipeItem(
         content: book,
-        likeAction: () async{
+        likeAction: () async {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Liked ${book.title}"),
             duration: const Duration(milliseconds: 500),
           ));
-          await _likeBook(widget.userID, book.BookId);
+          await _likeBook(widget.userID, book.bookId);
         },
         nopeAction: () async {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Nope ${book.title}"),
             duration: const Duration(milliseconds: 500),
           ));
-           await _unlikeBook(widget.userID, book.BookId);
+          await _unlikeBook(widget.userID, book.bookId);
         },
       ));
       // Initialize currentPhoto for each book to 0
@@ -94,7 +95,7 @@ class _BookCardState extends State<BookCard> {
       body: SwipeCards(
         matchEngine: _matchEngine!,
         itemBuilder: (context, i) {
-          Book book = _swipeItems[i].content;
+          BookDetails book = _swipeItems[i].content;
           int numberPhoto = book.img.length;
 
           // Get current photo for this specific book
@@ -223,7 +224,7 @@ class _BookCardState extends State<BookCard> {
                                   width: 10,
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 5),
+                                  padding: const EdgeInsets.only(top: 6),
                                   child: Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 8,
@@ -322,7 +323,7 @@ class _BookCardState extends State<BookCard> {
   }
 }
 
-Route _createRoute(Book book) {
+Route _createRoute(BookDetails book) {
   return PageRouteBuilder(
     pageBuilder: (context, animation, secondaryAnimation) =>
         BookInfoPage(book: book),

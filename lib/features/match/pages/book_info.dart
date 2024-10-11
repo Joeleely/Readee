@@ -6,7 +6,7 @@ import 'package:readee_app/typography.dart';
 
 class BookInfoPage extends StatefulWidget {
   const BookInfoPage({super.key, required this.book});
-  final Book book;
+  final BookDetails book;
 
   @override
   _BookInfoPageState createState() => _BookInfoPageState();
