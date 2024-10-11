@@ -15,7 +15,7 @@ class MatchPage extends StatefulWidget {
 
 class _MatchPageState extends State<MatchPage> {
   List<Book> books = [];
-  final int userID = 7; // Set your userID here
+  final int userID = 2; // Set your userID here
   final Random random = Random();
 
   @override
@@ -67,7 +67,7 @@ class _MatchPageState extends State<MatchPage> {
               description: book['BookDescription'],
               img: [book['BookPicture']],
               quality: '${book['Quality']}%',
-              genre: '',
+              genre: '', bookId: book['BookId'],
             );
           }).toList();
 
@@ -83,7 +83,7 @@ class _MatchPageState extends State<MatchPage> {
               description: book['BookDescription'],
               img: [book['BookPicture']],
               quality: '${book['Quality']}%',
-              genre: '',
+              genre: '', bookId: book['BookId'],
             );
           }).toList();
 
