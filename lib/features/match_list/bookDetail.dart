@@ -22,9 +22,10 @@ class BookDetailPage extends StatefulWidget {
 class _BookDetailPageState extends State<BookDetailPage> {
   late Book2 book;
   late String userName;
-  late int timesSwap;
-  late double rating;
-  late String profile;
+  late String ownerName = '';
+  late int timesSwap = 0;
+  late double rating = 0.0;
+  late String profile = '';
   bool isExpanded = false;
   bool showToggle = false;
   bool isLoading = true;
@@ -58,35 +59,54 @@ class _BookDetailPageState extends State<BookDetailPage> {
   }
 
   Future<void> _fetchBookData() async {
-    try {
-      final response = await http
-          .get(Uri.parse('http://localhost:3000/getBook/${widget.bookId}'));
+  try {
+    final response = await http
+        .get(Uri.parse('http://localhost:3000/getBook/${widget.bookId}'));
 
-      if (response.statusCode == 200) {
-        final bookData = json.decode(response.body);
-        setState(() {
-          book = Book2(
-            title: bookData['BookName'] ?? 'ThisIsNull',
-            author: bookData['Author'] ?? 'ThisIsNull',
-            img: bookData['BookPicture'] is String
-                ? [bookData['BookPicture']]
-                : List<String>.from(bookData['BookPicture'] ?? []),
-            genre: bookData['GenreId']?.toString() ?? 'ThisIsNull',
-            quality: bookData['Quality']?.toString() ?? 'ThisIsNull',
-            description: bookData['BookDescription'] ?? 'ThisIsNull',
-            ownerId: bookData['OwnerId']?.toString() ?? 'ThisIsNull',
-            bookId: bookData['BookId']?.toString() ?? 'ThisIsNull',
-          );
-          _checkDescriptionLength();
-          isLoading = false;
-        });
-      } else {
-        _logError('Failed to fetch book data: ${response.statusCode}');
-      }
-    } catch (e) {
-      _logError('Error fetching book data: $e');
+    if (response.statusCode == 200) {
+      final bookData = json.decode(response.body);
+      setState(() {
+        book = Book2(
+          title: bookData['BookName'] ?? 'ThisIsNull',
+          author: bookData['Author'] ?? 'ThisIsNull',
+          img: bookData['BookPicture'] is String
+              ? [bookData['BookPicture']]
+              : List<String>.from(bookData['BookPicture'] ?? []),
+          genre: bookData['GenreId']?.toString() ?? 'ThisIsNull',
+          quality: bookData['Quality']?.toString() ?? 'ThisIsNull',
+          description: bookData['BookDescription'] ?? 'ThisIsNull',
+          ownerId: bookData['OwnerId']?.toString() ?? 'ThisIsNull',
+          bookId: bookData['BookId']?.toString() ?? 'ThisIsNull',
+        );
+        _fetchOwnerData(book.ownerId); // Fetch owner’s data here
+        _checkDescriptionLength();
+        isLoading = false;
+      });
+    } else {
+      _logError('Failed to fetch book data: ${response.statusCode}');
     }
+  } catch (e) {
+    _logError('Error fetching book data: $e');
   }
+}
+
+Future<void> _fetchOwnerData(String ownerId) async {
+  try {
+    final response = await http
+        .get(Uri.parse('http://localhost:3000/users/$ownerId'));
+
+    if (response.statusCode == 200) {
+      final ownerData = json.decode(response.body);
+      setState(() {
+        ownerName = ownerData['Username'] ?? 'ThisIsNull';
+      });
+    } else {
+      _logError('Failed to fetch owner data: ${response.statusCode}');
+    }
+  } catch (e) {
+    _logError('Error fetching owner data: $e');
+  }
+}
 
   void _logError(String message) {
     // You can use your preferred logging package or service here
@@ -239,7 +259,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(userName),
+                        Text(ownerName),
                         Row(
                           children: [
                             Text(

@@ -20,7 +20,7 @@ class HomePage extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: const Color.fromARGB(255, 243, 252, 255),
       ),
-      home: ReadeeNavigationBar(),
+      home: const ReadeeNavigationBar(),
     );
   }
 }

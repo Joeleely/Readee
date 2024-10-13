@@ -1,14 +1,18 @@
 import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
 import 'package:readee_app/features/match/pages/book_info.dart';
 import 'package:readee_app/typography.dart';
 import 'package:swipe_cards/swipe_cards.dart';
+import 'package:http/http.dart' as http;
+
 
 class BookCard extends StatefulWidget {
-  const BookCard({super.key, required this.books});
+  const BookCard({super.key, required this.books, required this.userID});
   final List<BookDetails> books;
+  final int userID;
 
   @override
   State<BookCard> createState() => _BookCardState();
@@ -27,17 +31,19 @@ class _BookCardState extends State<BookCard> {
     for (var book in widget.books) {
       _swipeItems.add(SwipeItem(
         content: book,
-        likeAction: () {
+        likeAction: () async{
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Liked ${book.title}"),
             duration: const Duration(milliseconds: 500),
           ));
+          await _likeBook(widget.userID, book.bookId);
         },
-        nopeAction: () {
+        nopeAction: () async {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Nope ${book.title}"),
             duration: const Duration(milliseconds: 500),
           ));
+           await _unlikeBook(widget.userID, book.bookId);
         },
       ));
       // Initialize currentPhoto for each book to 0
@@ -47,12 +53,41 @@ class _BookCardState extends State<BookCard> {
     _matchEngine = MatchEngine(swipeItems: _swipeItems);
   }
 
-  Uint8List _convertBase64Image(String base64String) {
+
+Uint8List _convertBase64Image(String base64String) {
     // Remove the prefix if it exists
     String base64Data = base64String.contains(',')
         ? base64String.split(',').last
         : base64String;
     return base64Decode(base64Data);
+  }
+
+  Future<void> _likeBook(int userId, int bookId) async {
+    final url = Uri.parse('http://localhost:3000/books/$bookId/like/$userId');
+    try {
+      final response = await http.post(url);
+      if (response.statusCode == 201) {
+        print("Successfully liked the book!");
+      } else {
+        print("Failed to like the book: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error liking the book: $e");
+    }
+  }
+
+  Future<void> _unlikeBook(int userId, int bookId) async {
+    final url = Uri.parse('http://localhost:3000/books/$bookId/unlike/$userId');
+    try {
+      final response = await http.post(url);
+      if (response.statusCode == 201) {
+        print("Successfully unliked the book!");
+      } else {
+        print("Failed to unlike the book: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error unliking the book: $e");
+    }
   }
 
   @override
@@ -102,9 +137,12 @@ class _BookCardState extends State<BookCard> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
+                            print('Left Tapped');
                             if (book.img.length > 1 && currentPhoto > 0) {
                               setState(() {
                                 currentPhotoMap[book] = currentPhoto - 1;
+                                print(
+                                    'numberPhoto: $numberPhoto, currentPhoto: $currentPhoto');
                               });
                             }
                           },
@@ -117,10 +155,14 @@ class _BookCardState extends State<BookCard> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
+                            print('current photo index $currentPhoto');
+                            print('Right Tapped');
                             if (book.img.length > 1) {
                               setState(() {
                                 currentPhotoMap[book] =
                                     (currentPhoto + 1) % numberPhoto;
+                                print(
+                                    'numberPhoto: $numberPhoto, currentPhoto: ${currentPhotoMap[book]}');
                               });
                             }
                           },
@@ -159,7 +201,7 @@ class _BookCardState extends State<BookCard> {
                                       : Theme.of(context)
                                           .colorScheme
                                           .secondary
-                                          .withOpacity(0.8),
+                                          .withOpacity(0.5),
                                 ),
                               ),
                             );
@@ -181,16 +223,16 @@ class _BookCardState extends State<BookCard> {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  book.title,
-                                  style: TypographyText.h2(Colors.white),
-                                  maxLines: 2,
-                                ),
-                                const SizedBox(
-                                  width: 10,
+                                Container(
+                                  width: 200,
+                                  child: Text(
+                                    book.title,
+                                    style: TypographyText.h2(Colors.white),
+                                    maxLines: 2,
+                                  ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 5),
+                                  padding: const EdgeInsets.only(top: 6),
                                   child: Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 8,
@@ -206,18 +248,15 @@ class _BookCardState extends State<BookCard> {
                                 ),
                               ],
                             ),
-                            Container(
-                              padding: const EdgeInsets.all(0.0),
-                              height: 30,
-                              child: IconButton(
-                                onPressed: () {
-                                  Navigator.of(context)
-                                      .push(_createRoute(book));
-                                },
-                                icon: const Icon(
-                                  Icons.info,
-                                  color: Colors.white,
-                                ),
+                            IconButton(
+                              padding: EdgeInsets.zero,
+                              constraints: BoxConstraints(),
+                              onPressed: () {
+                                Navigator.of(context).push(_createRoute(book));
+                              },
+                              icon: const Icon(
+                                Icons.info_rounded,
+                                color: Colors.white,
                               ),
                             )
                           ],
@@ -307,3 +346,4 @@ Route _createRoute(BookDetails book) {
     },
   );
 }
+

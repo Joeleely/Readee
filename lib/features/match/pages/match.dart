@@ -15,7 +15,7 @@ class MatchPage extends StatefulWidget {
 
 class _MatchPageState extends State<MatchPage> {
   List<BookDetails> books = [];
-  final int userID = 1; // Set your userID here
+  final int userID = 7; // Set your userID here
   final Random random = Random();
 
   @override
@@ -144,7 +144,7 @@ class _MatchPageState extends State<MatchPage> {
       ),
       body: Center(
         child: books.isNotEmpty
-            ? BookCard(books: books)
+            ? BookCard(books: books, userID: userID,)
             : const CircularProgressIndicator(), // Show loading indicator while data is fetched
       ),
     );

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
@@ -18,7 +19,7 @@ class MatchListPage extends StatefulWidget {
 class _MatchListPageState extends State<MatchListPage> {
   List<BookDetails> ownerBooks = [];
 
-  final int userID = 2;
+  final int userID = 7;
 
   Uint8List _convertBase64Image(String base64String) {
     // Remove the prefix if it exists
@@ -52,7 +53,6 @@ class _MatchListPageState extends State<MatchListPage> {
 
       // Step 2: Fetch books based on matches
       List<BookDetails> fetchedOwnerBooks = [];
-      List<BookDetails> fetchedMatchedBooks = [];
 
       for (var match in matches) {
         // print('Matches Response: ${matchesResponse.body}');
@@ -62,41 +62,25 @@ class _MatchListPageState extends State<MatchListPage> {
         if (ownerBookResponse.statusCode == 200) {
           final bookJson = json.decode(ownerBookResponse.body);
 
-          fetchedOwnerBooks.add(BookDetails(
+          var bookDetails = BookDetails(
               bookId: bookJson['BookId'] ?? '',
               title: bookJson['BookName'] ?? 'Unknown Title',
               author: bookJson['Author'] ?? 'Unknown Author',
-              img: [
-                bookJson['BookPicture'] ?? '',
-              ],
+              img: [bookJson['BookPicture'] ?? ''],
               description:
                   bookJson['BookDescription'] ?? 'No description available',
               quality: '${bookJson['Quality'] ?? '0'}%',
-              genre: bookJson['Genre'] ?? ''));
+              genre: bookJson['Genre'] ?? '');
 
-          // print(fetchedBooks);
-        } else {
-          print('Failed to load book for ID: ${match.matchedBookId}');
-        }
+          bool isDuplicate = fetchedOwnerBooks.any((book) => book.bookId == bookDetails.bookId);
 
-        final matchBookResponse = await http.get(
-            Uri.parse('http://localhost:3000/getBook/${match.matchedBookId}'));
-        if (matchBookResponse.statusCode == 200) {
-          final bookJson = json.decode(matchBookResponse.body);
+          if (!isDuplicate) {
+            fetchedOwnerBooks.add(bookDetails);
+          } else {
+            print('Duplicate book found: ${bookDetails.title}, skipping...');
+          }
 
-          fetchedMatchedBooks.add(BookDetails(
-              bookId: bookJson['BookId'] ?? '',
-              title: bookJson['BookName'] ?? 'Unknown Title',
-              author: bookJson['Author'] ?? 'Unknown Author',
-              img: [
-                bookJson['BookPicture'] ?? '',
-              ],
-              description:
-                  bookJson['BookDescription'] ?? 'No description available',
-              quality: '${bookJson['Quality'] ?? '0'}%',
-              genre: bookJson['Genre'] ?? ''));
-
-          // print(fetchedBooks);
+          print('Book added: ${bookDetails.title}');
         } else {
           print('Failed to load book for ID: ${match.matchedBookId}');
         }
