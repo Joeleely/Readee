@@ -9,7 +9,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final int userId;
+  const ProfilePage({super.key, required this.userId});
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -21,11 +22,12 @@ class _ProfilePageState extends State<ProfilePage> {
   String firstName = '';
   String lastName = '';
   String gender = '';
-  final int userID = 7;
+  late int userID;
 
   @override
   void initState() {
     super.initState();
+    userID = widget.userId;
     fetchUsername(userID);
   }
 

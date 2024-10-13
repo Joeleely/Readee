@@ -7,7 +7,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class MatchPage extends StatefulWidget {
-  const MatchPage({super.key});
+  final int userID;
+  const MatchPage({super.key, required this.userID});
 
   @override
   _MatchPageState createState() => _MatchPageState();
@@ -15,7 +16,6 @@ class MatchPage extends StatefulWidget {
 
 class _MatchPageState extends State<MatchPage> {
   List<BookDetails> books = [];
-  final int userID = 7; // Set your userID here
   final Random random = Random();
 
   @override
@@ -28,7 +28,7 @@ class _MatchPageState extends State<MatchPage> {
     try {
       // Step 1: Get user genres
       final genreResponse = await http
-          .get(Uri.parse('http://localhost:3000/userGenres?userID=$userID'));
+          .get(Uri.parse('http://localhost:3000/userGenres?userID=$widget.userID'));
       if (genreResponse.statusCode == 200) {
         List<dynamic> genresData = jsonDecode(genreResponse.body);
 
@@ -39,14 +39,14 @@ class _MatchPageState extends State<MatchPage> {
 
         // Step 2: Get user logs to filter out liked books
         final logsResponse =
-            await http.get(Uri.parse('http://localhost:3000/getLogs/$userID'));
+            await http.get(Uri.parse('http://localhost:3000/getLogs/$widget.userID'));
         List<int> likedBookIDs = [];
         if (logsResponse.statusCode == 200) {
           List<dynamic> logsData = jsonDecode(logsResponse.body);
           likedBookIDs =
               logsData.map((log) => log['BookLikeId'] as int).toList();
-          print("This is likedBookIDs");
-          print(likedBookIDs);
+          //print("This is likedBookIDs");
+          //print(likedBookIDs);
         }
 
         // Step 3: Get books
@@ -57,7 +57,7 @@ class _MatchPageState extends State<MatchPage> {
 
           List<BookDetails> matchingBooks = booksData.where((book) {
             return userGenreIDs.contains(book['GenreId']) &&
-                book['OwnerId'] != userID &&
+                book['OwnerId'] != widget.userID &&
                 book['IsTraded'] == false &&
                 !likedBookIDs.contains(book['BookId']);
           }).map((book) {
@@ -69,12 +69,13 @@ class _MatchPageState extends State<MatchPage> {
               quality: '${book['Quality']}%',
               genre: '',
               bookId: book['BookId'],
+              isTrade: book['IsTraded']
             );
           }).toList();
 
           List<BookDetails> nonMatchingBooks = booksData.where((book) {
             return !userGenreIDs.contains(book['GenreId']) &&
-                book['OwnerId'] != userID &&
+                book['OwnerId'] != widget.userID &&
                 book['IsTraded'] == false &&
                 !likedBookIDs.contains(book['BookId']);
           }).map((book) {
@@ -86,6 +87,7 @@ class _MatchPageState extends State<MatchPage> {
               quality: '${book['Quality']}%',
               genre: '',
               bookId: book['BookId'],
+              isTrade: book['IsTraded']
             );
           }).toList();
 
@@ -144,7 +146,7 @@ class _MatchPageState extends State<MatchPage> {
       ),
       body: Center(
         child: books.isNotEmpty
-            ? BookCard(books: books, userID: userID,)
+            ? BookCard(books: books, userID: widget.userID,)
             : const CircularProgressIndicator(), // Show loading indicator while data is fetched
       ),
     );

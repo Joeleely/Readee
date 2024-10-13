@@ -164,7 +164,7 @@ class _InformationPageState extends State<InformationPage> {
                       _formKey.currentState?.save();
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => PersonaPage()),
+                        MaterialPageRoute(builder: (context) => PersonaPage(userId: 7,)),
                       );
                       // Handle the next button press when all fields are valid
                       // Proceed with further actions

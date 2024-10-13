@@ -5,6 +5,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class PersonaPage extends StatefulWidget {
+  final int userId;
+
+  const PersonaPage({super.key, required this.userId});
   @override
   _PersonaPageState createState() => _PersonaPageState();
 }
@@ -66,9 +69,7 @@ class _PersonaPageState extends State<PersonaPage> {
     }
   }
 
-  Future<void> submitSelectedGenres() async {
-    int userId = 7;
-
+  Future<void> submitSelectedGenres(int userId) async {
     print(selectedGenreIds);
 
     Map<String, dynamic> postData = {
@@ -86,7 +87,7 @@ class _PersonaPageState extends State<PersonaPage> {
       print('Data submitted successfully');
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const MatchPage()),
+        MaterialPageRoute(builder: (context) => const ReadeeNavigationBar()),
       );
     } else {
       throw Exception('Failed to submit data');
@@ -178,7 +179,7 @@ class _PersonaPageState extends State<PersonaPage> {
                 child: ElevatedButton(
                   onPressed: selectedGenreIds.isNotEmpty
                       ? () {
-                          submitSelectedGenres();
+                          submitSelectedGenres(widget.userId);
                         }
                       : null,
                   style: ElevatedButton.styleFrom(

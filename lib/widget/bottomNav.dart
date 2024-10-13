@@ -18,16 +18,23 @@ class ReadeeNavigationBar extends StatefulWidget {
 
 class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
   int currentTab = 0;
-  final List<Widget> screens = [
-    const MatchPage(),
-    const ChatPage(),
-    const CreateBookPage(),
-    const ProfilePage(),
-    MatchListPage(),
-  ];
-
+  int userId = 7;
+  late List<Widget> screens;
   final PageStorageBucket bucket = PageStorageBucket();
-  Widget currentScreen = const MatchPage();
+  late Widget currentScreen;
+
+  @override
+  void initState() {
+    super.initState();
+    screens = [
+      MatchPage(userID: userId),
+      ChatPage(userId: userId,),
+      CreateBookPage(userId: userId,),
+      ProfilePage(userId: userId,),
+      MatchListPage(userId: userId,),
+    ];
+    currentScreen = MatchPage(userID: userId); // Set the initial screen
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,17 +54,17 @@ class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _buildNavButton(Icons.swap_horiz, 0, const MatchPage()),
-                _buildNavButton(Icons.list, 1, MatchListPage()),
+                _buildNavButton(Icons.swap_horiz, 0, MatchPage(userID: userId,)),
+                _buildNavButton(Icons.list, 1, MatchListPage(userId: userId,)),
                 FloatingActionButton(
                   elevation: 0,
                   child: const Icon(Icons.add),
                   onPressed: () {
-                    Navigator.of(context).push(_createRoute());
+                    Navigator.of(context).push(_createRoute(userId));
                   },
                 ),
-                _buildNavButton(Icons.textsms, 2, const ChatPage()),
-                _buildNavButton(Icons.person, 3, const ProfilePage()),
+                _buildNavButton(Icons.textsms, 2, ChatPage(userId: userId,)),
+                _buildNavButton(Icons.person, 3, ProfilePage(userId: userId,)),
               ],
             ),
           ),
@@ -88,9 +95,9 @@ class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
   }
 }
 
-Route _createRoute() {
+Route _createRoute(int userId) {
   return PageRouteBuilder(
-    pageBuilder: (context, animation, secondaryAnimation) => const CreateBookPage(),
+    pageBuilder: (context, animation, secondaryAnimation) => CreateBookPage(userId: userId,),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       const begin = Offset(0.0, 1.0);
       const end = Offset.zero;

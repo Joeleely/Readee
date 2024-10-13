@@ -8,12 +8,16 @@ import 'package:readee_app/features/create_book/edit_book.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
 import 'package:readee_app/features/match/pages/book_info.dart';
 import 'package:readee_app/features/profile/widget/pageRoute.dart';
+import 'package:readee_app/typography.dart';
 
 class BookDetailPage extends StatefulWidget {
   final int userId;
   final int bookId;
+  final int matchId;
+  final bool isEdit;
 
-  BookDetailPage({required this.bookId, required this.userId});
+  BookDetailPage(
+      {required this.bookId, required this.userId, required this.matchId, required this.isEdit});
 
   @override
   _BookDetailPageState createState() => _BookDetailPageState();
@@ -29,12 +33,18 @@ class _BookDetailPageState extends State<BookDetailPage> {
   bool isExpanded = false;
   bool showToggle = false;
   bool isLoading = true;
+  String tradeRequestStatus = '';
+  bool showAcceptAndRejectButton = false;
+  int personSwap = 0;
+  int firstUserId = 0;
+  int secondUserId = 0;
 
   @override
   void initState() {
     super.initState();
     _fetchUserData();
     _fetchBookData();
+    if (widget.matchId != 0) _checkTradeRequestStatus();
   }
 
   Future<void> _fetchUserData() async {
@@ -42,12 +52,13 @@ class _BookDetailPageState extends State<BookDetailPage> {
       final response = await http
           .get(Uri.parse('http://localhost:3000/users/${widget.userId}'));
 
+      //print("This is matchID: ${widget.matchId}");
       if (response.statusCode == 200) {
         final userData = json.decode(response.body);
         setState(() {
           userName = userData['Username'] ?? 'ThisIsNull';
-          timesSwap = userData['timesSwap'] ?? 0; // Changed to default int
-          rating = userData['rating'] ?? 0.0; // Changed to default double
+          timesSwap = userData['timesSwap'] ?? 0;
+          rating = userData['rating'] ?? 0.0;
           profile = userData['ProfileUrl'] ?? 'ThisIsNull';
         });
       } else {
@@ -59,54 +70,87 @@ class _BookDetailPageState extends State<BookDetailPage> {
   }
 
   Future<void> _fetchBookData() async {
-  try {
-    final response = await http
-        .get(Uri.parse('http://localhost:3000/getBook/${widget.bookId}'));
+    try {
+      final response = await http
+          .get(Uri.parse('http://localhost:3000/getBook/${widget.bookId}'));
 
-    if (response.statusCode == 200) {
-      final bookData = json.decode(response.body);
-      setState(() {
-        book = Book2(
-          title: bookData['BookName'] ?? 'ThisIsNull',
-          author: bookData['Author'] ?? 'ThisIsNull',
-          img: bookData['BookPicture'] is String
-              ? [bookData['BookPicture']]
-              : List<String>.from(bookData['BookPicture'] ?? []),
-          genre: bookData['GenreId']?.toString() ?? 'ThisIsNull',
-          quality: bookData['Quality']?.toString() ?? 'ThisIsNull',
-          description: bookData['BookDescription'] ?? 'ThisIsNull',
-          ownerId: bookData['OwnerId']?.toString() ?? 'ThisIsNull',
-          bookId: bookData['BookId']?.toString() ?? 'ThisIsNull',
-        );
-        _fetchOwnerData(book.ownerId); // Fetch owner’s data here
-        _checkDescriptionLength();
-        isLoading = false;
-      });
-    } else {
-      _logError('Failed to fetch book data: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final bookData = json.decode(response.body);
+        setState(() {
+          book = Book2(
+            title: bookData['BookName'] ?? 'ThisIsNull',
+            author: bookData['Author'] ?? 'ThisIsNull',
+            img: bookData['BookPicture'] is String
+                ? [bookData['BookPicture']]
+                : List<String>.from(bookData['BookPicture'] ?? []),
+            genre: bookData['GenreId']?.toString() ?? 'ThisIsNull',
+            quality: bookData['Quality']?.toString() ?? 'ThisIsNull',
+            description: bookData['BookDescription'] ?? 'ThisIsNull',
+            ownerId: bookData['OwnerId']?.toString() ?? 'ThisIsNull',
+            bookId: bookData['BookId']?.toString() ?? 'ThisIsNull',
+          );
+          _fetchOwnerData(book.ownerId); // Fetch owner’s data here
+          _checkDescriptionLength();
+          isLoading = false;
+        });
+      } else {
+        _logError('Failed to fetch book data: ${response.statusCode}');
+      }
+    } catch (e) {
+      _logError('Error fetching book data: $e');
     }
-  } catch (e) {
-    _logError('Error fetching book data: $e');
   }
-}
 
-Future<void> _fetchOwnerData(String ownerId) async {
-  try {
-    final response = await http
-        .get(Uri.parse('http://localhost:3000/users/$ownerId'));
+  Future<void> _fetchOwnerData(String ownerId) async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/users/$ownerId'));
 
-    if (response.statusCode == 200) {
-      final ownerData = json.decode(response.body);
-      setState(() {
-        ownerName = ownerData['Username'] ?? 'ThisIsNull';
-      });
-    } else {
-      _logError('Failed to fetch owner data: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final ownerData = json.decode(response.body);
+        setState(() {
+          ownerName = ownerData['Username'] ?? 'ThisIsNull';
+        });
+      } else {
+        _logError('Failed to fetch owner data: ${response.statusCode}');
+      }
+    } catch (e) {
+      _logError('Error fetching owner data: $e');
     }
-  } catch (e) {
-    _logError('Error fetching owner data: $e');
   }
-}
+
+  Future<void> _checkTradeRequestStatus() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/getAllMatches/${widget.matchId}'),
+      );
+
+      if (response.statusCode == 200) {
+        final matchData = json.decode(response.body);
+        setState(() {
+          tradeRequestStatus = matchData['TradeRequestStatus'] ?? '';
+          firstUserId = matchData['MatchedUserId'];
+          secondUserId = matchData['OwnerId'];
+          dynamic requestInitiatorId = matchData['RequestInitiatorId'];
+
+          if (requestInitiatorId != null) {
+            if (firstUserId == requestInitiatorId) { //secondUserId always be sender
+              personSwap = secondUserId;
+              secondUserId = firstUserId;
+              firstUserId = personSwap;
+            }
+            if (widget.userId == firstUserId) { //firstUserId is the receiver
+              showAcceptAndRejectButton = true;
+            }
+          }
+        });
+      } else {
+        _logError('Failed to fetch match data: ${response.statusCode}');
+      }
+    } catch (e) {
+      _logError('Error fetching match data: $e');
+    }
+  }
 
   void _logError(String message) {
     // You can use your preferred logging package or service here
@@ -139,46 +183,131 @@ Future<void> _fetchOwnerData(String ownerId) async {
     }
   }
 
-  void _showConfirmationDialog() {
+  void _showConfirmationDialog(
+      String title, String content, VoidCallback onConfirm) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Are you sure to send request?'),
+          title: Text(title),
+          content: Text(content),
           actions: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                TextButton(
-                  style: const ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(Colors.green),
-                    minimumSize: MaterialStatePropertyAll(Size(100, 50)),
-                  ),
-                  onPressed: () {
-                    // Handle the trade request here
-                  },
-                  child: const Text(
-                    'Yes',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                TextButton(
-                  style: const ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(Colors.grey),
-                    minimumSize: MaterialStatePropertyAll(Size(100, 50)),
-                  ),
-                  child:
-                      const Text('No', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                onConfirm();
+              },
+              child: const Text('Confirm'),
             ),
           ],
         );
       },
     );
+  }
+
+  void _showAcceptConfirmationDialog() {
+  _showConfirmationDialog(
+    'Confirm accept',
+    'Are you sure to accept the request?',
+    () async {
+      final url = Uri.parse(
+          'http://localhost:3000/trades/${widget.matchId}/accept');
+
+      try {
+        final response = await http.post(url);
+
+        if (response.statusCode == 200) {
+          if (mounted) {
+            setState(() {
+              tradeRequestStatus = 'accepted';
+            });
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Trade request accepted successfully!')),
+          );
+        } else {
+          _logError('Failed to accept trade request: ${response.statusCode}');
+        }
+      } catch (e) {
+        _logError('Error accepting trade request: $e');
+      }
+    },
+  );
+}
+
+  void _showRejectConfirmationDialog() {
+  _showConfirmationDialog(
+    'Confirm reject',
+    'Are you sure to reject the request?',
+    () async {
+      final url = Uri.parse(
+          'http://localhost:3000/trades/${widget.matchId}/reject');
+
+      try {
+        final response = await http.post(url);
+
+        if (response.statusCode == 200) {
+          if (mounted) {
+            setState(() {
+              tradeRequestStatus = 'rejected';
+            });
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Trade request rejected successfully!')),
+          );
+        } else {
+          _logError('Failed to reject trade request: ${response.statusCode}');
+        }
+      } catch (e) {
+        _logError('Error rejecting trade request: $e');
+      }
+    },
+  );
+}
+
+  void _showRequestConfirmationDialog() {
+    _showConfirmationDialog(
+      'Confirm reject',
+      'Are you sure to reject the request?',
+      () {
+        Navigator.of(context).pop();
+        _sendTradeRequest();
+      },
+    );
+  }
+
+  Future<void> _sendTradeRequest() async {
+    final url = Uri.parse(
+        'http://localhost:3000/trades/${widget.matchId}/send-request/${widget.userId}');
+    try {
+      final response = await http.post(url);
+
+      if (response.statusCode == 200) {
+        setState(() {
+          tradeRequestStatus = 'pending';
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Trade request sent successfully!')),
+        );
+      } else {
+        _logError('Failed to send trade request: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to send trade request.')),
+        );
+      }
+    } catch (e) {
+      _logError('Error sending trade request: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error sending trade request.')),
+      );
+    }
   }
 
   Future<void> _navigateToEditBookPage() async {
@@ -200,18 +329,36 @@ Future<void> _fetchOwnerData(String ownerId) async {
 
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 243, 252, 255),
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(LineAwesomeIcons.arrow_left),
         ),
-        title: Text(
-          book.title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              book.title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 5),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.4),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                ),
+                child: Text(
+                  "${book.quality}%",
+                  style: TypographyText.h4(Colors.white),
+                ),
+              ),
+            ),
+          ],
         ),
         actions: [
-          if (widget.userId == int.parse(book.ownerId))
+          if (widget.userId == int.parse(book.ownerId) && widget.isEdit == true)
             Padding(
               padding: const EdgeInsets.only(right: 10.0),
               child: IconButton(
@@ -278,7 +425,8 @@ Future<void> _fetchOwnerData(String ownerId) async {
                       ],
                     ),
                     const Spacer(),
-                    const Icon(Icons.sms),
+                    if (widget.userId != int.parse(book.ownerId))
+                      const Icon(Icons.sms),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -329,25 +477,91 @@ Future<void> _fetchOwnerData(String ownerId) async {
               ],
             ),
           ),
-          if (widget.userId != int.parse(book.ownerId))
+          if (widget.userId == secondUserId && tradeRequestStatus == 'pending')
             Positioned(
-              bottom: 20,
+              bottom: 30,
               left: 0,
               right: 0,
               child: Center(
                 child: ElevatedButton(
-                  onPressed: _showConfirmationDialog,
+                  onPressed: _showRequestConfirmationDialog,
                   style: ElevatedButton.styleFrom(
                     elevation: 5,
-                    backgroundColor: Colors.cyan,
+                    backgroundColor: tradeRequestStatus == 'pending'
+                        ? Colors.grey
+                        : Colors.cyan,
                   ),
-                  child: const Text(
-                    'Request to trade',
-                    style: TextStyle(
+                  child: Text(
+                    tradeRequestStatus == 'pending'
+                        ? 'Already send request'
+                        : 'Request to trade',
+                    style: const TextStyle(
                       color: Colors.white,
                     ),
                   ),
                 ),
+              ),
+            ),
+          if (showAcceptAndRejectButton && tradeRequestStatus == 'pending')
+            Positioned(
+              bottom: 30,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: _showRejectConfirmationDialog,
+                    style: ElevatedButton.styleFrom(
+                      elevation: 5,
+                      backgroundColor: Colors.red,
+                    ),
+                    child: const Text(
+                      'Reject request',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 30),
+                  ElevatedButton(
+                    onPressed: _showAcceptConfirmationDialog,
+                    style: ElevatedButton.styleFrom(
+                      elevation: 5,
+                      backgroundColor: Colors.cyan,
+                    ),
+                    child: const Text(
+                      'Accept request',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (tradeRequestStatus == 'accepted')
+            Positioned(
+              bottom: 30,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: (){},
+                    style: ElevatedButton.styleFrom(
+                      elevation: 5,
+                      backgroundColor: Colors.green,
+                    ),
+                    child: const Text(
+                      'Trade success',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
         ],

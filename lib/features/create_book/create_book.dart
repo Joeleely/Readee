@@ -13,7 +13,8 @@ import 'package:readee_app/widget/bottomNav.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class CreateBookPage extends StatefulWidget {
-  const CreateBookPage({super.key});
+  final int userId;
+  const CreateBookPage({super.key, required this.userId});
 
   @override
   _CreateBookPageState createState() => _CreateBookPageState();
@@ -82,7 +83,7 @@ class _CreateBookPageState extends State<CreateBookPage> {
 
       // Prepare the data for the POST request
       final Map<String, dynamic> bookData = {
-        'OwnerId': 7,
+        'OwnerId': widget.userId,
         'BookName': _titleController.text,
         'BookPicture': base64Image ?? '??',
         'Author': _authorController.text,

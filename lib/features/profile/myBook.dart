@@ -171,6 +171,7 @@ Widget build(BuildContext context) {
                             page: BookDetailPage(
                                 userId: widget.userId,
                                 bookId: books[index].bookId,
+                                matchId: 0, isEdit: true,
                             )
                           ));
                     },

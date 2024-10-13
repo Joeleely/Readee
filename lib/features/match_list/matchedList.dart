@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
 import 'package:readee_app/features/match_list/bookDetail.dart';
 import 'package:readee_app/features/match_list/model/matches.dart';
+import 'package:readee_app/features/profile/widget/pageRoute.dart';
 
 class MatchedList extends StatefulWidget {
-  const MatchedList({super.key});
+  final int userId;
+  const MatchedList({super.key, required this.userId});
 
   @override
   State<MatchedList> createState() => _MatchedListState();
@@ -15,7 +17,7 @@ class MatchedList extends StatefulWidget {
 
 class _MatchedListState extends State<MatchedList> {
   List<BookDetails> matchedBooks = [];
-  final int userID = 2;
+  List<Matches> matches = [];
 
   Uint8List _convertBase64Image(String base64String) {
     // Remove the prefix if it exists
@@ -35,8 +37,7 @@ class _MatchedListState extends State<MatchedList> {
     try {
       // Step 1: Get matches for the user
       final matchesResponse =
-          await http.get(Uri.parse('http://localhost:3000/getMatches/$userID'));
-      List<Matches> matches = [];
+          await http.get(Uri.parse('http://localhost:3000/getMatches/${widget.userId}'));
 
       if (matchesResponse.statusCode == 200) {
         final matchesData = json.decode(matchesResponse.body);
@@ -51,13 +52,10 @@ class _MatchedListState extends State<MatchedList> {
       List<BookDetails> fetchedMatchedBooks = [];
 
       for (var match in matches) {
-        // print('Matches Response: ${matchesResponse.body}');
-
         final matchBookResponse = await http.get(
             Uri.parse('http://localhost:3000/getBook/${match.matchedBookId}'));
         if (matchBookResponse.statusCode == 200) {
           final bookJson = json.decode(matchBookResponse.body);
-
           fetchedMatchedBooks.add(BookDetails(
               bookId: bookJson['BookId'] ?? '',
               title: bookJson['BookName'] ?? 'Unknown Title',
@@ -65,19 +63,17 @@ class _MatchedListState extends State<MatchedList> {
               img: [
                 bookJson['BookPicture'] ?? '',
               ],
-              description:
-                  bookJson['BookDescription'] ?? 'No description available',
+              description: bookJson['BookDescription'] ?? 'No description available',
               quality: '${bookJson['Quality'] ?? '0'}%',
+              isTrade: bookJson['IsTraded'],
               genre: bookJson['Genre'] ?? ''));
-
-          // print(fetchedBooks);
         } else {
           print('Failed to load book for ID: ${match.matchedBookId}');
         }
       }
 
       setState(() {
-        matchedBooks = fetchedMatchedBooks; // Store the fetched books
+        matchedBooks = fetchedMatchedBooks;
       });
     } catch (error) {
       print('Error fetching matched books: $error');
@@ -101,15 +97,16 @@ class _MatchedListState extends State<MatchedList> {
                 itemCount: matchedBooks.length,
                 itemBuilder: (context, index) {
                   final book = matchedBooks[index];
+                  final match = matches[index];
+
                   return Column(
                     children: [
                       InkWell(
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => BookDetailPage(
-                                bookId: book.bookId, userId: userID),
-                          ));
-                        },
+                        onTap: () => Navigator.push(
+                          context,
+                          CustomPageRoute(
+                              page: BookDetailPage(bookId: book.bookId, userId: widget.userId, matchId: match.matchId, isEdit: false,
+                          ))),
                         child: ListTile(
                           leading: Container(
                             width: 50,
