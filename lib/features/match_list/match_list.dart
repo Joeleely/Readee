@@ -58,31 +58,36 @@ class _MatchListPageState extends State<MatchListPage> {
 
       for (var match in matches) {
         final ownerBookResponse = await http.get(Uri.parse('http://localhost:3000/getBook/${match.ownerBookId}'));
-        if (ownerBookResponse.statusCode == 200) {
-          final bookJson = json.decode(ownerBookResponse.body);
+        final matchedBookResponse = await http.get(Uri.parse('http://localhost:3000/getBook/${match.matchedBookId}'));
+        if (ownerBookResponse.statusCode == 200 && matchedBookResponse.statusCode == 200) {
+        final ownerBookJson = json.decode(ownerBookResponse.body);
+        final matchedBookJson = json.decode(matchedBookResponse.body);
 
-          var bookDetails = BookDetails(
-            bookId: bookJson['BookId'] ?? '',
-            title: bookJson['BookName'] ?? 'Unknown Title',
-            author: bookJson['Author'] ?? 'Unknown Author',
-            img: [bookJson['BookPicture'] ?? ''],
-            description: bookJson['BookDescription'] ?? 'No description available',
-            quality: '${bookJson['Quality'] ?? '0'}%',
-            isTrade: bookJson['IsTraded'],
-            genre: bookJson['Genre'] ?? '',
-          );
+           var bookDetails = BookDetails(
+          bookId: ownerBookJson['BookId'] ?? '',
+          title: ownerBookJson['BookName'] ?? 'Unknown Title',
+          author: ownerBookJson['Author'] ?? 'Unknown Author',
+          img: [ownerBookJson['BookPicture'] ?? ''],
+          description: ownerBookJson['BookDescription'] ?? 'No description available',
+          quality: '${ownerBookJson['Quality'] ?? '0'}%',
+          isTrade: ownerBookJson['IsTraded'],
+          genre: ownerBookJson['Genre'] ?? '',
+        );
 
-          bool isDuplicate = fetchedOwnerBooks.any((book) => book.bookId == bookDetails.bookId);
+        bool isDuplicate = fetchedOwnerBooks.any((book) => book.bookId == bookDetails.bookId);
 
-          if (!isDuplicate && bookDetails.isTrade == false) {
-            fetchedOwnerBooks.add(bookDetails);
-          } else {
-            print('Duplicate book found: ${bookDetails.title}, skipping...');
-          }
+        // Check that both ownerBookId and matchedBookId have isTrade == false
+        if (!isDuplicate &&
+            bookDetails.isTrade == false &&
+            matchedBookJson['IsTraded'] == false) {
+          fetchedOwnerBooks.add(bookDetails);
         } else {
-          print('Failed to load book for ID: ${match.ownerBookId}');
+          print('Skipping book: ${bookDetails.title} - Trade status: ownerBookId: ${bookDetails.isTrade}, matchedBookId: ${matchedBookJson['IsTraded']}');
         }
+      } else {
+        print('Failed to load book for ID: ${match.ownerBookId} or ${match.matchedBookId}');
       }
+    }
 
       // Update the state with the fetched books
       setState(() {

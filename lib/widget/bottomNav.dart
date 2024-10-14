@@ -10,7 +10,8 @@ import 'package:readee_app/home.dart';
 import 'package:readee_app/pages/logo.dart';
 
 class ReadeeNavigationBar extends StatefulWidget {
-  const ReadeeNavigationBar({super.key});
+  final int userId;
+  const ReadeeNavigationBar({super.key, required this.userId});
 
   @override
   State<ReadeeNavigationBar> createState() => _ReadeeNavigationBarState();
@@ -18,7 +19,6 @@ class ReadeeNavigationBar extends StatefulWidget {
 
 class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
   int currentTab = 0;
-  int userId = 7;
   late List<Widget> screens;
   final PageStorageBucket bucket = PageStorageBucket();
   late Widget currentScreen;
@@ -27,13 +27,13 @@ class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
   void initState() {
     super.initState();
     screens = [
-      MatchPage(userID: userId),
-      ChatPage(userId: userId,),
-      CreateBookPage(userId: userId,),
-      ProfilePage(userId: userId,),
-      MatchListPage(userId: userId,),
+      MatchPage(userID: widget.userId),
+      ChatPage(userId: widget.userId,),
+      CreateBookPage(userId: widget.userId,),
+      ProfilePage(userId: widget.userId,),
+      MatchListPage(userId: widget.userId,),
     ];
-    currentScreen = MatchPage(userID: userId); // Set the initial screen
+    currentScreen = MatchPage(userID: widget.userId); // Set the initial screen
   }
 
   @override
@@ -54,17 +54,17 @@ class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _buildNavButton(Icons.swap_horiz, 0, MatchPage(userID: userId,)),
-                _buildNavButton(Icons.list, 1, MatchListPage(userId: userId,)),
+                _buildNavButton(Icons.swap_horiz, 0, MatchPage(userID: widget.userId,)),
+                _buildNavButton(Icons.list, 1, MatchListPage(userId: widget.userId,)),
                 FloatingActionButton(
                   elevation: 0,
                   child: const Icon(Icons.add),
                   onPressed: () {
-                    Navigator.of(context).push(_createRoute(userId));
+                    Navigator.of(context).push(_createRoute(widget.userId));
                   },
                 ),
-                _buildNavButton(Icons.textsms, 2, ChatPage(userId: userId,)),
-                _buildNavButton(Icons.person, 3, ProfilePage(userId: userId,)),
+                _buildNavButton(Icons.textsms, 2, ChatPage(userId: widget.userId,)),
+                _buildNavButton(Icons.person, 3, ProfilePage(userId: widget.userId,)),
               ],
             ),
           ),

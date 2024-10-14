@@ -22,8 +22,8 @@ class HomePage extends StatelessWidget {
         scaffoldBackgroundColor: const Color.fromARGB(255, 243, 252, 255),
       ),
       home: 
-      //BookDetailPage(bookId: 32,matchId: 88,userId: 7, isEdit: false,)
-      const ReadeeNavigationBar(),
+      //BookDetailPage(bookId: 4,matchId: 83,userId: 2, isEdit: false,)
+      const ReadeeNavigationBar(userId: 2,),
     );
   }
 }

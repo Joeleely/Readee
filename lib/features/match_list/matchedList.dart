@@ -18,6 +18,7 @@ class MatchedList extends StatefulWidget {
 class _MatchedListState extends State<MatchedList> {
   List<BookDetails> matchedBooks = [];
   List<Matches> matches = [];
+  bool isLoading = true;
 
   Uint8List _convertBase64Image(String base64String) {
     // Remove the prefix if it exists
@@ -56,27 +57,39 @@ class _MatchedListState extends State<MatchedList> {
             Uri.parse('http://localhost:3000/getBook/${match.matchedBookId}'));
         if (matchBookResponse.statusCode == 200) {
           final bookJson = json.decode(matchBookResponse.body);
-          fetchedMatchedBooks.add(BookDetails(
-              bookId: bookJson['BookId'] ?? '',
-              title: bookJson['BookName'] ?? 'Unknown Title',
-              author: bookJson['Author'] ?? 'Unknown Author',
-              img: [
-                bookJson['BookPicture'] ?? '',
-              ],
-              description: bookJson['BookDescription'] ?? 'No description available',
-              quality: '${bookJson['Quality'] ?? '0'}%',
-              isTrade: bookJson['IsTraded'],
-              genre: bookJson['Genre'] ?? ''));
+
+          var bookDetails = BookDetails(
+            bookId: bookJson['BookId'] ?? '',
+            title: bookJson['BookName'] ?? 'Unknown Title',
+            author: bookJson['Author'] ?? 'Unknown Author',
+            img: [bookJson['BookPicture'] ?? ''],
+            description: bookJson['BookDescription'] ?? 'No description available',
+            quality: '${bookJson['Quality'] ?? '0'}%',
+            isTrade: bookJson['IsTraded'],
+            genre: bookJson['Genre'] ?? '',
+          );
+
+          bool isDuplicate = fetchedMatchedBooks.any((book) => book.bookId == bookDetails.bookId);
+
+          if (!isDuplicate && bookDetails.isTrade == false) {
+            fetchedMatchedBooks.add(bookDetails);
+          } else {
+            print('Duplicate book found: ${bookDetails.title}, skipping...');
+          }
         } else {
-          print('Failed to load book for ID: ${match.matchedBookId}');
+          print('Failed to load book for ID: ${match.ownerBookId}');
         }
       }
 
       setState(() {
         matchedBooks = fetchedMatchedBooks;
+        isLoading = false;
       });
     } catch (error) {
       print('Error fetching matched books: $error');
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -87,10 +100,10 @@ class _MatchedListState extends State<MatchedList> {
         // title: const Text('Matched Books'),
         backgroundColor: const Color.fromARGB(255, 243, 252, 255),
       ),
-      body: matchedBooks.isEmpty
-          ? const Center(
-              child:
-                  CircularProgressIndicator()) // Show loading spinner when fetching data
+      body: isLoading // Show loading indicator while data is being fetched
+          ? const Center(child: CircularProgressIndicator())
+          : matchedBooks.isEmpty
+              ? const Center(child: Text("You have no book match right now"))
           : Padding(
               padding: const EdgeInsets.all(20.0),
               child: ListView.builder(

@@ -101,7 +101,7 @@ class _CreateBookPageState extends State<CreateBookPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const ReadeeNavigationBar(),
+            builder: (context) => ReadeeNavigationBar(userId: widget.userId,),
           ),
         );
       } else {
@@ -119,7 +119,7 @@ class _CreateBookPageState extends State<CreateBookPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => const ReadeeNavigationBar()),
+                builder: (context) => ReadeeNavigationBar(userId: widget.userId,)),
           );
         } else {
           print('Failed to create book: ${response.body}');

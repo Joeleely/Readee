@@ -222,6 +222,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
         if (response.statusCode == 200) {
           if (mounted) {
+            Navigator.of(context).pop();
             setState(() {
               tradeRequestStatus = 'accepted';
             });
@@ -253,6 +254,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
         if (response.statusCode == 200) {
           if (mounted) {
+            Navigator.of(context).pop();
             setState(() {
               tradeRequestStatus = 'rejected';
             });
@@ -271,13 +273,24 @@ class _BookDetailPageState extends State<BookDetailPage> {
   );
 }
 
-  void _showRequestConfirmationDialog() {
+void _showRequestConfirmationDialog() {
     _showConfirmationDialog(
-      'Confirm reject',
-      'Are you sure to reject the request?',
+      'Confirm send request',
+      'Are you sure to send the request?',
       () {
         Navigator.of(context).pop();
         _sendTradeRequest();
+      },
+    );
+  }
+
+  void _showCancelRequestConfirmationDialog() {
+    _showConfirmationDialog(
+      'Confirm cancel request',
+      'Are you sure to ceancel the request?',
+      () {
+        Navigator.of(context).pop();
+        cancelTradeRequest();
       },
     );
   }
@@ -309,6 +322,29 @@ class _BookDetailPageState extends State<BookDetailPage> {
       );
     }
   }
+
+Future<void> cancelTradeRequest() async {
+  final url = Uri.parse('http://localhost:3000/trades/${widget.matchId}/cancel-request');
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseBody = jsonDecode(response.body);
+      print('Trade request canceled: ${responseBody['message']}');
+    } else {
+      print('Failed to cancel trade request: ${response.body}');
+    }
+  } catch (e) {
+    print('Error canceling trade request: $e');
+  }
+}
+
 
   Future<void> _navigateToEditBookPage() async {
     final result = await Navigator.push(context,
@@ -477,6 +513,31 @@ class _BookDetailPageState extends State<BookDetailPage> {
               ],
             ),
           ),
+          if(tradeRequestStatus == 'none')
+          Positioned(
+              bottom: 30,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: ElevatedButton(
+                  onPressed: _showRequestConfirmationDialog,
+                  style: ElevatedButton.styleFrom(
+                    elevation: 5,
+                    backgroundColor: tradeRequestStatus == 'pending'
+                        ? Colors.grey
+                        : Colors.cyan,
+                  ),
+                  child: Text(
+                    tradeRequestStatus == 'pending'
+                        ? 'Already send request'
+                        : 'Request to trade',
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           if (widget.userId == secondUserId && tradeRequestStatus == 'pending')
             Positioned(
               bottom: 30,
@@ -484,7 +545,9 @@ class _BookDetailPageState extends State<BookDetailPage> {
               right: 0,
               child: Center(
                 child: ElevatedButton(
-                  onPressed: _showRequestConfirmationDialog,
+                  onPressed: tradeRequestStatus == 'pending'
+                  ?_showCancelRequestConfirmationDialog
+                  :_showRequestConfirmationDialog,
                   style: ElevatedButton.styleFrom(
                     elevation: 5,
                     backgroundColor: tradeRequestStatus == 'pending'

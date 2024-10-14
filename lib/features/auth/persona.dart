@@ -87,7 +87,7 @@ class _PersonaPageState extends State<PersonaPage> {
       print('Data submitted successfully');
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ReadeeNavigationBar()),
+        MaterialPageRoute(builder: (context) => ReadeeNavigationBar(userId: widget.userId,)),
       );
     } else {
       throw Exception('Failed to submit data');
