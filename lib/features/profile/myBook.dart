@@ -17,6 +17,7 @@ class MyBooksPage extends StatefulWidget {
 
 class _MyBooksPageState extends State<MyBooksPage> {
   List<Book> books = [];
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -31,7 +32,9 @@ class _MyBooksPageState extends State<MyBooksPage> {
       if (response.statusCode == 200) {
         final List<dynamic> bookJson = json.decode(response.body);
         setState(() {
-          books = bookJson.map((json) => Book.fromJson(json)).toList();
+          books = bookJson.map((json) => Book.fromJson(json))
+          .where((book) => book.isTraded == false).toList();
+          isLoading = false;
         });
       } else {
         throw Exception('Failed to load books: ${response.statusCode}');
@@ -130,9 +133,11 @@ Widget build(BuildContext context) {
       ),
       title: const Text('My Book'),
     ),
-    body: books.isEmpty
-        ? const Center(child: CircularProgressIndicator())
-        : Padding(
+    body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : books.isEmpty
+              ? const Center(child: Text("You have no book match right now"))
+              : Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
             child: ListView.builder(
               itemCount: books.length,
@@ -145,77 +150,120 @@ Widget build(BuildContext context) {
                       _convertBase64Image(books[index].bookPicture));
                 }
 
-                return Dismissible(
-                  key: Key((books[index].bookId).toString()),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: const Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                    ),
+                return // The onDismissed will not remove the item immediately, just show the dialog.
+Dismissible(
+  key: Key((books[index].bookId).toString()),
+  direction: DismissDirection.endToStart,
+  background: Container(
+    color: Colors.red,
+    alignment: Alignment.centerRight,
+    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+    child: const Icon(
+      Icons.delete,
+      color: Colors.white,
+    ),
+  ),
+  confirmDismiss: (direction) async {
+    // Show the confirmation dialog and wait for the response
+    return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Are you sure you want to delete this book?'),
+          actions: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  style: const ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll(Colors.red),
+                    minimumSize: MaterialStatePropertyAll(Size(100, 50)),
                   ),
-                  onDismissed: (direction) {
-                    // Instead of refreshing here, just show the dialog
-                    _showConfirmationDialog(index);
-                    // You can also handle removal temporarily if needed
-                    // books.removeAt(index);
+                  onPressed: () {
+                    // Return true to confirm the dismissal and delete the book
+                    Navigator.of(context).pop(true);
                   },
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          CustomPageRoute(
-                            page: BookDetailPage(
-                                userId: widget.userId,
-                                bookId: books[index].bookId,
-                                matchId: 0, isEdit: true,
-                            )
-                          ));
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.cyan,
-                                width: 2,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image(
-                                image: imageProvider,
-                                fit: BoxFit.cover,
-                                width: 55,
-                                height: 100,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 30),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(books[index].bookName),
-                              const SizedBox(height: 10),
-                              Text(
-                                books[index].authorName,
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                  child: const Text(
+                    'Yes',
+                    style: TextStyle(color: Colors.white),
                   ),
-                );
+                ),
+                TextButton(
+                  style: const ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll(Colors.grey),
+                    minimumSize: MaterialStatePropertyAll(Size(100, 50)),
+                  ),
+                  onPressed: () {
+                    // Return false to cancel the dismissal
+                    Navigator.of(context).pop(false);
+                  },
+                  child: const Text('No', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  },
+  onDismissed: (direction) {
+    // If confirmed, delete the book
+    _deleteBook(index);
+  },
+  child: InkWell(
+    onTap: () {
+      Navigator.push(
+          context,
+          CustomPageRoute(
+            page: BookDetailPage(
+                userId: widget.userId,
+                bookId: books[index].bookId,
+                matchId: 0, isEdit: true,
+            )
+          ));
+    },
+    child: Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.cyan,
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image(
+                image: imageProvider,
+                fit: BoxFit.cover,
+                width: 55,
+                height: 100,
+              ),
+            ),
+          ),
+          const SizedBox(width: 30),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(books[index].bookName),
+              const SizedBox(height: 10),
+              Text(
+                books[index].authorName,
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  ),
+);
+
               },
             ),
           ),
@@ -228,8 +276,9 @@ class Book {
   final String bookPicture;
   final String authorName;
   final int bookId;
+  final bool isTraded;
 
-  Book({required this.bookName,required this.bookId, required this.bookPicture, required this.authorName});
+  Book({required this.bookName,required this.bookId, required this.bookPicture, required this.authorName, required this.isTraded});
 
   factory Book.fromJson(Map<String, dynamic> json) {
     return Book(
@@ -237,6 +286,7 @@ class Book {
       bookId: json['BookId'],
       bookPicture: json['BookPicture'],
       authorName: json['Author'],
+      isTraded: json['IsTraded']
     );
   }
 }

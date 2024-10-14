@@ -23,7 +23,7 @@ class HomePage extends StatelessWidget {
       ),
       home: 
       //BookDetailPage(bookId: 4,matchId: 83,userId: 2, isEdit: false,)
-      const ReadeeNavigationBar(userId: 2,),
+      const ReadeeNavigationBar(userId: 2),
     );
   }
 }

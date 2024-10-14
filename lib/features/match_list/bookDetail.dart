@@ -17,7 +17,10 @@ class BookDetailPage extends StatefulWidget {
   final bool isEdit;
 
   BookDetailPage(
-      {required this.bookId, required this.userId, required this.matchId, required this.isEdit});
+      {required this.bookId,
+      required this.userId,
+      required this.matchId,
+      required this.isEdit});
 
   @override
   _BookDetailPageState createState() => _BookDetailPageState();
@@ -134,12 +137,14 @@ class _BookDetailPageState extends State<BookDetailPage> {
           dynamic requestInitiatorId = matchData['RequestInitiatorId'];
 
           if (requestInitiatorId != null) {
-            if (firstUserId == requestInitiatorId) { //secondUserId always be sender
+            if (firstUserId == requestInitiatorId) {
+              //secondUserId always be sender
               personSwap = secondUserId;
               secondUserId = firstUserId;
               firstUserId = personSwap;
             }
-            if (widget.userId == firstUserId) { //firstUserId is the receiver
+            if (widget.userId == firstUserId) {
+              //firstUserId is the receiver
               showAcceptAndRejectButton = true;
             }
           }
@@ -210,75 +215,79 @@ class _BookDetailPageState extends State<BookDetailPage> {
   }
 
   void _showAcceptConfirmationDialog() {
-  _showConfirmationDialog(
-    'Confirm accept',
-    'Are you sure to accept the request?',
-    () async {
-      final url = Uri.parse(
-          'http://localhost:3000/trades/${widget.matchId}/accept');
+    _showConfirmationDialog(
+      'Confirm accept',
+      'Are you sure to accept the request?',
+      () async {
+        final url =
+            Uri.parse('http://localhost:3000/trades/${widget.matchId}/accept');
 
-      try {
-        final response = await http.post(url);
+        try {
+          final response = await http.post(url);
 
-        if (response.statusCode == 200) {
-          if (mounted) {
-            Navigator.of(context).pop();
-            setState(() {
-              tradeRequestStatus = 'accepted';
-            });
+          if (response.statusCode == 200) {
+            if (mounted) {
+              //Navigator.of(context).pop();
+              setState(() {
+                tradeRequestStatus = 'accepted';
+                showAcceptAndRejectButton = false;
+              });
+            }
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Trade request accepted successfully!')),
+            );
+          } else {
+            _logError('Failed to accept trade request: ${response.statusCode}');
           }
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Trade request accepted successfully!')),
-          );
-        } else {
-          _logError('Failed to accept trade request: ${response.statusCode}');
+        } catch (e) {
+          _logError('Error accepting trade request: $e');
         }
-      } catch (e) {
-        _logError('Error accepting trade request: $e');
-      }
-    },
-  );
-}
+      },
+    );
+  }
 
   void _showRejectConfirmationDialog() {
-  _showConfirmationDialog(
-    'Confirm reject',
-    'Are you sure to reject the request?',
-    () async {
-      final url = Uri.parse(
-          'http://localhost:3000/trades/${widget.matchId}/reject');
+    _showConfirmationDialog(
+      'Confirm reject',
+      'Are you sure to reject the request?',
+      () async {
+        final url =
+            Uri.parse('http://localhost:3000/trades/${widget.matchId}/reject');
 
-      try {
-        final response = await http.post(url);
+        try {
+          final response = await http.post(url);
 
-        if (response.statusCode == 200) {
-          if (mounted) {
-            Navigator.of(context).pop();
-            setState(() {
-              tradeRequestStatus = 'rejected';
-            });
+          if (response.statusCode == 200) {
+            if (mounted) {
+              Navigator.of(context).pop();
+              setState(() {
+                tradeRequestStatus = 'rejected';
+                showAcceptAndRejectButton = false;
+              });
+            }
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Trade request rejected successfully!')),
+            );
+          } else {
+            _logError('Failed to reject trade request: ${response.statusCode}');
           }
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Trade request rejected successfully!')),
-          );
-        } else {
-          _logError('Failed to reject trade request: ${response.statusCode}');
+        } catch (e) {
+          _logError('Error rejecting trade request: $e');
         }
-      } catch (e) {
-        _logError('Error rejecting trade request: $e');
-      }
-    },
-  );
-}
+      },
+    );
+  }
 
-void _showRequestConfirmationDialog() {
+  void _showRequestConfirmationDialog() {
     _showConfirmationDialog(
       'Confirm send request',
       'Are you sure to send the request?',
       () {
-        Navigator.of(context).pop();
+        //Navigator.of(context).pop();
         _sendTradeRequest();
       },
     );
@@ -289,7 +298,7 @@ void _showRequestConfirmationDialog() {
       'Confirm cancel request',
       'Are you sure to ceancel the request?',
       () {
-        Navigator.of(context).pop();
+        //Navigator.of(context).pop();
         cancelTradeRequest();
       },
     );
@@ -323,28 +332,31 @@ void _showRequestConfirmationDialog() {
     }
   }
 
-Future<void> cancelTradeRequest() async {
-  final url = Uri.parse('http://localhost:3000/trades/${widget.matchId}/cancel-request');
+  Future<void> cancelTradeRequest() async {
+    final url = Uri.parse(
+        'http://localhost:3000/trades/${widget.matchId}/cancel-request');
 
-  try {
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    );
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final responseBody = jsonDecode(response.body);
-      print('Trade request canceled: ${responseBody['message']}');
-    } else {
-      print('Failed to cancel trade request: ${response.body}');
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        setState(() {
+          tradeRequestStatus = 'none';
+        });
+        print('Trade request canceled: ${responseBody['message']}');
+      } else {
+        print('Failed to cancel trade request: ${response.body}');
+      }
+    } catch (e) {
+      print('Error canceling trade request: $e');
     }
-  } catch (e) {
-    print('Error canceling trade request: $e');
   }
-}
-
 
   Future<void> _navigateToEditBookPage() async {
     final result = await Navigator.push(context,
@@ -513,14 +525,18 @@ Future<void> cancelTradeRequest() async {
               ],
             ),
           ),
-          if(tradeRequestStatus == 'none')
-          Positioned(
+          if (tradeRequestStatus == 'none')
+            Positioned(
               bottom: 30,
               left: 0,
               right: 0,
               child: Center(
                 child: ElevatedButton(
-                  onPressed: _showRequestConfirmationDialog,
+                  onPressed: () {
+                    setState(() {
+                      _showRequestConfirmationDialog();
+                    });
+                  },
                   style: ElevatedButton.styleFrom(
                     elevation: 5,
                     backgroundColor: tradeRequestStatus == 'pending'
@@ -545,9 +561,13 @@ Future<void> cancelTradeRequest() async {
               right: 0,
               child: Center(
                 child: ElevatedButton(
-                  onPressed: tradeRequestStatus == 'pending'
-                  ?_showCancelRequestConfirmationDialog
-                  :_showRequestConfirmationDialog,
+                  onPressed: () {
+                    setState(() {
+                      tradeRequestStatus == 'pending'
+                          ? _showCancelRequestConfirmationDialog()
+                          : _showRequestConfirmationDialog();
+                    });
+                  },
                   style: ElevatedButton.styleFrom(
                     elevation: 5,
                     backgroundColor: tradeRequestStatus == 'pending'
@@ -574,7 +594,11 @@ Future<void> cancelTradeRequest() async {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed: _showRejectConfirmationDialog,
+                    onPressed: () {
+                  setState(() {
+                    _showRejectConfirmationDialog();
+                  });
+                },
                     style: ElevatedButton.styleFrom(
                       elevation: 5,
                       backgroundColor: Colors.red,
@@ -588,7 +612,11 @@ Future<void> cancelTradeRequest() async {
                   ),
                   const SizedBox(width: 30),
                   ElevatedButton(
-                    onPressed: _showAcceptConfirmationDialog,
+                    onPressed: () {
+                  setState(() {
+                    _showAcceptConfirmationDialog();
+                  });
+                },
                     style: ElevatedButton.styleFrom(
                       elevation: 5,
                       backgroundColor: Colors.cyan,
@@ -603,7 +631,7 @@ Future<void> cancelTradeRequest() async {
                 ],
               ),
             ),
-            if (tradeRequestStatus == 'accepted')
+          if (tradeRequestStatus == 'accepted')
             Positioned(
               bottom: 30,
               left: 0,
@@ -612,7 +640,11 @@ Future<void> cancelTradeRequest() async {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed: (){},
+                    onPressed: () {
+                      setState(() {
+                        // Handle trade success logic
+                      });
+                    },
                     style: ElevatedButton.styleFrom(
                       elevation: 5,
                       backgroundColor: Colors.green,
