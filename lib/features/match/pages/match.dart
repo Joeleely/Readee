@@ -17,6 +17,7 @@ class MatchPage extends StatefulWidget {
 class _MatchPageState extends State<MatchPage> {
   List<BookDetails> books = [];
   final Random random = Random();
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -39,7 +40,7 @@ class _MatchPageState extends State<MatchPage> {
 
         // Step 2: Get user logs to filter out liked books
         final logsResponse =
-            await http.get(Uri.parse('http://localhost:3000/getLogs/$widget.userID'));
+            await http.get(Uri.parse('http://localhost:3000/getLogs/${widget.userID}'));
         List<int> likedBookIDs = [];
         if (logsResponse.statusCode == 200) {
           List<dynamic> logsData = jsonDecode(logsResponse.body);
@@ -61,6 +62,7 @@ class _MatchPageState extends State<MatchPage> {
                 book['IsTraded'] == false &&
                 !likedBookIDs.contains(book['BookId']);
           }).map((book) {
+            print("bookOwnerId: ${book['OwnerId']}, userId: ${widget.userID}");
             return BookDetails(
               title: book['BookName'],
               author: book['Author'],
@@ -111,6 +113,7 @@ class _MatchPageState extends State<MatchPage> {
 
           setState(() {
             books = combinedBooks;
+            isLoading = false;
           });
 
           // print("this is book that get from filter");
@@ -145,9 +148,11 @@ class _MatchPageState extends State<MatchPage> {
         backgroundColor: const Color.fromARGB(255, 243, 252, 255),
       ),
       body: Center(
-        child: books.isNotEmpty
-            ? BookCard(books: books, userID: widget.userID,)
-            : const CircularProgressIndicator(), // Show loading indicator while data is fetched
+        child: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : books.isEmpty
+              ? const Center(child: Text("No more book to show, wait for other to post the book"))
+              : BookCard(books: books, userID: widget.userID,)
       ),
     );
   }

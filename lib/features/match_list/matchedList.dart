@@ -9,7 +9,8 @@ import 'package:readee_app/features/profile/widget/pageRoute.dart';
 
 class MatchedList extends StatefulWidget {
   final int userId;
-  const MatchedList({super.key, required this.userId});
+  final int bookId;
+  const MatchedList({super.key, required this.userId, required this.bookId});
 
   @override
   State<MatchedList> createState() => _MatchedListState();
@@ -18,6 +19,7 @@ class MatchedList extends StatefulWidget {
 class _MatchedListState extends State<MatchedList> {
   List<BookDetails> matchedBooks = [];
   List<Matches> matches = [];
+  List<Matches> validMatches = [];
   bool isLoading = true;
 
   Uint8List _convertBase64Image(String base64String) {
@@ -31,14 +33,94 @@ class _MatchedListState extends State<MatchedList> {
   @override
   void initState() {
     super.initState();
-    fetchMatchedBooks(); // Fetch books when the page initializes
+    fetchMatchedBooks();
+  }
+
+  Future<BookDetails?> getMatchedBookIfOwnerMatches(int matchId) async {
+    try {
+      final matchDataResponse = await http.get(
+        Uri.parse('http://localhost:3000/getAllMatches/$matchId'),
+      );
+
+      if (matchDataResponse.statusCode == 200) {
+        final matchDataJson = json.decode(matchDataResponse.body);
+        var matchTradeStatus = matchDataJson['TradeRequestStatus'];
+        var ownerBookId = matchDataJson['OwnerBookId'];
+        var matchedBookId = matchDataJson['MatchedBookId'];
+        var ownerId = matchDataJson['OwnerId']; // Get ownerId
+        var matchedUserId = matchDataJson['MatchedUserId']; // Get matchedUserId
+
+        print('Match ID: $matchId');
+        print('Owner ID: $ownerId, Matched User ID: $matchedUserId');
+        print('Owner Book ID: $ownerBookId, Matched Book ID: $matchedBookId');
+        print('This is widget.userId: ${widget.userId}');
+
+        // Check if ownerId matches widget.userId
+        if (ownerId == widget.userId && matchTradeStatus != 'rejected') {
+          if (widget.bookId == ownerBookId) {
+            final matchBookResponse = await http.get(
+              Uri.parse('http://localhost:3000/getBook/$matchedBookId'),
+            );
+
+            if (matchBookResponse.statusCode == 200) {
+              final bookJson = json.decode(matchBookResponse.body);
+
+              return BookDetails(
+                bookId: bookJson['BookId'] ?? '',
+                title: bookJson['BookName'] ?? 'Unknown Title',
+                author: bookJson['Author'] ?? 'Unknown Author',
+                img: [bookJson['BookPicture'] ?? ''],
+                description:
+                    bookJson['BookDescription'] ?? 'No description available',
+                quality: '${bookJson['Quality'] ?? '0'}%',
+                isTrade: bookJson['IsTraded'],
+                genre: bookJson['Genre'] ?? '',
+              );
+            } else {
+              print('Failed to load book for matchedBookId: $matchedBookId');
+            }
+          }
+          // Owner is the current user, fetch matched book
+        } else {
+          if (widget.bookId == matchedBookId && matchTradeStatus != 'rejected') {
+            final matchBookResponse = await http.get(
+              Uri.parse('http://localhost:3000/getBook/$ownerBookId'),
+            );
+
+            if (matchBookResponse.statusCode == 200) {
+              final bookJson = json.decode(matchBookResponse.body);
+
+              return BookDetails(
+                bookId: bookJson['BookId'] ?? '',
+                title: bookJson['BookName'] ?? 'Unknown Title',
+                author: bookJson['Author'] ?? 'Unknown Author',
+                img: [bookJson['BookPicture'] ?? ''],
+                description:
+                    bookJson['BookDescription'] ?? 'No description available',
+                quality: '${bookJson['Quality'] ?? '0'}%',
+                isTrade: bookJson['IsTraded'],
+                genre: bookJson['Genre'] ?? '',
+              );
+            } else {
+              print('Failed to load book for ownerBookId: $ownerBookId');
+            }
+          }
+          // Current user is the matched user, fetch owner's book
+        }
+      } else {
+        print('Failed to load match data for matchId: $matchId');
+      }
+    } catch (error) {
+      print('Error fetching matched book: $error');
+    }
+    return null;
   }
 
   Future<void> fetchMatchedBooks() async {
     try {
-      // Step 1: Get matches for the user
-      final matchesResponse = await http
-          .get(Uri.parse('http://localhost:3000/getMatches/${widget.userId}'));
+      final matchesResponse = await http.get(
+        Uri.parse('http://localhost:3000/getMatches/${widget.userId}'),
+      );
 
       if (matchesResponse.statusCode == 200) {
         final matchesData = json.decode(matchesResponse.body);
@@ -50,63 +132,23 @@ class _MatchedListState extends State<MatchedList> {
       }
 
       Set<String> rejectedBookIds = {};
-      // Step 2: Fetch books based on matches
       List<BookDetails> fetchedMatchedBooks = [];
 
       for (var match in matches) {
-        final matchDataResponse = await http.get(
-            Uri.parse('http://localhost:3000/getAllMatches/${match.matchId}'));
-        if (matchDataResponse.statusCode == 200) {
-          // Assuming the match data contains a property for TradeRequestStatus
-          final matchDataJson = json.decode(matchDataResponse.body);
-          var matchTradeStatus = matchDataJson['TradeRequestStatus'];
-          print("match Id: ${match.matchId}");
-          print("match trade status: $matchTradeStatus");
+        BookDetails? bookDetails =
+            await getMatchedBookIfOwnerMatches(match.matchId);
 
-          final matchBookResponse = await http.get(Uri.parse(
-              'http://localhost:3000/getBook/${match.matchedBookId}'));
-          if (matchBookResponse.statusCode == 200) {
-            final bookJson = json.decode(matchBookResponse.body);
-
-            var bookDetails = BookDetails(
-              bookId: bookJson['BookId'] ?? '',
-              title: bookJson['BookName'] ?? 'Unknown Title',
-              author: bookJson['Author'] ?? 'Unknown Author',
-              img: [bookJson['BookPicture'] ?? ''],
-              description:
-                  bookJson['BookDescription'] ?? 'No description available',
-              quality: '${bookJson['Quality'] ?? '0'}%',
-              isTrade: bookJson['IsTraded'],
-              genre: bookJson['Genre'] ?? '',
-            );
-
-            if (matchTradeStatus == 'rejected') {
-              rejectedBookIds.add(
-                  bookDetails.bookId.toString()); // Store the rejected book ID
-              print("Rejected book ID added: ${bookDetails.bookId}");
-              continue; // Skip further processing for this match
-            }
-
-            bool isDuplicate = fetchedMatchedBooks
-                .any((book) => book.bookId == bookDetails.bookId);
+        if (bookDetails != null) {
+          if (bookDetails.isTrade == false &&
+              !rejectedBookIds.contains(bookDetails.bookId.toString())) {
+            fetchedMatchedBooks.add(bookDetails);
+            validMatches.add(match);
             print(
-                "Checking book: ${bookDetails.title}, isDuplicate: $isDuplicate, isTrade: ${bookDetails.isTrade}, matchTradeStatus: $matchTradeStatus");
-
-            if (!isDuplicate &&
-                bookDetails.isTrade == false &&
-                !rejectedBookIds.contains(bookDetails.bookId.toString())) {
-              fetchedMatchedBooks.add(bookDetails);
-              print(
-                  "Added book: ${bookDetails.title}, BookId ${bookDetails.bookId}");
-            } else {
-              print(
-                  'Skipped book: ${bookDetails.title}, Duplicate: $isDuplicate, Trade Status: $matchTradeStatus, BookId ${bookDetails.bookId}');
-            }
+                "Added book: ${bookDetails.title}, BookId: ${bookDetails.bookId}, MatchId: ${match.matchId}");
           } else {
-            print('Failed to load book for ID: ${match.ownerBookId}');
+            print(
+                'Skipped book: ${bookDetails.title}, Trade Status: ${bookDetails.isTrade}, Duplicate: ');
           }
-        } else {
-          print('Failed to load match data for ID: ${match.matchId}');
         }
       }
 
@@ -139,7 +181,9 @@ class _MatchedListState extends State<MatchedList> {
                     itemCount: matchedBooks.length,
                     itemBuilder: (context, index) {
                       final book = matchedBooks[index];
-                      final match = matches[index];
+                      final match = validMatches[index];
+
+                      print(match.matchId);
 
                       return Column(
                         children: [
