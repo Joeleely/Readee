@@ -8,7 +8,6 @@ import 'package:readee_app/typography.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'package:http/http.dart' as http;
 
-
 class BookCard extends StatefulWidget {
   const BookCard({super.key, required this.books, required this.userID});
   final List<BookDetails> books;
@@ -21,7 +20,8 @@ class BookCard extends StatefulWidget {
 class _BookCardState extends State<BookCard> {
   final List<SwipeItem> _swipeItems = <SwipeItem>[];
   MatchEngine? _matchEngine;
-  Map<BookDetails, int> currentPhotoMap = {}; // Track currentPhoto for each book
+  Map<BookDetails, int> currentPhotoMap =
+      {}; // Track currentPhoto for each book
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _BookCardState extends State<BookCard> {
     for (var book in widget.books) {
       _swipeItems.add(SwipeItem(
         content: book,
-        likeAction: () async{
+        likeAction: () async {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Liked ${book.title}"),
             duration: const Duration(milliseconds: 500),
@@ -43,7 +43,7 @@ class _BookCardState extends State<BookCard> {
             content: Text("Nope ${book.title}"),
             duration: const Duration(milliseconds: 500),
           ));
-           await _unlikeBook(widget.userID, book.bookId);
+          await _unlikeBook(widget.userID, book.bookId);
         },
       ));
       // Initialize currentPhoto for each book to 0
@@ -53,8 +53,7 @@ class _BookCardState extends State<BookCard> {
     _matchEngine = MatchEngine(swipeItems: _swipeItems);
   }
 
-
-Uint8List _convertBase64Image(String base64String) {
+  Uint8List _convertBase64Image(String base64String) {
     // Remove the prefix if it exists
     String base64Data = base64String.contains(',')
         ? base64String.split(',').last
@@ -223,13 +222,13 @@ Uint8List _convertBase64Image(String base64String) {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  width: 200,
-                                  child: Text(
-                                    book.title,
-                                    style: TypographyText.h2(Colors.white),
-                                    maxLines: 2,
-                                  ),
+                                Text(
+                                  book.title,
+                                  style: TypographyText.h2(Colors.white),
+                                  maxLines: 2,
+                                ),
+                                const SizedBox(
+                                  width: 10,
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.only(top: 6),
@@ -248,15 +247,19 @@ Uint8List _convertBase64Image(String base64String) {
                                 ),
                               ],
                             ),
-                            IconButton(
-                              padding: EdgeInsets.zero,
-                              constraints: BoxConstraints(),
-                              onPressed: () {
-                                Navigator.of(context).push(_createRoute(book));
-                              },
-                              icon: const Icon(
-                                Icons.info_rounded,
-                                color: Colors.white,
+                            SizedBox(
+                              height: 30,
+                              child: IconButton(
+                                padding: EdgeInsets.zero,
+                                constraints: BoxConstraints(),
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .push(_createRoute(book));
+                                },
+                                icon: const Icon(
+                                  Icons.info_rounded,
+                                  color: Colors.white,
+                                ),
                               ),
                             )
                           ],
@@ -346,4 +349,3 @@ Route _createRoute(BookDetails book) {
     },
   );
 }
-
