@@ -32,6 +32,8 @@ class _EditBookPageState extends State<EditBookPage> {
   int _descriptionLength = 0;
   XFile? _selectedImage;
   String? _selectedGenre;
+  Uint8List? _existingImage;
+  String? _existingImageUrl;
 
   final ImagePicker _picker = ImagePicker();
   bool _isTitleEmpty = false;
@@ -41,9 +43,7 @@ class _EditBookPageState extends State<EditBookPage> {
   @override
   void initState() {
     super.initState();
-    // Fetch the book data when the page is initialized
     _fetchBookData();
-    // Listen to description controller to update the counter
     _descriptionController.addListener(() {
       setState(() {
         _descriptionLength = _descriptionController.text.length;
@@ -65,12 +65,19 @@ class _EditBookPageState extends State<EditBookPage> {
         _authorController.text = bookData['Author'];
         _descriptionController.text = bookData['BookDescription'];
         _selectedGenre = _getGenreName(bookData['GenreId']);
-        _quality = bookData['Quality'].toDouble();
+        _quality = bookData['Quality'];
 
         // Optionally, load the existing image if needed
         if (bookData['BookPicture'] != null) {
-          // Handle loading the existing book picture if applicable
-          // e.g. Convert Base64 string to image and show it
+          // If it's a URL, assign it to the variable
+          if (bookData['BookPicture'].startsWith('http')) {
+            _existingImageUrl = bookData['BookPicture'];
+            _existingImage = null; // Clear any existing byte data
+          } else {
+            // Otherwise, assume it's base64 encoded
+            _existingImage = base64Decode(bookData['BookPicture']);
+            _existingImageUrl = null; // Clear any existing URL
+          }
         }
 
         setState(() {}); // Update the UI after loading data
@@ -101,7 +108,11 @@ class _EditBookPageState extends State<EditBookPage> {
           ..writeAsBytesSync(compressedImage);
         final imageTemp = XFile(tempFile.path);
 
-        setState(() => _selectedImage = imageTemp);
+        setState(() {
+          _selectedImage = imageTemp;
+          _existingImage =
+              null; // Clear existing image when a new one is picked
+        });
       } else {
         print('Image compression failed');
       }
@@ -109,6 +120,21 @@ class _EditBookPageState extends State<EditBookPage> {
       print('Failed to pick image: $e');
     }
   }
+
+  Future<String?> _fetchNetworkImageAsBase64(String url) async {
+  try {
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      return base64Encode(response.bodyBytes);
+    } else {
+      print('Failed to fetch image: ${response.body}');
+      return null;
+    }
+  } catch (e) {
+    print('Error fetching network image: $e');
+    return null;
+  }
+}
 
   Future<void> _saveBook() async {
     setState(() {
@@ -124,10 +150,21 @@ class _EditBookPageState extends State<EditBookPage> {
 
     try {
       String? base64Image;
+
+      // If a new image is selected, convert it to base64
       if (_selectedImage != null) {
-        final bytes = await _selectedImage!.readAsBytes();
-        base64Image = base64Encode(bytes);
-      }
+      final bytes = await _selectedImage!.readAsBytes();
+      base64Image = base64Encode(bytes);
+    } else if (_existingImage != null) {
+      // Use the existing local image if no new image is selected
+      base64Image = base64Encode(_existingImage!);
+    } else if (_existingImageUrl != null) {
+      // If no new image is selected and there's no existing local image, use the existing image URL
+      base64Image = await _fetchNetworkImageAsBase64(_existingImageUrl!);
+    } else {
+      // Fallback if no image is available
+      base64Image = null; // or assign a default image if needed
+    }
 
       final Map<String, dynamic> bookData = {
         'BookName': _titleController.text,
@@ -341,39 +378,71 @@ class _EditBookPageState extends State<EditBookPage> {
             const SizedBox(height: 16),
             Row(
               children: [
-                _selectedImage != null
-                    ? Image.file(
-                        File(_selectedImage!.path),
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      )
-                    : GestureDetector(
-                        onTap: _pickImage,
-                        child: DottedBorder(
-                          borderType: BorderType.RRect,
-                          radius: const Radius.circular(20),
-                          dashPattern: [6, 3],
-                          color: Colors.cyan,
-                          strokeWidth: 2,
-                          child: Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: _selectedImage != null
-                                ? Image.file(
-                                    File(_selectedImage!.path),
+                GestureDetector(
+                  onTap: _pickImage, // Allow image to be changed on tap
+                  child: _selectedImage != null
+                      ? Image.file(
+                          File(_selectedImage!.path),
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                        )
+                      : _existingImageUrl != null // Check for URL first
+                          ? Image.network(
+                              _existingImageUrl!,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent? loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            (loadingProgress
+                                                    .expectedTotalBytes ??
+                                                1)
+                                        : null,
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width: 80,
+                                  height: 80,
+                                  color: Colors.grey,
+                                  child: const Icon(Icons.error),
+                                );
+                              },
+                            )
+                          : _existingImage != null
+                              ? Image.memory(
+                                  _existingImage!,
+                                  width: 80,
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                )
+                              : DottedBorder(
+                                  borderType: BorderType.RRect,
+                                  radius: const Radius.circular(20),
+                                  dashPattern: [6, 3],
+                                  color: Colors.cyan,
+                                  strokeWidth: 2,
+                                  child: Container(
                                     width: 80,
                                     height: 80,
-                                    fit: BoxFit.cover,
-                                  )
-                                : const Icon(Icons.cloud_upload,
-                                    color: Colors.cyan),
-                          ),
-                        ),
-                      ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Icon(Icons.cloud_upload,
+                                        color: Colors.cyan),
+                                  ),
+                                ),
+                ),
                 const SizedBox(width: 16),
               ],
             ),
