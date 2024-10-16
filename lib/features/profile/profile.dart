@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:readee_app/features/profile/editGenres.dart';
 import 'package:readee_app/features/profile/editProfileScreen.dart';
+import 'package:readee_app/features/profile/history.dart';
 import 'package:readee_app/features/profile/myBook.dart';
 import 'package:readee_app/features/profile/widget/pageRoute.dart';
 import 'package:readee_app/widget/profile_menu.dart';
@@ -141,7 +142,11 @@ class _ProfilePageState extends State<ProfilePage> {
                             page: MyBooksPage(userId: userID,)
                           ))),
                   ProfileMenuWidget(
-                      title: 'History', icon: Icons.history, onClicked: () {}),
+                      title: 'History', icon: Icons.history, onClicked: () => Navigator.push(
+                          context,
+                          CustomPageRoute(
+                            page: const HistoryPage()
+                          ))),
                   const SizedBox(height: 25),
                   SizedBox(
                       width: 200,
