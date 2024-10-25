@@ -39,13 +39,33 @@ class _BookInfoPageState extends State<BookInfoPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.7,
-                  child: Text(
-                    widget.book.title,
-                    maxLines: 2,
-                    style: TypographyText.h2(Colors.black),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      child: Text(
+                        widget.book.title,
+                        maxLines: 2,
+                        style: TypographyText.h2(Colors.black),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 5),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(10)),
+                        ),
+                        child: Text(
+                          "${widget.book.quality}",
+                          style: TypographyText.h4(Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 5),
                 Text(
@@ -77,9 +97,13 @@ class _BookInfoPageState extends State<BookInfoPage> {
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         fit: BoxFit.cover,
-                        image: widget.book.img[_currentImageIndex].startsWith('http')
-                            ? NetworkImage(widget.book.img[_currentImageIndex]) // Network image
-                            : MemoryImage(_convertBase64Image(widget.book.img[_currentImageIndex])) as ImageProvider<Object>, // Base64 image
+                        image: widget.book.img[_currentImageIndex]
+                                .startsWith('http')
+                            ? NetworkImage(widget
+                                .book.img[_currentImageIndex]) // Network image
+                            : MemoryImage(_convertBase64Image(
+                                    widget.book.img[_currentImageIndex]))
+                                as ImageProvider<Object>, // Base64 image
                       ),
                     ),
                   ),
