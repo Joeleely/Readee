@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:readee_app/features/auth/persona.dart';
-import 'package:readee_app/features/chat/chat.dart';
+import 'package:readee_app/features/chat/chatList.dart';
 import 'package:readee_app/features/create_book/create_book.dart';
 import 'package:readee_app/features/match/pages/match.dart';
 import 'package:readee_app/features/match_list/match_list.dart';
 import 'package:readee_app/features/profile/profile.dart';
 import 'package:readee_app/home.dart';
-import 'package:readee_app/pages/logo.dart';
 
 class ReadeeNavigationBar extends StatefulWidget {
   final int userId;
@@ -28,7 +26,7 @@ class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
     super.initState();
     screens = [
       MatchPage(userID: widget.userId),
-      ChatPage(userId: widget.userId,),
+      ChatListPage(userId: widget.userId,),
       CreateBookPage(userId: widget.userId,),
       ProfilePage(userId: widget.userId,),
       MatchListPage(userId: widget.userId,),
@@ -63,7 +61,7 @@ class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
                     Navigator.of(context).push(_createRoute(widget.userId));
                   },
                 ),
-                _buildNavButton(Icons.textsms, 2, ChatPage(userId: widget.userId,)),
+                _buildNavButton(Icons.textsms, 2, ChatListPage(userId: widget.userId,)),
                 _buildNavButton(Icons.person, 3, ProfilePage(userId: widget.userId,)),
               ],
             ),

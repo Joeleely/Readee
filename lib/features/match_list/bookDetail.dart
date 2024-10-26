@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:readee_app/features/chat/chat.dart';
 import 'package:readee_app/features/create_book/edit_book.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
 import 'package:readee_app/features/match/pages/book_info.dart';
@@ -375,6 +377,55 @@ class _BookDetailPageState extends State<BookDetailPage> {
     }
   }
 
+  Future<void> _getRoomId(BuildContext context) async {
+    final response = await http.get(
+      Uri.parse('http://localhost:3000/getRoomId/$secondUserId/$firstUserId'),
+    );
+    print("secondUserId: $secondUserId, firstUserId: $firstUserId");
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final roomId = data['roomId']; // Adjust according to your API response
+
+      // Navigate to ChatPage with roomId
+      if (roomId != null) {
+        // Room exists, navigate to ChatPage with roomId
+        Navigator.push(
+          context,
+          CustomPageRoute(
+            page: ChatPage(roomId: roomId, userId: widget.userId, otherName: ownerName,),
+          ),
+        );
+      } else {
+        // Room does not exist, create a new room
+        final createResponse = await http.post(
+          Uri.parse(
+              'http://localhost:3000/createRoom/$firstUserId/$secondUserId'),
+        );
+
+        if (createResponse.statusCode == 201) {
+          final createData = json.decode(createResponse.body);
+          final newRoomId =
+              createData['roomId']; // Adjust according to your API response
+
+          // Navigate to ChatPage with the new roomId
+          Navigator.push(
+            context,
+            CustomPageRoute(
+              page: ChatPage(roomId: newRoomId, userId: widget.userId, otherName: ownerName,),
+            ),
+          );
+        } else {
+          // Handle error creating the room
+          print('Failed to create room');
+        }
+      }
+    } else {
+      // Handle error
+      print('Failed to fetch room ID');
+    }
+  }
+
   Future<void> _navigateToEditBookPage() async {
     final result = await Navigator.push(context,
         CustomPageRoute(page: EditBookPage(bookId: int.parse(book.bookId))));
@@ -491,7 +542,10 @@ class _BookDetailPageState extends State<BookDetailPage> {
                     ),
                     const Spacer(),
                     if (widget.userId != int.parse(book.ownerId))
-                      const Icon(Icons.sms),
+                      IconButton(
+                        icon: const Icon(Icons.sms),
+                        onPressed: () => _getRoomId(context),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 20),
