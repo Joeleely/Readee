@@ -69,8 +69,7 @@ class _MatchListPageState extends State<MatchListPage> {
 
           //print(matchStatusResponse.body);
           // Debugging logs to help trace the issue
-          print(
-              'Checking matchId: ${match.matchId}, TradeRequestStatus: $matchTradeStatus');
+          //print('Checking matchId: ${match.matchId}, TradeRequestStatus: $matchTradeStatus');
 
           if (matchTradeStatus != 'rejected' && matchTradeStatus != 'accepted') {
             // Fetch books for valid matches

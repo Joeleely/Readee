@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -272,6 +273,22 @@ class _BookDetailPageState extends State<BookDetailPage> {
               const SnackBar(
                   content: Text('Trade request rejected successfully!')),
             );
+
+            final unlikeUrl = Uri.parse(
+                'http://localhost:3000/unlikeLogs/${widget.bookId}/${widget.userId}');
+            final unlikeResponse = await http.post(unlikeUrl);
+            //print(widget.bookId);
+            //print(widget.userId);
+            if (unlikeResponse.statusCode == 200) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Unlike log updated successfully!'),
+                ),
+              );
+            } else {
+              _logError(
+                  'Failed to update unlike log: ${unlikeResponse.statusCode}');
+            }
           } else {
             _logError('Failed to reject trade request: ${response.statusCode}');
           }
@@ -595,10 +612,10 @@ class _BookDetailPageState extends State<BookDetailPage> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                  setState(() {
-                    _showRejectConfirmationDialog();
-                  });
-                },
+                      setState(() {
+                        _showRejectConfirmationDialog();
+                      });
+                    },
                     style: ElevatedButton.styleFrom(
                       elevation: 5,
                       backgroundColor: Colors.red,
@@ -613,10 +630,10 @@ class _BookDetailPageState extends State<BookDetailPage> {
                   const SizedBox(width: 30),
                   ElevatedButton(
                     onPressed: () {
-                  setState(() {
-                    _showAcceptConfirmationDialog();
-                  });
-                },
+                      setState(() {
+                        _showAcceptConfirmationDialog();
+                      });
+                    },
                     style: ElevatedButton.styleFrom(
                       elevation: 5,
                       backgroundColor: Colors.cyan,
