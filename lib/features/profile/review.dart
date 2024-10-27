@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:readee_app/features/profile/yourRating.dart';
 import 'package:readee_app/features/profile/yourReview.dart';
 
 class ReviewPage extends StatefulWidget {
@@ -38,7 +39,7 @@ class _ReviewPageState extends State<ReviewPage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const YourReviewPage()),
+                  MaterialPageRoute(builder: (context) => YourRatingPage()),
                 );
               },
             ),
