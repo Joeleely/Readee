@@ -121,16 +121,24 @@ class _MatchListPageState extends State<MatchListPage> {
       }
 
       // Update the state with the fetched books
+      if (mounted) {
       setState(() {
         ownerBooks = fetchedOwnerBooks;
         isLoading = false; // Set loading to false after fetching
       });
+      }
     } catch (error) {
       print('Error fetching matched books: $error');
       setState(() {
         isLoading = false; // Ensure loading is set to false on error
       });
     }
+  }
+
+  @override
+  void dispose() {
+    // Cancel any timers or listeners here
+    super.dispose();
   }
 
   @override

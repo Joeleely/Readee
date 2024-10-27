@@ -62,7 +62,7 @@ class _MatchPageState extends State<MatchPage> {
                 book['IsTraded'] == false &&
                 !likedBookIDs.contains(book['BookId']);
           }).map((book) {
-            print("bookOwnerId: ${book['OwnerId']}, userId: ${widget.userID}");
+            //print("bookOwnerId: ${book['OwnerId']}, userId: ${widget.userID}");
             return BookDetails(
               title: book['BookName'],
               author: book['Author'],
@@ -111,11 +111,12 @@ class _MatchPageState extends State<MatchPage> {
           // Step 6: Shuffle the combined list to randomize the order
           combinedBooks.shuffle(random);
 
+           if (mounted) {
           setState(() {
             books = combinedBooks;
             isLoading = false;
           });
-
+        }
           // print("this is book that get from filter");
           // print(filteredBooks);
         } else {
