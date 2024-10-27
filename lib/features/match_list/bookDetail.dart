@@ -36,6 +36,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
   late int timesSwap = 0;
   late double rating = 0.0;
   late String profile = '';
+  late String otherPorfile = '';
   bool isExpanded = false;
   bool showToggle = false;
   bool isLoading = true;
@@ -116,6 +117,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
         final ownerData = json.decode(response.body);
         setState(() {
           ownerName = ownerData['Username'] ?? 'ThisIsNull';
+          otherPorfile = ownerData['ProfileUrl'] ?? 'NoProfileUrl';
         });
       } else {
         _logError('Failed to fetch owner data: ${response.statusCode}');
@@ -393,7 +395,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
         Navigator.push(
           context,
           CustomPageRoute(
-            page: ChatPage(roomId: roomId, userId: widget.userId, otherName: ownerName,),
+            page: ChatPage(roomId: roomId, userId: widget.userId, otherName: ownerName, otherPorfile: otherPorfile,),
           ),
         );
       } else {
@@ -412,7 +414,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
           Navigator.push(
             context,
             CustomPageRoute(
-              page: ChatPage(roomId: newRoomId, userId: widget.userId, otherName: ownerName,),
+              page: ChatPage(roomId: newRoomId, userId: widget.userId, otherName: ownerName, otherPorfile: otherPorfile,),
             ),
           );
         } else {
@@ -509,13 +511,11 @@ class _BookDetailPageState extends State<BookDetailPage> {
                 const SizedBox(height: 30),
                 Row(
                   children: [
-                    const Align(
+                    Align(
                       alignment: Alignment.center,
                       child: CircleAvatar(
                         radius: 20,
-                        backgroundImage: NetworkImage(
-                          'https://content.api.news/v3/images/bin/76239ca855744661be0454d51f9b9fa2?width=1024',
-                        ),
+                        backgroundImage: NetworkImage(otherPorfile),
                       ),
                     ),
                     const SizedBox(width: 10),

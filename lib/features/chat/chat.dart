@@ -6,12 +6,14 @@ class ChatPage extends StatefulWidget {
   final int userId;
   final int roomId;
   final String otherName;
+  final String otherPorfile;
 
   const ChatPage(
       {super.key,
       required this.userId,
       required this.roomId,
-      required this.otherName});
+      required this.otherName,
+      required this.otherPorfile});
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -116,7 +118,19 @@ class _ChatPageState extends State<ChatPage> {
                   final message = _messages[index];
                   final isSentByMe = message['senderId'] == widget.userId;
 
-                  return Container(
+                  return Row(
+                    mainAxisAlignment: isSentByMe
+                        ? MainAxisAlignment.end
+                        : MainAxisAlignment.start,
+                    children: [
+                      if (!isSentByMe)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0, right: 3.0),
+                          child: CircleAvatar(
+                            radius: 15,
+                            backgroundImage: NetworkImage(widget.otherPorfile),
+                          ),
+                        ),Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     alignment: isSentByMe
@@ -139,6 +153,8 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                       ),
                     ),
+                        )
+                    ],
                   );
                 },
               ),

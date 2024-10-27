@@ -22,12 +22,12 @@ class ChatListPage extends StatelessWidget {
 
         // Fetch names for each chat based on SenderId/ReceiverId
         for (var chat in chats) {
-          final otherUserId = (chat['SenderId'] == userId)
-              ? chat['ReceiverId']
-              : chat['SenderId'];
-          chat['otherUserName'] = await fetchUserName(otherUserId);
-          chat['otherUserRating'] = await fetchUserRating(otherUserId);
-        }
+        final otherUserId = (chat['SenderId'] == userId) ? chat['ReceiverId'] : chat['SenderId'];
+        final userDetails = await fetchUserDetails(otherUserId);
+        chat['otherUserName'] = userDetails['Username'];
+        chat['otherUserRating'] = await fetchUserRating(otherUserId);
+        chat['otherUserProfileUrl'] = userDetails['ProfileUrl'];
+      }
 
         return chats;
       } else {
@@ -38,17 +38,19 @@ class ChatListPage extends StatelessWidget {
     }
   }
 
-  Future<String> fetchUserName(int userId) async {
-    final response =
-        await http.get(Uri.parse('http://localhost:3000/users/$userId'));
+  Future<Map<String, String>> fetchUserDetails(int userId) async {
+  final response = await http.get(Uri.parse('http://localhost:3000/users/$userId'));
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
-      return data['Username'] ?? 'Unknown';
-    } else {
-      throw Exception('Failed to load user name');
-    }
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> data = json.decode(response.body);
+    return {
+      'Username': data['Username'] ?? 'Unknown',
+      'ProfileUrl': data['ProfileUrl'] ?? '', // Assuming ProfileUrl is a field in the response
+    };
+  } else {
+    throw Exception('Failed to load user details');
   }
+}
 
   Future<String> fetchUserRating(int userId) async {
     try {
@@ -94,11 +96,13 @@ class ChatListPage extends StatelessWidget {
                 final chat = chats[index];
                 return ListTile(
                   leading: CircleAvatar(
-                    child: Text(chat['otherUserName']
-                        .toString()
-                        .substring(0, 1)
-                        .toUpperCase()),
-                  ),
+                  backgroundImage: chat['otherUserProfileUrl'] != ''
+                      ? NetworkImage(chat['otherUserProfileUrl']) 
+                      : null,
+                  child: chat['otherUserProfileUrl'] == ''
+                      ? Text(chat['otherUserName'].toString().substring(0, 1).toUpperCase())
+                      : null,
+                ),
                   title: Text(chat['otherUserName']),
                   subtitle: Text('Rating: ${chat['otherUserRating']}'),
                   onTap: () {
@@ -108,7 +112,7 @@ class ChatListPage extends StatelessWidget {
                         page: ChatPage(
                           userId: userId,
                           roomId: chat['RoomId'],
-                          otherName: chat['otherUserName'],
+                          otherName: chat['otherUserName'], otherPorfile: chat['otherUserProfileUrl'],
                         ),
                       ),
                     );

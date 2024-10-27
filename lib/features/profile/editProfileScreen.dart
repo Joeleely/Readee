@@ -12,6 +12,7 @@ class EditProfileScreen extends StatefulWidget {
   final String email;
   final String gender;
   final int userID;
+  final String prifile;
 
   const EditProfileScreen({
     super.key,
@@ -21,6 +22,7 @@ class EditProfileScreen extends StatefulWidget {
     required this.email,
     required this.gender,
     required this.userID,
+    required this.prifile,
   });
 
   @override
@@ -125,12 +127,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 10),
-                  const Align(
+                  Align(
                     alignment: Alignment.center,
                     child: CircleAvatar(
                       radius: 100,
-                      backgroundImage: NetworkImage(
-                          'https://content.api.news/v3/images/bin/76239ca855744661be0454d51f9b9fa2?width=1024'),
+                      backgroundImage: NetworkImage(widget.prifile),
                     ),
                   ),
                   const SizedBox(height: 40),

@@ -23,6 +23,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String firstName = '';
   String lastName = '';
   String gender = '';
+  String profile = '';
   late int userID;
 
   @override
@@ -46,6 +47,7 @@ class _ProfilePageState extends State<ProfilePage> {
           firstName = data['Firstname'] ?? 'ThisIsNull';
           lastName = data['Lastname'] ?? 'ThisIsNull';
           gender = data['Gender'] ?? 'ThisIsNull';
+          profile = data['ProfileUrl'] ?? 'NoProfile';
         });
       } else {
         throw Exception('Failed to load user data');
@@ -73,12 +75,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   // Profile picture
                   const SizedBox(height: 10),
-                  const Align(
+                  Align(
                     alignment: Alignment.center,
                     child: CircleAvatar(
                       radius: 100,
-                      backgroundImage: NetworkImage(
-                          'https://content.api.news/v3/images/bin/76239ca855744661be0454d51f9b9fa2?width=1024'),
+                      backgroundImage: NetworkImage(profile),
                     ),
                   ),
                   const SizedBox(height: 25),
@@ -119,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               username: username,
                               email: email,
                               gender: gender,
-                              userID: userID,
+                              userID: userID, prifile: profile,
                             ),
                           ))),
                   ProfileMenuWidget(
