@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:readee_app/typography.dart';
 
 class YourReviewPage extends StatefulWidget {
@@ -9,38 +11,24 @@ class YourReviewPage extends StatefulWidget {
 }
 
 class _YourReviewPageState extends State<YourReviewPage> {
-  final List<Review> reviews = [
-    Review(
-      username: 'Joe',
-      profileImageUrl:
-          'https://content.api.news/v3/images/bin/76239ca855744661be0454d51f9b9fa2?width=1024',
-      bookName: 'Book 1',
-      comment: 'Lorem ipsum is simply dummy text of the printing and typesetting industry.',
-      rating: 5,
-    ),
-    Review(
-      username: 'Emma',
-      profileImageUrl: 'https://randomuser.me/api/portraits/women/45.jpg',
-      bookName: 'Book 2',
-      comment: 'A great read, highly recommend!',
-      rating: 4,
-    ),
-     Review(
-      username: 'Emma',
-      profileImageUrl: 'https://randomuser.me/api/portraits/women/45.jpg',
-      bookName: 'Book 2',
-      comment: 'A great read, highly recommend!',
-      rating: 4,
-    ),
-     Review(
-      username: 'Emma',
-      profileImageUrl: 'https://randomuser.me/api/portraits/women/45.jpg',
-      bookName: 'Book 2',
-      comment: 'A great read, highly recommend!',
-      rating: 4,
-    ),
-    // Add more reviews here
-  ];
+  late Future<List<Review>> reviewsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    reviewsFuture = fetchReviews();
+  }
+
+  Future<List<Review>> fetchReviews() async {
+    final response = await http.get(Uri.parse('http://localhost:3000/reviews/given/1'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body)['reviews'];
+      return data.map((json) => Review.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load reviews');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,18 +38,31 @@ class _YourReviewPageState extends State<YourReviewPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: ListView.separated(
-          itemCount: reviews.length,
-          itemBuilder: (context, index) {
-            final review = reviews[index];
-            return ReviewCard(review: review);
-          },
-          separatorBuilder: (context, index) {
-            return const Divider(
-              color: Colors.grey,
-              thickness: 0.5,
-              height: 32,
-            );
+        child: FutureBuilder<List<Review>>(
+          future: reviewsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('No reviews available'));
+            } else {
+              final reviews = snapshot.data!;
+              return ListView.separated(
+                itemCount: reviews.length,
+                itemBuilder: (context, index) {
+                  return ReviewCard(review: reviews[index]);
+                },
+                separatorBuilder: (context, index) {
+                  return const Divider(
+                    color: Colors.grey,
+                    thickness: 0.5,
+                    height: 32,
+                  );
+                },
+              );
+            }
           },
         ),
       ),
@@ -85,7 +86,19 @@ class Review {
     required this.comment,
     required this.rating,
   });
+
+  // Factory method to create a Review object from JSON
+  factory Review.fromJson(Map<String, dynamic> json) {
+    return Review(
+      username: json['receiver_name'],
+      profileImageUrl: json['receiver_picture'] ?? 'https://example.com/placeholder.jpg', // Placeholder if image is null
+      bookName: json['receiver_book_name'] ?? 'Unknown Book',
+      comment: json['review'],
+      rating: json['rating'],
+    );
+  }
 }
+
 
 class ReviewCard extends StatelessWidget {
   final Review review;
