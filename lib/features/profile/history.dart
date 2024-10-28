@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -8,65 +10,109 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
+  Future<List<History>> fetchHistories() async {
+    final response = await http.get(Uri.parse('http://localhost:3000/history/7'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonData = json.decode(response.body)['histories'];
+      return jsonData.map((json) => History.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load histories');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('History'),
-        ),
-        body: ListView(
-          children: <Widget>[
-            SizedBox(
-              height: 20,
-            ),
-            Column(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+      appBar: AppBar(
+        title: const Text('History'),
+      ),
+      body: FutureBuilder<List<History>>(
+        future: fetchHistories(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No history found'));
+          } else {
+            final histories = snapshot.data!;
+            return ListView.builder(
+              itemCount: histories.length,
+              itemBuilder: (context, index) {
+                final history = histories[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          image: const DecorationImage(
-                              fit: BoxFit.cover,
-                              image: NetworkImage(
-                                  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRU3BLi1Tkm6IWiYqcugjdwY9wbCnyRK58U9A&s')),
-                        ),
-                      ),
-                      Container(
-                          alignment: Alignment.center,
-                          width: 80,
-                          child: const Text(
-                            'Test long text for book 1',
-                            overflow: TextOverflow.ellipsis,
-                          )),
+                      _buildImageContainer(history.userBookPicture),
+                      _buildTextContainer(history.userBookName),
                       const Icon(Icons.swap_horiz),
-                      Container(
-                          alignment: Alignment.center,
-                          width: 80,
-                          child: const Text('Test long text for book 2',
-                              overflow: TextOverflow.ellipsis)),
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          image: const DecorationImage(
-                              fit: BoxFit.cover,
-                              image: NetworkImage(
-                                  'https://photos-us.bazaarvoice.com/photo/2/cGhvdG86aW5kaWdvLWNh/0fbb5eb4-82fa-5244-b56b-1e17edf42758')),
-                        ),
-                      ),
+                      _buildTextContainer(history.matchedUserBookName),
+                      _buildImageContainer(history.matchedUserBookPicture),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ],
-        ));
+                );
+              },
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildImageContainer(String imageUrl) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        image: DecorationImage(
+          fit: BoxFit.cover,
+          image: imageUrl.startsWith("http")
+              ? NetworkImage(imageUrl)
+              : MemoryImage(base64Decode(imageUrl)) as ImageProvider,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextContainer(String text) {
+    return Container(
+      alignment: Alignment.center,
+      width: 80,
+      child: Text(
+        text,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+}
+
+class History {
+  final String matchedUserBookName;
+  final String matchedUserBookPicture;
+  final String tradeTime;
+  final String userBookName;
+  final String userBookPicture;
+
+  History({
+    required this.matchedUserBookName,
+    required this.matchedUserBookPicture,
+    required this.tradeTime,
+    required this.userBookName,
+    required this.userBookPicture,
+  });
+
+  factory History.fromJson(Map<String, dynamic> json) {
+    return History(
+      matchedUserBookName: json['matched_user_book_name'],
+      matchedUserBookPicture: json['matched_user_book_picture'],
+      tradeTime: json['trade_time'],
+      userBookName: json['user_book_name'],
+      userBookPicture: json['user_book_picture'],
+    );
   }
 }
