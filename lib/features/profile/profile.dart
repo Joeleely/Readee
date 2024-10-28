@@ -4,6 +4,7 @@ import 'package:readee_app/features/profile/editGenres.dart';
 import 'package:readee_app/features/profile/editProfileScreen.dart';
 import 'package:readee_app/features/profile/history.dart';
 import 'package:readee_app/features/profile/myBook.dart';
+import 'package:readee_app/features/profile/review.dart';
 import 'package:readee_app/features/profile/widget/pageRoute.dart';
 import 'package:readee_app/widget/profile_menu.dart';
 import 'package:get/get.dart';
@@ -148,7 +149,12 @@ class _ProfilePageState extends State<ProfilePage> {
                             userID: userID,
                           )))),
                   ProfileMenuWidget(
-                      title: 'Reviews', icon: Icons.star, onClicked: () {}),
+                      title: 'Reviews', icon: Icons.star, onClicked: () => Navigator.push(
+                          context,
+                          CustomPageRoute(
+                              page: ReviewPage(
+                            userID: userID,
+                          )))),
                   ProfileMenuWidget(
                       title: 'My Books',
                       icon: Icons.menu_book,
@@ -161,7 +167,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       title: 'History', icon: Icons.history, onClicked: () => Navigator.push(
                           context,
                           CustomPageRoute(
-                            page: const HistoryPage()
+                            page: HistoryPage(userId: userID,)
                           ))),
                   const SizedBox(height: 25),
                   SizedBox(
