@@ -39,7 +39,7 @@ class _ReviewPageState extends State<ReviewPage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => YourRatingPage()),
+                  MaterialPageRoute(builder: (context) => YourRatingPage(userId: 1,)),
                 );
               },
             ),
