@@ -55,12 +55,12 @@ class ChatListPage extends StatelessWidget {
   Future<String> fetchUserRating(int userId) async {
     try {
       final response =
-          await http.get(Uri.parse('http://localhost:3000/getRating/$userId'));
+          await http.get(Uri.parse('http://localhost:3000/getAverageRate/$userId'));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         double rating =
-            data['Rating']?.toDouble() ?? 0.0; // Parse rating as double
+            data['averageScore']?.toDouble() ?? 0.0; // Parse rating as double
         return rating.toStringAsFixed(2); // Format to two decimal places
       } else {
         // Return a default message if the user does not have a rating

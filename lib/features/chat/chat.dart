@@ -130,30 +130,32 @@ class _ChatPageState extends State<ChatPage> {
                             radius: 15,
                             backgroundImage: NetworkImage(widget.otherPorfile),
                           ),
-                        ),Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    alignment: isSentByMe
-                        ? Alignment.centerRight
-                        : Alignment.centerLeft,
-                    child: Container(
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width *0.6, // Limit width to 70% of screen width
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color:
-                            isSentByMe ? Colors.blueAccent : Colors.grey[300],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        message['message'] ?? "Null",
-                        style: TextStyle(
-                          color: isSentByMe ? Colors.white : Colors.black,
                         ),
-                      ),
-                    ),
-                        )
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        alignment: isSentByMe
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Container(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.6,
+                          ),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: isSentByMe
+                                ? Colors.blueAccent
+                                : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            message['message'] ?? "Null",
+                            style: TextStyle(
+                              color: isSentByMe ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ),
+                      )
                     ],
                   );
                 },
@@ -162,21 +164,26 @@ class _ChatPageState extends State<ChatPage> {
             Container(
               color: const Color.fromARGB(255, 223, 246, 253),
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 16.0, top: 8.0),
                 child: Row(
                   children: [
                     Expanded(
                       child: TextField(
                         controller: _controller,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: 'Type your message...',
-                          border: OutlineInputBorder(),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20.0)),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                                20.0), // Keep the same radius for consistency
+                          ),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.send),
+                            onPressed: _sendMessage,
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.send),
-                      onPressed: _sendMessage,
                     ),
                   ],
                 ),

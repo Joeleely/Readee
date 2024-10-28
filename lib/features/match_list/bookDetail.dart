@@ -34,7 +34,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
   late String userName;
   late String ownerName = '';
   late int timesSwap = 0;
-  late double rating = 0.0;
+  late double averageRate = 0.0;
   late String profile = '';
   late String otherPorfile = '';
   bool isExpanded = false;
@@ -45,6 +45,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
   int personSwap = 0;
   int firstUserId = 0;
   int secondUserId = 0;
+  int tradeCount = 0;
 
   @override
   void initState() {
@@ -65,7 +66,6 @@ class _BookDetailPageState extends State<BookDetailPage> {
         setState(() {
           userName = userData['Username'] ?? 'ThisIsNull';
           timesSwap = userData['timesSwap'] ?? 0;
-          rating = userData['rating'] ?? 0.0;
           profile = userData['ProfileUrl'] ?? 'ThisIsNull';
         });
       } else {
@@ -97,6 +97,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
             bookId: bookData['BookId']?.toString() ?? 'ThisIsNull',
           );
           _fetchOwnerData(book.ownerId); // Fetch owner’s data here
+          _fetchTradeCount(book.ownerId);
+          _fetchAverageRate(book.ownerId);
           _checkDescriptionLength();
           isLoading = false;
         });
@@ -124,6 +126,42 @@ class _BookDetailPageState extends State<BookDetailPage> {
       }
     } catch (e) {
       _logError('Error fetching owner data: $e');
+    }
+  }
+
+  Future<void> _fetchTradeCount(String ownerId) async {
+    try {
+      final response = await http
+          .get(Uri.parse('http://localhost:3000/tradeCount/$ownerId'));
+
+      if (response.statusCode == 200) {
+        final tradeCountData = json.decode(response.body);
+        setState(() {
+          tradeCount = tradeCountData['tradeCount'] ?? 0;
+        });
+      } else {
+        _logError('Failed to fetch trade count: ${response.statusCode}');
+      }
+    } catch (e) {
+      _logError('Error fetching trade count: $e');
+    }
+  }
+
+  Future<void> _fetchAverageRate(String ownerId) async {
+    try {
+      final response = await http
+          .get(Uri.parse('http://localhost:3000/getAverageRate/$ownerId'));
+
+      if (response.statusCode == 200) {
+        final averageRateData = json.decode(response.body);
+        setState(() {
+          averageRate = averageRateData['averageScore'] ?? 0.0;
+        });
+      } else {
+        _logError('Failed to fetch average rate: ${response.statusCode}');
+      }
+    } catch (e) {
+      _logError('Error fetching average rate: $e');
     }
   }
 
@@ -395,7 +433,12 @@ class _BookDetailPageState extends State<BookDetailPage> {
         Navigator.push(
           context,
           CustomPageRoute(
-            page: ChatPage(roomId: roomId, userId: widget.userId, otherName: ownerName, otherPorfile: otherPorfile,),
+            page: ChatPage(
+              roomId: roomId,
+              userId: widget.userId,
+              otherName: ownerName,
+              otherPorfile: otherPorfile,
+            ),
           ),
         );
       } else {
@@ -414,7 +457,12 @@ class _BookDetailPageState extends State<BookDetailPage> {
           Navigator.push(
             context,
             CustomPageRoute(
-              page: ChatPage(roomId: newRoomId, userId: widget.userId, otherName: ownerName, otherPorfile: otherPorfile,),
+              page: ChatPage(
+                roomId: newRoomId,
+                userId: widget.userId,
+                otherName: ownerName,
+                otherPorfile: otherPorfile,
+              ),
             ),
           );
         } else {
@@ -460,7 +508,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 5),
+              padding: const EdgeInsets.only(left: 10),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
@@ -526,13 +574,15 @@ class _BookDetailPageState extends State<BookDetailPage> {
                         Row(
                           children: [
                             Text(
-                              "$timesSwap",
+                              "$tradeCount",
                               style: const TextStyle(color: Colors.cyan),
                             ),
                             const Text(" Swapped"),
                             const SizedBox(width: 10),
                             Text(
-                              "$rating",
+                              averageRate.toString().contains('.')
+                                  ? averageRate.toStringAsFixed(2)
+                                  : averageRate.toString(),
                               style: const TextStyle(color: Colors.cyan),
                             ),
                             const Text(" Ratings"),
