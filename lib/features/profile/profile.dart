@@ -152,7 +152,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       title: 'History', icon: Icons.history, onClicked: () => Navigator.push(
                           context,
                           CustomPageRoute(
-                            page: const HistoryPage()
+                            page: HistoryPage(userId: userID,)
                           ))),
                   const SizedBox(height: 25),
                   SizedBox(

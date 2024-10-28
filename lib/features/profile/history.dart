@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class HistoryPage extends StatefulWidget {
-  const HistoryPage({super.key});
+  final int userId;
+  const HistoryPage({super.key, required this.userId});
 
   @override
   State<HistoryPage> createState() => _HistoryPageState();
@@ -11,7 +12,7 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   Future<List<History>> fetchHistories() async {
-    final response = await http.get(Uri.parse('http://localhost:3000/history/7'));
+    final response = await http.get(Uri.parse('http://localhost:3000/history/${widget.userId}'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body)['histories'];
