@@ -111,7 +111,11 @@ class _PersonaPageState extends State<PersonaPage> {
 
     if (response.statusCode == 201) {
       print('Data submitted successfully');
-      await checkUserBooksAndNavigate(userId);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ReadeeNavigationBar(userId: widget.userId)),
+      );
+      //await checkUserBooksAndNavigate(userId);
     } else {
       throw Exception('Failed to submit data');
     }
@@ -180,13 +184,13 @@ class _PersonaPageState extends State<PersonaPage> {
                                       fontWeight: FontWeight.bold,
                                       overflow: TextOverflow.ellipsis),
                                 ),
-                                const Spacer(),
-                                Image(
-                                  image: AssetImage(imageOfBook),
-                                  width: 55,
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                ),
+                                //const Spacer(),
+                                // Image(
+                                //   image: AssetImage(imageOfBook),
+                                //   width: 55,
+                                //   height: 100,
+                                //   fit: BoxFit.cover,
+                                // ),
                               ],
                             ),
                           ),
