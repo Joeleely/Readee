@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:readee_app/typography.dart';
 
 class YourReviewPage extends StatefulWidget {
-  const YourReviewPage({super.key});
+  final int userId;
+  const YourReviewPage({super.key, required this.userId});
 
   @override
   State<YourReviewPage> createState() => _YourReviewPageState();
@@ -20,7 +21,7 @@ class _YourReviewPageState extends State<YourReviewPage> {
   }
 
   Future<List<Review>> fetchReviews() async {
-    final response = await http.get(Uri.parse('http://localhost:3000/reviews/given/1'));
+    final response = await http.get(Uri.parse('http://localhost:3000/reviews/given/${widget.userId}'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body)['reviews'];
