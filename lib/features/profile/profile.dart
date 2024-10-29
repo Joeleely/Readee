@@ -131,12 +131,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           context,
                           CustomPageRoute(
                             page: EditProfileScreen(
-                              firstName: firstName,
-                              lastName: lastName,
-                              username: username,
-                              email: email,
-                              gender: gender,
-                              userID: userID, prifile: profile,
+                              userID: userID, profile: profile,
                             ),
                           ))),
                   ProfileMenuWidget(

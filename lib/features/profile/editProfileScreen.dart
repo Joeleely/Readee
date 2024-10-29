@@ -1,29 +1,20 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:readee_app/features/profile/widget/constant.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class EditProfileScreen extends StatefulWidget {
-  final String firstName;
-  final String lastName;
-  final String username;
-  final String email;
-  final String gender;
   final int userID;
-  final String prifile;
+  final String profile;
 
-  const EditProfileScreen({
-    super.key,
-    required this.firstName,
-    required this.lastName,
-    required this.username,
-    required this.email,
-    required this.gender,
-    required this.userID,
-    required this.prifile,
-  });
+  const EditProfileScreen({super.key, required this.userID, required this.profile});
 
   @override
   _EditProfileScreenState createState() => _EditProfileScreenState();
@@ -31,7 +22,6 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   bool isEditing = false;
-
   late TextEditingController firstNameController;
   late TextEditingController lastNameController;
   late TextEditingController usernameController;
@@ -39,27 +29,91 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController genderController;
 
   // Local variables to hold the editable values
-  late String editableFirstName;
-  late String editableLastName;
-  late String editableUsername;
-  late String editableEmail;
-  late String editableGender;
+late String editableFirstName = '';
+late String editableLastName = '';
+late String editableUsername = '';
+late String editableEmail = '';
+late String editableGender = '';
+late String profilePicture = '';
+
+  String? _usernameError;
+  String? base64Image;
+  XFile? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
+    firstNameController = TextEditingController();
+    lastNameController = TextEditingController();
+    usernameController = TextEditingController();
+    emailController = TextEditingController();
+    genderController = TextEditingController();
+    _fetchUserData(); // Fetch user data on initialization
+  }
 
-    firstNameController = TextEditingController(text: widget.firstName);
-    lastNameController = TextEditingController(text: widget.lastName);
-    usernameController = TextEditingController(text: widget.username);
-    emailController = TextEditingController(text: widget.email);
-    genderController = TextEditingController(text: widget.gender);
+   Future<void> _pickImage() async {
+    try {
+      final image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image == null) return;
 
-    editableFirstName = widget.firstName;
-    editableLastName = widget.lastName;
-    editableUsername = widget.username;
-    editableEmail = widget.email;
-    editableGender = widget.gender;
+      // Compress the image
+      final compressedImage = await FlutterImageCompress.compressWithFile(
+        image.path,
+        minWidth: 500,
+        minHeight: 500,
+        quality: 25,
+      );
+
+      if (compressedImage != null) {
+        final tempDir = Directory.systemTemp;
+        final tempFile = File('${tempDir.path}/temp_image.jpg')
+          ..writeAsBytesSync(compressedImage);
+        final imageTemp = XFile(tempFile.path);
+
+        setState(() {
+          _selectedImage = imageTemp;
+        });
+
+        final bytes = await _selectedImage!.readAsBytes();
+        base64Image = base64Encode(bytes);
+      } else {
+        print('Image compression failed');
+      }
+    } on PlatformException catch (e) {
+      print('Failed to pick image: $e');
+    }
+  }
+
+  Future<void> _fetchUserData() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/users/${widget.userID}'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        setState(() {
+          editableFirstName = data['Firstname'] ?? '';
+          editableLastName = data['Lastname'] ?? '';
+          editableUsername = data['Username'] ?? '';
+          editableEmail = data['Email'] ?? '';
+          editableGender = data['Gender'] ?? '';
+          profilePicture = data['Profile'] ?? '';
+
+          firstNameController.text = editableFirstName;
+          lastNameController.text = editableLastName;
+          usernameController.text = editableUsername;
+          emailController.text = editableEmail;
+          genderController.text = editableGender;
+        });
+      } else {
+        print('Failed to load user data: ${response.body}');
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
   }
 
   void toggleEdit() {
@@ -68,16 +122,59 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     });
   }
 
-  void saveProfile() {
-    setState(() {
-      // Update the local variables with the edited values
-      editableFirstName = firstNameController.text;
-      editableLastName = lastNameController.text;
-      editableUsername = usernameController.text;
-      editableEmail = emailController.text;
-      editableGender = genderController.text;
-      isEditing = false;
-    });
+  Future<void> saveProfile() async {
+    // Update the local variables with the edited values
+    editableFirstName = firstNameController.text;
+    editableLastName = lastNameController.text;
+    editableUsername = usernameController.text;
+    editableEmail = emailController.text;
+    editableGender = genderController.text;
+
+    //await _checkUser(editableUsername, usernameController.text);
+
+    // If there's an error, do not proceed with saving
+    // if (_usernameError != null) {
+    //   return; // Early return if there's an error
+    // }
+
+    // Prepare the data for the POST request
+    final Map<String, dynamic> data = {
+      'Firstname': editableFirstName,
+      'Lastname': editableLastName,
+      'gender': editableGender,
+      'ProfileUrl': base64Image,
+    };
+  //   if (editableUsername != usernameController.text) {
+  //   data['Username'] = editableUsername;
+  // }
+
+  // setState(() {
+  //     _usernameError = null;
+  //   });
+
+    // Perform the HTTP POST request
+    try {
+      final response = await http.patch(
+        Uri.parse('http://localhost:3000/user/edit/${widget.userID}'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        // Successfully updated the profile
+        print('Profile updated successfully!');
+        setState(() {
+          isEditing = false; // Exit editing mode
+        });
+      } else {
+        // Handle error response
+        print('Failed to update profile: ${response.body}');
+      }
+    } catch (e) {
+      print('Error occurred while updating profile: $e');
+    }
   }
 
   void cancelEdit() {
@@ -87,9 +184,47 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       usernameController.text = editableUsername;
       emailController.text = editableEmail;
       genderController.text = editableGender;
+      _usernameError = null;
       isEditing = false;
     });
   }
+
+  // Future<void> _checkUser(String beforeName, String afterName) async {
+  //   final url = Uri.parse('http://localhost:3000/checkUser');
+  //   final headers = {'Content-Type': 'application/json'};
+  //   final body = jsonEncode({
+  //     "username": usernameController.text,
+  //     "email": emailController.text,
+  //   });
+
+  //   if(beforeName == afterName){
+  //     setState(() {
+  //         _usernameError = null;
+  //       });
+  //   }
+
+  //   try {
+  //     final response = await http.post(url, headers: headers, body: body);
+  //     if (response.statusCode == 409) {
+  //       final data = jsonDecode(response.body);
+  //       if (data['error'].contains('username')) {
+  //         setState(() {
+  //           _usernameError = data['error'];
+  //         });
+  //       }
+  //       return; // Early return if there's an error
+  //     } else {
+  //       // Clear errors if checks pass
+  //       setState(() {
+  //         _usernameError = null;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text("Error checking user: $e")),
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -127,11 +262,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.center,
+                  GestureDetector(
+                    onTap: _pickImage,
                     child: CircleAvatar(
                       radius: 100,
-                      backgroundImage: NetworkImage(widget.prifile),
+                      backgroundImage: _selectedImage != null
+                          ? FileImage(File(_selectedImage!.path))
+                          : NetworkImage(widget.profile) as ImageProvider,
+                      child: _selectedImage == null
+                          ? const Icon(Icons.camera_alt, size: 40, color: Colors.white54)
+                          : null,
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -179,14 +319,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                   // Username
                   Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Flexible(
                     child: isEditing
-                        ? TextField(
-                            controller: usernameController,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.only(bottom: 3),
-                              labelText: tUsername,
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
+                        ? Container(
+                            color: Colors.grey[300],
+                            child: ListTile(
+                              title: const Text(tUsername),
+                              subtitle: Text(editableUsername),
                             ),
                           )
                         : ListTile(
@@ -194,16 +336,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             subtitle: Text(editableUsername),
                           ),
                   ),
+
                   const SizedBox(height: 10),
                   Flexible(
                     child: isEditing
-                        ? TextField(
-                            controller: emailController,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.only(bottom: 3),
-                              labelText: tEmail,
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
+                        ? Container(
+                            color: Colors.grey[300],
+                            child: ListTile(
+                              title: const Text(tEmail),
+                              subtitle: Text(editableEmail),
                             ),
                           )
                         : ListTile(
@@ -274,9 +415,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ],
               ),
             ),
-          ),
+                ]
+          )
         ),
       ),
+    ),
+      )
     );
   }
 }

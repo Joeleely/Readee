@@ -204,7 +204,7 @@ class _InformationPageState extends State<InformationPage> {
         const SizedBox(height: 5),
         DropdownButtonFormField<String>(
           value: value,
-          items: <String>['Male', 'Female'].map((String value) {
+          items: <String>['Male', 'Female', 'Other'].map((String value) {
             return DropdownMenuItem<String>(
               value: value,
               child: Text(value),
