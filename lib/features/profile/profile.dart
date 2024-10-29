@@ -98,7 +98,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ),
-        
+
                   const SizedBox(height: 25),
                   const Divider(
                     color: Colors.grey,
@@ -121,7 +121,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               username: username,
                               email: email,
                               gender: gender,
-                              userID: userID, prifile: profile,
+                              userID: userID,
+                              profile: profile,
                             ),
                           ))),
                   ProfileMenuWidget(
@@ -134,7 +135,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             userID: userID,
                           )))),
                   ProfileMenuWidget(
-                      title: 'Reviews', icon: Icons.star, onClicked: () => Navigator.push(
+                      title: 'Reviews',
+                      icon: Icons.star,
+                      onClicked: () => Navigator.push(
                           context,
                           CustomPageRoute(
                               page: ReviewPage(
@@ -146,13 +149,18 @@ class _ProfilePageState extends State<ProfilePage> {
                       onClicked: () => Navigator.push(
                           context,
                           CustomPageRoute(
-                            page: MyBooksPage(userId: userID,)
-                          ))),
+                              page: MyBooksPage(
+                            userId: userID,
+                          )))),
                   ProfileMenuWidget(
-                      title: 'History', icon: Icons.history, onClicked: () => Navigator.push(
+                      title: 'History',
+                      icon: Icons.history,
+                      onClicked: () => Navigator.push(
                           context,
                           CustomPageRoute(
-                            page: const HistoryPage()
+                            page: HistoryPage(
+                              userId: userID,
+                            ),
                           ))),
                   const SizedBox(height: 25),
                   SizedBox(

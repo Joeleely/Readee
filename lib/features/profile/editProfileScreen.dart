@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:readee_app/features/profile/widget/constant.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final String firstName;
@@ -12,7 +15,7 @@ class EditProfileScreen extends StatefulWidget {
   final String email;
   final String gender;
   final int userID;
-  final String prifile;
+  final String profile;
 
   const EditProfileScreen({
     super.key,
@@ -22,7 +25,7 @@ class EditProfileScreen extends StatefulWidget {
     required this.email,
     required this.gender,
     required this.userID,
-    required this.prifile,
+    required this.profile,
   });
 
   @override
@@ -37,6 +40,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController usernameController;
   late TextEditingController emailController;
   late TextEditingController genderController;
+  late TextEditingController profileUrlController;
 
   // Local variables to hold the editable values
   late String editableFirstName;
@@ -44,6 +48,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late String editableUsername;
   late String editableEmail;
   late String editableGender;
+  late String editableProfileUrl;
+  late String profileUrl;
+
+  final ImagePicker _picker = ImagePicker();
+  XFile? _imageFile;
 
   @override
   void initState() {
@@ -54,12 +63,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     usernameController = TextEditingController(text: widget.username);
     emailController = TextEditingController(text: widget.email);
     genderController = TextEditingController(text: widget.gender);
+    profileUrlController = TextEditingController(text: widget.profile);
 
     editableFirstName = widget.firstName;
     editableLastName = widget.lastName;
     editableUsername = widget.username;
     editableEmail = widget.email;
     editableGender = widget.gender;
+    editableProfileUrl = widget.profile;
+  }
+
+  void pickImage() async {
+    final XFile? selectedImage =
+        await _picker.pickImage(source: ImageSource.gallery);
+
+    if (selectedImage != null) {
+      setState(() {
+        _imageFile = selectedImage;
+        editableProfileUrl = selectedImage.path;
+      });
+    }
   }
 
   void toggleEdit() {
@@ -68,25 +91,95 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     });
   }
 
+  Future<void> updateProfile() async {
+    final url = Uri.parse("http://localhost:3000/user/edit/${widget.userID}");
+
+    try {
+      final request = http.MultipartRequest("PATCH", url);
+      request.headers["Authorization"] = "Bearer <Your-Token>"; // ใส่โทเค็นจริง
+      request.fields['email'] = emailController.text;
+      request.fields['username'] = usernameController.text;
+      request.fields['phone_number'] = "0912345678";
+      request.fields['firstname'] = firstNameController.text;
+      request.fields['lastname'] = lastNameController.text;
+      request.fields['gender'] = editableGender;
+
+      if (_imageFile != null) {
+        request.files.add(
+            await http.MultipartFile.fromPath('profile_url', _imageFile!.path));
+      }
+
+      final response = await request.send();
+      if (response.statusCode == 200) {
+        print("Profile updated successfully");
+        setState(() {
+          editableFirstName = firstNameController.text ?? '';
+          editableLastName = lastNameController.text ?? '';
+          editableUsername = usernameController.text ?? '';
+          editableEmail = emailController.text ?? '';
+          editableGender = genderController.text ?? '';
+          editableProfileUrl =
+              _imageFile != null ? _imageFile!.path : editableProfileUrl;
+        });
+      } else {
+        print("Failed to update profile: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
   void saveProfile() {
     setState(() {
-      // Update the local variables with the edited values
       editableFirstName = firstNameController.text;
       editableLastName = lastNameController.text;
       editableUsername = usernameController.text;
       editableEmail = emailController.text;
       editableGender = genderController.text;
+      editableProfileUrl =
+          _imageFile != null ? _imageFile!.path : editableProfileUrl;
       isEditing = false;
     });
+
+    updateProfile().then((_) {
+      fetchUpdatedProfile();
+    });
+  }
+
+  Future<void> fetchUpdatedProfile() async {
+    final url = Uri.parse("http://localhost:3000/users/${widget.userID}");
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        setState(() {
+          // อัปเดตข้อมูลใหม่ใน UI โดยเช็คค่า null ก่อน
+          editableFirstName = data["firstname"] ?? '';
+          editableLastName = data["lastname"] ?? '';
+          editableUsername = data["username"] ?? '';
+          editableEmail = data["email"] ?? '';
+          editableGender = data["gender"] ?? '';
+          editableProfileUrl = data["profile_url"] ?? '';
+        });
+      } else {
+        print("Failed to fetch updated profile: ${response.body}");
+      }
+    } catch (e) {
+      print("Error fetching profile: $e");
+    }
   }
 
   void cancelEdit() {
     setState(() {
-      firstNameController.text = editableFirstName;
-      lastNameController.text = editableLastName;
-      usernameController.text = editableUsername;
-      emailController.text = editableEmail;
-      genderController.text = editableGender;
+      firstNameController.text = widget.firstName;
+      lastNameController.text = widget.lastName;
+      usernameController.text = widget.username;
+      emailController.text = widget.email;
+      genderController.text = widget.gender;
+      editableProfileUrl = widget.profile;
+      _imageFile = null; // รีเซ็ตภาพ
       isEditing = false;
     });
   }
@@ -129,11 +222,30 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   const SizedBox(height: 10),
                   Align(
                     alignment: Alignment.center,
-                    child: CircleAvatar(
-                      radius: 100,
-                      backgroundImage: NetworkImage(widget.prifile),
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 100,
+                          backgroundImage: _imageFile != null
+                              ? FileImage(File(_imageFile!.path))
+                              : NetworkImage(editableProfileUrl)
+                                  as ImageProvider,
+                        ),
+                        // แสดงไอคอนกล้องเฉพาะเมื่ออยู่ในโหมดแก้ไข
+                        if (isEditing)
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: IconButton(
+                              icon: const Icon(Icons.camera_alt,
+                                  color: Colors.blue),
+                              onPressed: pickImage, // เรียกใช้ฟังก์ชันเลือกภาพ
+                            ),
+                          ),
+                      ],
                     ),
                   ),
+
                   const SizedBox(height: 40),
 
                   // First Name and Last Name in one line
