@@ -4,7 +4,9 @@ import 'package:http/http.dart' as http;
 import 'package:readee_app/typography.dart';
 
 class YourReviewPage extends StatefulWidget {
-  const YourReviewPage({super.key});
+  final int userId;
+
+  const YourReviewPage({super.key, required this.userId});
 
   @override
   State<YourReviewPage> createState() => _YourReviewPageState();
@@ -20,7 +22,8 @@ class _YourReviewPageState extends State<YourReviewPage> {
   }
 
   Future<List<Review>> fetchReviews() async {
-    final response = await http.get(Uri.parse('http://localhost:3000/reviews/given/1'));
+    final response = await http
+        .get(Uri.parse('http://localhost:3000/reviews/given/${widget.userId}'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body)['reviews'];
@@ -70,8 +73,6 @@ class _YourReviewPageState extends State<YourReviewPage> {
   }
 }
 
-
-
 class Review {
   final String username;
   final String profileImageUrl;
@@ -91,14 +92,14 @@ class Review {
   factory Review.fromJson(Map<String, dynamic> json) {
     return Review(
       username: json['receiver_name'],
-      profileImageUrl: json['receiver_picture'] ?? 'https://example.com/placeholder.jpg', // Placeholder if image is null
+      profileImageUrl: json['receiver_picture'] ??
+          'https://example.com/placeholder.jpg', // Placeholder if image is null
       bookName: json['receiver_book_name'] ?? 'Unknown Book',
       comment: json['review'],
       rating: json['rating'],
     );
   }
 }
-
 
 class ReviewCard extends StatelessWidget {
   final Review review;

@@ -14,8 +14,7 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   Future<List<History>> fetchHistories() async {
-    final response = await http
-        .get(Uri.parse('http://localhost:3000/history/${widget.userId}'));
+    final response = await http.get(Uri.parse('http://localhost:3000/history/7'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body)['histories'];

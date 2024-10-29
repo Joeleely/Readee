@@ -41,9 +41,9 @@ class _BookInfoPageState extends State<BookInfoPage> {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.7,
                       child: Text(
                         widget.book.title,
                         maxLines: 2,

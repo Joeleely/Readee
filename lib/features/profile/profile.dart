@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:readee_app/features/auth/login.dart';
 import 'package:readee_app/features/profile/editGenres.dart';
 import 'package:readee_app/features/profile/editProfileScreen.dart';
 import 'package:readee_app/features/profile/history.dart';
@@ -10,6 +11,8 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class ProfilePage extends StatefulWidget {
   final int userId;
   const ProfilePage({super.key, required this.userId});
@@ -19,11 +22,11 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String username = '';
-  String email = '';
-  String firstName = '';
-  String lastName = '';
-  String gender = '';
+  String username = 'Loading...';
+  String email = 'Loading...';
+  String firstName = 'Loading...';
+  String lastName = 'Loading...';
+  String gender = 'Loading...';
   String profile = '';
   late int userID;
 
@@ -32,6 +35,18 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     userID = widget.userId;
     fetchUsername(userID);
+  }
+
+   Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user_token'); // Replace 'token' with your actual token key
+
+    // Navigate to the login screen
+    Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const LoginPage()),
+            );
   }
 
   Future<void> fetchUsername(int userId) async {
@@ -166,7 +181,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   SizedBox(
                       width: 200,
                       child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: logout,
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue,
                               side: BorderSide.none,

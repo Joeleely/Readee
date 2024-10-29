@@ -1,9 +1,118 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:readee_app/features/auth/information.dart';
+import 'package:readee_app/features/auth/persona.dart';
 import 'package:readee_app/features/auth/register.dart';
+import 'package:readee_app/widget/bottomNav.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+   String? _errorMessage;
+
+  Future<void> login() async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/login'), // Adjust the URL if needed
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "emailOrUsername": _emailController.text,
+          "password": _passwordController.text,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final token = data['token'];
+        final userId = data['userId'];
+        final firstName = data['firstname'];
+
+        // Store token in SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_token', token);
+
+        if (firstName == null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => InformationPage(userId: userId)),
+          );
+        } else {
+          // Check user genres
+          final genresResponse = await http
+              .get(Uri.parse('http://localhost:3000/userGenres/$userId'));
+
+          if (genresResponse.statusCode == 404) {
+            // If genres not found, navigate to PersonaPage
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => PersonaPage(userId: userId)),
+            );
+          } else if (genresResponse.statusCode == 200) {
+            // Navigate to the main navigation page if genres are found
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ReadeeNavigationBar(userId: userId)),
+            );
+          } else {
+            // Handle other possible errors (e.g., server error)
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Error checking user genres')),
+            );
+          }
+        }
+        setState(() {
+          _errorMessage = null; // Clear error message on successful login
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'Username or password incorrect';
+        });
+      }
+    } catch (e) {
+      print('Login error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Something went wrong')),
+      );
+    }
+  }
+
+  // Future<UserCredential?> loginWithGoogle() async {
+  //   try {
+  //     // Initialize Google Sign-In
+  //     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+  //     // Get authentication details from the Google account
+  //     final GoogleSignInAuthentication? googleAuth =
+  //         await googleUser?.authentication;
+
+  //     // Create a new credential
+  //     final credential = GoogleAuthProvider.credential(
+  //       accessToken: googleAuth?.accessToken,
+  //       idToken: googleAuth?.idToken,
+  //     );
+
+  //     // Use the credential to sign in to Firebase
+  //     return await FirebaseAuth.instance.signInWithCredential(credential);
+  //   } catch (e) {
+  //     print(e.toString());
+  //     return null;
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +146,7 @@ class LoginPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 TextFormField(
+                  controller: _emailController,
                   decoration: const InputDecoration(
                     hintText: 'hello@email.com',
                     border: OutlineInputBorder(
@@ -49,13 +159,23 @@ class LoginPage extends StatelessWidget {
                   child: Text('Password'),
                 ),
                 const SizedBox(height: 5),
-                const PasswordFormField(),
+                PasswordFormField(controller: _passwordController),
+                if (_errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 10),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: InkWell(
                     onTap: () {
-                      // Add function here
                       print('Forgot password? tapped');
                     },
                     child: const Text(
@@ -68,9 +188,7 @@ class LoginPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 50),
                 ElevatedButton(
-                  onPressed: () {
-                    // Add function here
-                  },
+                  onPressed: login, // Calls the login function
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor: const Color(0xFF28A9D1),
@@ -79,45 +197,45 @@ class LoginPage extends StatelessWidget {
                   child: const Text('Login'),
                 ),
                 const SizedBox(height: 40),
-                const Row(
-                  children: [
-                    Expanded(
-                      child: Divider(
-                        color: Colors.grey,
-                        height: 1,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text('or login with'),
-                    ),
-                    Expanded(
-                      child: Divider(
-                        color: Colors.grey,
-                        height: 1,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Add function here
-                  },
-                  icon: const Image(
-                    image: AssetImage('assets/Google_logo.png'),
-                    width: 24,
-                    height: 24,
-                  ),
-                  label: const Text('Google'),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.grey),
-                    minimumSize: const Size(double.infinity, 48),
-                  ),
-                ),
-                const SizedBox(height: 24),
+                // const Row(
+                //   children: [
+                //     Expanded(
+                //       child: Divider(
+                //         color: Colors.grey,
+                //         height: 1,
+                //       ),
+                //     ),
+                //     Padding(
+                //       padding: EdgeInsets.symmetric(horizontal: 8.0),
+                //       child: Text('or login with'),
+                //     ),
+                //     Expanded(
+                //       child: Divider(
+                //         color: Colors.grey,
+                //         height: 1,
+                //       ),
+                //     ),
+                //   ],
+                // ),
+                // const SizedBox(height: 40),
+                // ElevatedButton.icon(
+                //   onPressed: () async {
+                //     await loginWithGoogle();
+                //   },
+                //   icon: const Image(
+                //     image: AssetImage('assets/Google_logo.png'),
+                //     width: 24,
+                //     height: 24,
+                //   ),
+                //   label: const Text('Google'),
+                //   style: ElevatedButton.styleFrom(
+                //     foregroundColor: Colors.black,
+                //     backgroundColor: Colors.white,
+                //     side: const BorderSide(color: Colors.grey),
+                //     minimumSize: const Size(double.infinity, 48),
+                //   ),
+                // ),
+                // const SizedBox(height: 24),
                 Align(
                   alignment: Alignment.center,
                   child: RichText(
@@ -157,7 +275,10 @@ class LoginPage extends StatelessWidget {
 }
 
 class PasswordFormField extends StatefulWidget {
-  const PasswordFormField({super.key});
+  final TextEditingController controller;
+
+  const PasswordFormField({Key? key, required this.controller})
+      : super(key: key);
 
   @override
   _PasswordFormFieldState createState() => _PasswordFormFieldState();
@@ -169,6 +290,7 @@ class _PasswordFormFieldState extends State<PasswordFormField> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      controller: widget.controller,
       obscureText: _obscureText,
       decoration: InputDecoration(
         hintText: '********',

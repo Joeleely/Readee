@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:readee_app/features/create_book/create_book.dart';
 import 'package:readee_app/features/match/pages/match.dart';
 import 'package:readee_app/widget/bottomNav.dart';
 import 'package:http/http.dart' as http;
@@ -69,6 +70,31 @@ class _PersonaPageState extends State<PersonaPage> {
     }
   }
 
+  Future<void> checkUserBooksAndNavigate(int userId) async {
+  final response = await http.get(Uri.parse('http://localhost:3000/getBookByUser/$userId'));
+
+  if (response.statusCode == 200) {
+    // Assuming the response body contains a list of books
+    List<dynamic> books = json.decode(response.body);
+    
+    if (books.isNotEmpty) {
+      // Navigate to ReadeeNavigationBar if books are found
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ReadeeNavigationBar(userId: widget.userId)),
+      );
+    } else {
+      // Navigate to CreateBookPage if no books are found
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => CreateBookPage(userId: widget.userId,)), // Replace CreateBookPage with the correct import
+      );
+    }
+  } else {
+    throw Exception('Failed to load books');
+  }
+}
+
   Future<void> submitSelectedGenres(int userId) async {
     print(selectedGenreIds);
 
@@ -85,10 +111,7 @@ class _PersonaPageState extends State<PersonaPage> {
 
     if (response.statusCode == 201) {
       print('Data submitted successfully');
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ReadeeNavigationBar(userId: widget.userId,)),
-      );
+      await checkUserBooksAndNavigate(userId);
     } else {
       throw Exception('Failed to submit data');
     }

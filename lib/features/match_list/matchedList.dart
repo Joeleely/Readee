@@ -101,17 +101,6 @@ class _MatchedListState extends State<MatchedList> {
     }
   }
 
-  String _calculateTimeLeft(String matchedTime) {
-    final matchDate = DateTime.parse(matchedTime);
-    final difference = DateTime.now().difference(matchDate);
-    final daysLeft = 7 - difference.inDays;
-
-    if (daysLeft <= 0) {
-      return 'Expired';
-    }
-    return '$daysLeft days left';
-  }
-
   Future<void> showRejectConfirmation(
       int matchId, int matchedBookId, int userId) async {
     bool? confirm = await showDialog<bool>(
@@ -151,9 +140,7 @@ class _MatchedListState extends State<MatchedList> {
         var matchTradeStatus = matchDataJson['TradeRequestStatus'];
         var ownerBookId = matchDataJson['OwnerBookId'];
         var matchedBookId = matchDataJson['MatchedBookId'];
-        var matchTime = matchDataJson['MatchTime'];
-        var ownerId = matchDataJson['OwnerId']; // Get ownerId
-        var matchedUserId = matchDataJson['MatchedUserId']; // Get matchedUserId
+        var ownerId = matchDataJson['OwnerId'];
 
         // print('Match ID: $matchId');
         // print('Owner ID: $ownerId, Matched User ID: $matchedUserId');
