@@ -28,7 +28,10 @@ class _ReviewPageState extends State<ReviewPage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => YourReviewPage(userId: widget.userID)),
+                  MaterialPageRoute(
+                      builder: (context) => YourReviewPage(
+                            userId: widget.userID,
+                          )),
                 );
               },
             ),
@@ -39,7 +42,7 @@ class _ReviewPageState extends State<ReviewPage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => YourRatingPage(userId: widget.userID)),
+                  MaterialPageRoute(builder: (context) => YourRatingPage(userId: 1,)),
                 );
               },
             ),
