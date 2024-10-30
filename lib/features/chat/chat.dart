@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert';
 
 class ChatPage extends StatefulWidget {
@@ -22,11 +23,35 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   List<Map<String, dynamic>> _messages = [];
   final TextEditingController _controller = TextEditingController();
+  late WebSocketChannel _channel;
 
   @override
   void initState() {
     super.initState();
+    _connectToWebSocket();
     _fetchMessages();
+  }
+
+  void _connectToWebSocket() {
+    try {
+      _channel = WebSocketChannel.connect(
+        Uri.parse('ws://localhost:3000/chat/${widget.roomId}'),
+      );
+
+      _channel.stream.listen((data) {
+        final message = json.decode(data);
+        setState(() {
+          _messages.add({
+            'senderId': message['SenderId'],
+            'message': message['Message'] ?? 'ThisShouldNotBeNull',
+          });
+        });
+      }, onError: (error) {
+        _showError("WebSocket connection error: $error");
+      });
+    } catch (e) {
+      _showError("Failed to connect to WebSocket: $e");
+    }
   }
 
   Future<void> _fetchMessages() async {
@@ -61,33 +86,44 @@ class _ChatPageState extends State<ChatPage> {
         'Message': _controller.text.trim(),
       };
 
-      try {
-        final response = await http.post(
-          Uri.parse('http://localhost:3000/createMessage'),
-          headers: {'Content-Type': 'application/json'},
-          body: json.encode(messageData),
-        );
+  //     setState(() {
+  //       _messages.add({
+  //         'senderId': widget.userId,
+  //         'message': _controller.text.trim(),
+  //       });
+  //     });
 
-        if (response.statusCode == 201) {
-          // Parse the response to get the created message
-          final newMessage = json.decode(response.body);
+  //     _controller.clear();
+  //   }
+  // }
+  try {
+    _channel.sink.add(json.encode(messageData));
+    final response = await http.post(
+      Uri.parse('http://localhost:3000/createMessage'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(messageData),
+    );
 
-          setState(() {
-            // Ensure that you check for null values and handle them
-            _messages.add({
-              'senderId': newMessage['SenderId'],
-              'message': newMessage['Message'] ??
-                  'ThisShouldNotNull', // Use empty string if null
-            });
-          });
+    if (response.statusCode == 201) {
+      // Parse the response to get the created message
+      final newMessage = json.decode(response.body);
 
-          _controller.clear();
-        } else {
-          throw Exception('Failed to send message');
-        }
-      } catch (e) {
-        print('Error sending message: $e'); // Handle errors gracefully
-      }
+  // setState(() {
+  //   // Ensure that you check for null values and handle them
+  //   _messages.add({
+  //     'senderId': newMessage['SenderId'],
+  //     'message': newMessage['Message'] ??
+  //         'ThisShouldNotNull', // Use empty string if null
+  //   });
+  // });
+
+  _controller.clear();
+    } else {
+      throw Exception('Failed to send message');
+    }
+  } catch (e) {
+    print('Error sending message: $e'); // Handle errors gracefully
+  }
     }
   }
 
@@ -98,6 +134,13 @@ class _ChatPageState extends State<ChatPage> {
         duration: const Duration(seconds: 2),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // Close WebSocket connection when the widget is disposed
+    _channel.sink.close();
+    super.dispose();
   }
 
   @override
@@ -164,7 +207,8 @@ class _ChatPageState extends State<ChatPage> {
             Container(
               color: const Color.fromARGB(255, 223, 246, 253),
               child: Padding(
-                padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 16.0, top: 8.0),
+                padding: const EdgeInsets.only(
+                    left: 8.0, right: 8.0, bottom: 16.0, top: 8.0),
                 child: Row(
                   children: [
                     Expanded(

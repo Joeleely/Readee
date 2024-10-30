@@ -9,14 +9,16 @@ import 'package:readee_app/home.dart';
 
 class ReadeeNavigationBar extends StatefulWidget {
   final int userId;
-  const ReadeeNavigationBar({super.key, required this.userId});
+  final int initialTab;
+
+  const ReadeeNavigationBar({super.key, required this.userId, required this.initialTab});
 
   @override
   State<ReadeeNavigationBar> createState() => _ReadeeNavigationBarState();
 }
 
 class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
-  int currentTab = 0;
+  late int currentTab;
   late List<Widget> screens;
   final PageStorageBucket bucket = PageStorageBucket();
   late Widget currentScreen;
@@ -24,6 +26,7 @@ class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
   @override
   void initState() {
     super.initState();
+    currentTab = widget.initialTab;
     screens = [
       MatchPage(userID: widget.userId),
       ChatListPage(userId: widget.userId,),
@@ -31,7 +34,7 @@ class _ReadeeNavigationBarState extends State<ReadeeNavigationBar> {
       ProfilePage(userId: widget.userId,),
       MatchListPage(userId: widget.userId,),
     ];
-    currentScreen = MatchPage(userID: widget.userId); // Set the initial screen
+    currentScreen = screens[currentTab]; 
   }
 
   @override

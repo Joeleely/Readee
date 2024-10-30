@@ -81,7 +81,7 @@ class _PersonaPageState extends State<PersonaPage> {
       // Navigate to ReadeeNavigationBar if books are found
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ReadeeNavigationBar(userId: widget.userId)),
+        MaterialPageRoute(builder: (context) => ReadeeNavigationBar(userId: widget.userId, initialTab: 0,)),
       );
     } else {
       // Navigate to CreateBookPage if no books are found
@@ -113,7 +113,7 @@ class _PersonaPageState extends State<PersonaPage> {
       print('Data submitted successfully');
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ReadeeNavigationBar(userId: widget.userId)),
+        MaterialPageRoute(builder: (context) => ReadeeNavigationBar(userId: widget.userId, initialTab: 0,)),
       );
       //await checkUserBooksAndNavigate(userId);
     } else {

@@ -155,7 +155,9 @@ class _BookDetailPageState extends State<BookDetailPage> {
       if (response.statusCode == 200) {
         final averageRateData = json.decode(response.body);
         setState(() {
-          averageRate = averageRateData['averageScore'] ?? 0.0;
+          averageRate =
+              double.tryParse(averageRateData['averageScore'] ?? '0.00') ??
+                  0.00;
         });
       } else {
         _logError('Failed to fetch average rate: ${response.statusCode}');
@@ -441,39 +443,40 @@ class _BookDetailPageState extends State<BookDetailPage> {
             ),
           ),
         );
-      } else {
-        // Room does not exist, create a new room
-        final createResponse = await http.post(
-          Uri.parse(
-              'http://localhost:3000/createRoom/$firstUserId/$secondUserId'),
-        );
-
-        if (createResponse.statusCode == 201) {
-          final createData = json.decode(createResponse.body);
-          final newRoomId =
-              createData['roomId']; // Adjust according to your API response
-
-          // Navigate to ChatPage with the new roomId
-          Navigator.push(
-            context,
-            CustomPageRoute(
-              page: ChatPage(
-                roomId: newRoomId,
-                userId: widget.userId,
-                otherName: ownerName,
-                otherPorfile: otherPorfile,
-              ),
-            ),
-          );
-        } else {
-          // Handle error creating the room
-          print('Failed to create room');
-        }
       }
     } else {
-      // Handle error
-      print('Failed to fetch room ID');
+      // Room does not exist, create a new room
+      final createResponse = await http.post(
+        Uri.parse(
+            'http://localhost:3000/createRoom/$firstUserId/$secondUserId'),
+      );
+
+      if (createResponse.statusCode == 200) {
+        final createData = json.decode(createResponse.body);
+        final newRoomId =
+            createData['RoomId']; // Adjust according to your API response
+
+        // Navigate to ChatPage with the new roomId
+        Navigator.push(
+          context,
+          CustomPageRoute(
+            page: ChatPage(
+              roomId: newRoomId,
+              userId: widget.userId,
+              otherName: ownerName,
+              otherPorfile: otherPorfile,
+            ),
+          ),
+        );
+      } else {
+        // Handle error creating the room
+        print('Failed to create room');
+      }
     }
+    // } else {
+    //   // Handle error
+    //   print('Failed to fetch room ID');
+    // }
   }
 
   Future<void> _navigateToEditBookPage() async {
@@ -580,9 +583,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
                             const Text(" Swapped"),
                             const SizedBox(width: 10),
                             Text(
-                              averageRate.toString().contains('.')
-                                  ? averageRate.toStringAsFixed(2)
-                                  : averageRate.toString(),
+                              averageRate.toStringAsFixed(2), // Displaying 5.00
                               style: const TextStyle(color: Colors.cyan),
                             ),
                             const Text(" Ratings"),

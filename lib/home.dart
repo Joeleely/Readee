@@ -22,8 +22,8 @@ class HomePage extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: const Color.fromARGB(255, 243, 252, 255),
       ),
-      home: const LoginPage()
-      //const ReadeeNavigationBar(userId: 7),
+      home: //const LoginPage()
+      const ReadeeNavigationBar(userId: 7, initialTab: 3,),
     );
   }
 }

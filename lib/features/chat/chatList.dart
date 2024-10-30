@@ -60,7 +60,7 @@ class ChatListPage extends StatelessWidget {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         double rating =
-            data['averageScore']?.toDouble() ?? 0.0; // Parse rating as double
+            double.tryParse(data['averageScore']?? '0.00') ?? 0.0; // Parse rating as double
         return rating.toStringAsFixed(2); // Format to two decimal places
       } else {
         // Return a default message if the user does not have a rating

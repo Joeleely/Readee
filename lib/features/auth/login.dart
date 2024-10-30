@@ -64,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (context) => ReadeeNavigationBar(userId: userId)),
+                  builder: (context) => ReadeeNavigationBar(userId: userId, initialTab: 0,)),
             );
           } else {
             // Handle other possible errors (e.g., server error)
