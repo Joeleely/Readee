@@ -55,6 +55,7 @@ class _YourRatingPageState extends State<YourRatingPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your rating'),
+        backgroundColor: Color.fromARGB(255, 228, 248, 255),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),

@@ -57,23 +57,25 @@ class _RateAndReviewPageState extends State<RateAndReviewPage> {
           isSubmitted = false;
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to fetch existing review")),
-        );
+        print("Failed to fetch existing review");
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Failed to fetch existing review")),
+        // );
       }
     } catch (e) {
       print("Error fetching review: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error fetching review")),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text("Error fetching review")),
+      // );
     }
   }
 
   Future<void> submitReview() async {
     if (widget.receiverId == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: Invalid matched user ID")),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text("Error: Invalid matched user ID")),
+      // );
+      print("Error: Invalid matched user ID");
       return;
     }
 
@@ -91,7 +93,7 @@ class _RateAndReviewPageState extends State<RateAndReviewPage> {
         url,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer <Your-Token>",
+          //"Authorization": "Bearer <Your-Token>",
         },
         body: body,
       );
@@ -106,10 +108,13 @@ class _RateAndReviewPageState extends State<RateAndReviewPage> {
 
         // Unfocus the text field to remove the cursor
         FocusScope.of(context).unfocus();
+
+        Navigator.pop(context);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to submit: ${response.body}")),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Failed to submit: ${response.body}")),
+        // );
+        print("Failed to submit: ${response.body}");
       }
     } catch (e) {
       print("Error submitting review: $e");

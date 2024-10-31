@@ -38,6 +38,7 @@ class _YourReviewPageState extends State<YourReviewPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Reviews'),
+        backgroundColor: Color.fromARGB(255, 228, 248, 255),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -113,6 +114,7 @@ class ReviewCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Text("To: "),
           CircleAvatar(
             radius: 18,
             backgroundImage: NetworkImage(review.profileImageUrl),
@@ -137,10 +139,10 @@ class ReviewCard extends StatelessWidget {
                   }),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  review.bookName,
-                  style: TypographyText.h3(Colors.black),
-                ),
+                // Text(
+                //   review.bookName,
+                //   style: TypographyText.h3(Colors.black),
+                // ),
                 Text(
                   review.comment,
                   style: const TextStyle(fontSize: 14),

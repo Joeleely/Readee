@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:readee_app/features/profile/widget/pageRoute.dart';
 import 'package:readee_app/features/profile/yourRating.dart';
 import 'package:readee_app/features/profile/yourReview.dart';
 
@@ -16,6 +17,7 @@ class _ReviewPageState extends State<ReviewPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Review'),
+        backgroundColor: Color.fromARGB(255, 228, 248, 255),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -28,10 +30,10 @@ class _ReviewPageState extends State<ReviewPage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => YourReviewPage(
-                            userId: widget.userID,
-                          )),
+                  CustomPageRoute(
+                      page: YourReviewPage(
+                    userId: widget.userID,
+                  )),
                 );
               },
             ),
@@ -42,7 +44,10 @@ class _ReviewPageState extends State<ReviewPage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => YourRatingPage(userId: 1,)),
+                  CustomPageRoute(
+                      page: YourRatingPage(
+                    userId: widget.userID,
+                  )),
                 );
               },
             ),
