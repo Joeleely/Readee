@@ -29,10 +29,14 @@ class _YourRatingPageState extends State<YourRatingPage> {
 
   Future<List<Rating>> fetchReviews() async {
     final response = await http.get(Uri.parse(reviewsApiUrl));
-
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body)['reviews'];
-      return data.map((json) => Rating.fromJson(json)).toList();
+      List<Rating> reviews = data.map((json) => Rating.fromJson(json)).toList();
+      // Debugging to check values
+      for (var review in reviews) {
+        print("Review Rating: ${review.rating}");
+      }
+      return reviews;
     } else {
       throw Exception('Failed to load reviews');
     }
@@ -43,7 +47,8 @@ class _YourRatingPageState extends State<YourRatingPage> {
 
     if (response.statusCode == 200) {
       setState(() {
-        averageRating = json.decode(response.body)['average_rating'];
+        averageRating =
+            (json.decode(response.body)['average_rating'] ?? 0.0).toDouble();
       });
     } else {
       throw Exception('Failed to load average rating');
@@ -131,21 +136,24 @@ class Rating {
   final String profileImageUrl;
   final String comment;
   final int rating;
+  final int score;
 
   Rating({
     required this.username,
     required this.profileImageUrl,
     required this.comment,
     required this.rating,
+    required this.score,
   });
 
-  // Factory method to create a Rating object from JSON
   factory Rating.fromJson(Map<String, dynamic> json) {
     return Rating(
-      username: json['giver_name'],
-      profileImageUrl: json['giver_picture'],
-      comment: json['review'],
-      rating: json['rating'],
+      username: json['giver_name'] ?? 'Unknown User',
+      profileImageUrl:
+          json['giver_picture'] ?? 'https://example.com/placeholder.jpg',
+      comment: json['review'] ?? '',
+      rating: (json['rating'] ?? 0),
+      score: (json['score'] ?? 0),
     );
   }
 }
@@ -191,10 +199,11 @@ class RatingCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
+        // Generate stars based on the rating
         Row(
           children: List.generate(5, (index) {
             return Icon(
-              index < review.rating ? Icons.star : Icons.star_border,
+              index < review.score ? Icons.star : Icons.star_border,
               color: Colors.amber,
               size: 18,
             );

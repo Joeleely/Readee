@@ -80,6 +80,7 @@ class Review {
   final String bookName;
   final String comment;
   final int rating;
+  final int score;
 
   Review({
     required this.username,
@@ -87,17 +88,18 @@ class Review {
     required this.bookName,
     required this.comment,
     required this.rating,
+    required this.score,
   });
 
-  // Factory method to create a Review object from JSON
   factory Review.fromJson(Map<String, dynamic> json) {
     return Review(
-      username: json['receiver_name'],
-      profileImageUrl: json['receiver_picture'] ??
-          'https://example.com/placeholder.jpg', // Placeholder if image is null
+      username: json['receiver_name'] ?? 'Unknown User',
+      profileImageUrl:
+          json['receiver_picture'] ?? 'https://example.com/placeholder.jpg',
       bookName: json['receiver_book_name'] ?? 'Unknown Book',
-      comment: json['review'],
-      rating: json['rating'],
+      comment: json['review'] ?? 'No comment',
+      rating: (json['rating'] ?? 0) as int,
+      score: (json['score'] ?? 0) as int,
     );
   }
 }
@@ -130,19 +132,26 @@ class ReviewCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Row(
-                  children: List.generate(review.rating, (index) {
-                    return const Icon(
-                      Icons.star,
-                      color: Colors.amber,
-                      size: 18,
-                    );
-                  }),
+                  children: [
+                    // Display filled stars based on review.score
+                    ...List.generate(review.score, (index) {
+                      return const Icon(
+                        Icons.star,
+                        color: Colors.amber,
+                        size: 18,
+                      );
+                    }),
+                    // Display empty stars for the remaining stars
+                    ...List.generate(5 - review.score, (index) {
+                      return const Icon(
+                        Icons.star_border,
+                        color: Colors.amber,
+                        size: 18,
+                      );
+                    }),
+                  ],
                 ),
                 const SizedBox(height: 8),
-                // Text(
-                //   review.bookName,
-                //   style: TypographyText.h3(Colors.black),
-                // ),
                 Text(
                   review.comment,
                   style: const TextStyle(fontSize: 14),
