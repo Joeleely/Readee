@@ -10,6 +10,7 @@ import 'package:readee_app/features/chat/chat.dart';
 import 'package:readee_app/features/create_book/edit_book.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
 import 'package:readee_app/features/match/pages/book_info.dart';
+import 'package:readee_app/features/profile/history.dart';
 import 'package:readee_app/features/profile/widget/pageRoute.dart';
 import 'package:readee_app/typography.dart';
 
@@ -272,11 +273,11 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
           if (response.statusCode == 200) {
             if (mounted) {
-              //Navigator.of(context).pop();
               setState(() {
                 tradeRequestStatus = 'accepted';
                 showAcceptAndRejectButton = false;
               });
+              Navigator.push(context, CustomPageRoute(page: HistoryPage(userId: widget.userId,)));
             }
 
             ScaffoldMessenger.of(context).showSnackBar(
