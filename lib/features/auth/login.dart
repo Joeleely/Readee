@@ -18,7 +18,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-   String? _errorMessage;
+  String? _errorMessage;
 
   Future<void> login() async {
     try {
@@ -64,7 +64,10 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (context) => ReadeeNavigationBar(userId: userId, initialTab: 0,)),
+                  builder: (context) => ReadeeNavigationBar(
+                        userId: userId,
+                        initialTab: 0,
+                      )),
             );
           } else {
             // Handle other possible errors (e.g., server error)
@@ -88,29 +91,6 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
   }
-
-  // Future<UserCredential?> loginWithGoogle() async {
-  //   try {
-  //     // Initialize Google Sign-In
-  //     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-  //     // Get authentication details from the Google account
-  //     final GoogleSignInAuthentication? googleAuth =
-  //         await googleUser?.authentication;
-
-  //     // Create a new credential
-  //     final credential = GoogleAuthProvider.credential(
-  //       accessToken: googleAuth?.accessToken,
-  //       idToken: googleAuth?.idToken,
-  //     );
-
-  //     // Use the credential to sign in to Firebase
-  //     return await FirebaseAuth.instance.signInWithCredential(credential);
-  //   } catch (e) {
-  //     print(e.toString());
-  //     return null;
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
