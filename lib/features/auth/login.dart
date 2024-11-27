@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_2fa/flutter_2fa.dart';
 import 'package:readee_app/features/auth/information.dart';
 import 'package:readee_app/features/auth/persona.dart';
 import 'package:readee_app/features/auth/register.dart';
@@ -36,6 +37,53 @@ class _LoginPageState extends State<LoginPage> {
         final token = data['token'];
         final userId = data['userId'];
         final firstName = data['firstname'];
+        final secKey = data['secKey'];
+
+        if (secKey == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text(
+                    "Failed to login! Please make sure you have an account")),
+          );
+          return; // Stop execution if `secKey` is null
+        }
+
+        SharedPreferences localStorage = await SharedPreferences.getInstance();
+        localStorage.setBool('activate2FA', true);
+        localStorage.setString('secKey', secKey);
+
+        //print("activate2FA: ${localStorage.getBool('activate2FA')}");
+        //print("Seckey: $secKey");
+
+        // Perform 2FA verification
+        bool verified = false;
+        try {
+          FutureBuilder<void>(
+            future: Flutter2FA().verify(
+              context: context,
+              page: ReadeeNavigationBar(userId: userId,
+                        initialTab: 0,),
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                verified = true; // Verification succeeded
+                Navigator.pop(context); // Close the dialog
+              }
+              return Center(
+                child: snapshot.connectionState != ConnectionState.done
+                    ? Container()
+                    : const SizedBox.shrink(),
+              );
+            },
+          );
+        } catch (e) {
+          print('2FA Verification failed: $e');
+          return; // Stop execution if verification fails
+        }
+        if (!verified) {
+          print('2FA Verification canceled or failed.');
+          return; // Stop execution if canceled or not verified
+        }
 
         // Store token in SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
