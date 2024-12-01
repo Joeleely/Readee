@@ -40,6 +40,11 @@ class _ProfilePageState extends State<ProfilePage> {
    Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_token'); // Replace 'token' with your actual token key
+    await prefs.remove('activate2FA');
+    await prefs.remove('secKey');
+
+    print("activate2FA: ${prefs.getBool('activate2FA')}");
+    print("Seckey: ${prefs.getString('secKey')}");
 
     // Navigate to the login screen
     Navigator.pushReplacement(
@@ -65,6 +70,8 @@ class _ProfilePageState extends State<ProfilePage> {
           gender = data['Gender'] ?? 'ThisIsNull';
           profile = data['ProfileUrl'] ?? 'NoProfile';
         });
+
+          print("ProfileUrl: $profile");
       } else {
         throw Exception('Failed to load user data');
       }

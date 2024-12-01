@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:readee_app/features/auth/func/test2fac.dart';
 import 'package:readee_app/features/auth/login.dart';
 import 'package:readee_app/features/auth/persona.dart';
 import 'package:readee_app/features/create_book/create_book.dart';
