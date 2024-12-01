@@ -96,8 +96,8 @@ class Review {
       profileImageUrl: json['receiver_picture'] ??
           'https://example.com/placeholder.jpg', // Placeholder if image is null
       bookName: json['receiver_book_name'] ?? 'Unknown Book',
-      comment: json['review'],
-      rating: json['rating'],
+      comment: json['review'] ?? '',
+      rating: json['rating'] ?? 0,
     );
   }
 }

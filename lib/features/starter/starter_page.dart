@@ -41,7 +41,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       }
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => ReadeeNavigationBar(userId: 2)),
+        MaterialPageRoute(builder: (context) => ReadeeNavigationBar(userId: 2, initialTab: 0,)),
       );
     } else {
       Navigator.pushReplacement(

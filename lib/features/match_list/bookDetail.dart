@@ -10,6 +10,7 @@ import 'package:readee_app/features/chat/chat.dart';
 import 'package:readee_app/features/create_book/edit_book.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
 import 'package:readee_app/features/match/pages/book_info.dart';
+import 'package:readee_app/features/match_list/seeReview.dart';
 import 'package:readee_app/features/profile/history.dart';
 import 'package:readee_app/features/profile/widget/pageRoute.dart';
 import 'package:readee_app/typography.dart';
@@ -37,6 +38,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
   late int timesSwap = 0;
   late double averageRate = 0.0;
   late String profile = '';
+  late String ownerId = '';
   late String otherPorfile = '';
   bool isExpanded = false;
   bool showToggle = false;
@@ -277,7 +279,12 @@ class _BookDetailPageState extends State<BookDetailPage> {
                 tradeRequestStatus = 'accepted';
                 showAcceptAndRejectButton = false;
               });
-              Navigator.push(context, CustomPageRoute(page: HistoryPage(userId: widget.userId,)));
+              Navigator.push(
+                  context,
+                  CustomPageRoute(
+                      page: HistoryPage(
+                    userId: widget.userId,
+                  )));
             }
 
             ScaffoldMessenger.of(context).showSnackBar(
@@ -565,9 +572,17 @@ class _BookDetailPageState extends State<BookDetailPage> {
                   children: [
                     Align(
                       alignment: Alignment.center,
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundImage: NetworkImage(otherPorfile),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            CustomPageRoute(page: SeeReviewPage(userId: book.ownerId,OwnerName: ownerName,))
+                          );
+                        },
+                        child: CircleAvatar(
+                          radius: 20,
+                          backgroundImage: NetworkImage(otherPorfile),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),
