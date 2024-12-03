@@ -89,6 +89,16 @@ class _BookCardState extends State<BookCard> {
     }
   }
 
+  void _reportBook(BookDetails book) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Reported ${book.title}"),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    // Add logic to handle reporting the book, such as sending a request to the backend.
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -172,6 +182,56 @@ class _BookCardState extends State<BookCard> {
                         ),
                       ),
                     ],
+                  ),
+                  Positioned(
+                    top: 15,
+                    right: 10,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior
+                          .deferToChild, // Ensures taps are passed to child widgets
+                      onTap:
+                          () {}, // Prevent GestureDetector from intercepting this area
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: PopupMenuButton<String>(
+                          onSelected: (value) {
+                            if (value == 'report') {
+                              // Handle report action
+                              _reportBook(book);
+                            }
+                          },
+                          itemBuilder: (BuildContext context) {
+                            return [
+                              const PopupMenuItem<String>(
+                                value: 'report',
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.warning_amber,
+                                      color: Colors.red, // Red icon color
+                                    ),
+                                    SizedBox(
+                                        width: 8), // Space between icon and text
+                                    Text('Report',
+                                      style: TextStyle(
+                                        color: Colors.red, // Red text color
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ];
+                          },
+                          icon: const Icon(
+                            Icons.more_vert,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                   Align(
                     alignment: Alignment.topCenter,
