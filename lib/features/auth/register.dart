@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_2fa/flutter_2fa.dart';
 import 'package:flutter_2fa/screens/verify_code.dart';
 import 'package:get/get.dart';
+import 'package:crypto/crypto.dart';
 import 'package:readee_app/features/auth/information.dart';
 import 'package:http/http.dart' as http;
 import 'package:readee_app/features/profile/widget/pageRoute.dart';
+import 'package:readee_app/widget/flutter2FAMySelf.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -21,16 +23,18 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   bool agreedToTerms = false;
   String? _usernameError;
   String? _emailError;
   String? secKey;
+  String? recoverPhrase;
 
   bool _isValidEmail(String email) {
-    final RegExp emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    final RegExp emailRegex = RegExp(r'^[^@]+@(?:gmail\.com|hotmail\.com)$');
     return emailRegex.hasMatch(email);
   }
 
@@ -80,54 +84,74 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (_formKey.currentState?.validate() != true) return;
 
-  SharedPreferences localStorage = await SharedPreferences.getInstance();
-  localStorage.setBool('activate2FA', true);
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    localStorage.setBool('activate2FA', true);
 
-   await Flutter2FA().activate(
-    context: context,
-    appName: 'ReadeeApp',
-    email: _emailController.text,
-  );
-
-  // After activation, check if the 2FA is activated in SharedPreferences
-  bool isActivated = localStorage.getBool('activate2FA') ?? false;
-  secKey = localStorage.getString('secKey');
-
-print("This is secKey: $secKey");
-
-if (!isActivated) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Please activate 2FA first.")),
+    bool proceed = await showDialog(
+      context: context,
+      barrierDismissible:
+          false, // Prevent dismissing the dialog by tapping outside
+      builder: (context) => AlertDialog(
+        title: const Text("Important"),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Please securely store your Recovery Phrase. It is essential for recovering your 2FA authentication in case you lose access to your device.",
+            ),
+            SizedBox(height: 10),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.blue[100]!)),
+            child: const Text(
+              "Understood",
+            ),
+          ),
+          TextButton(
+            onPressed: () =>
+                Navigator.of(context).pop(false), // Return `false` to cancel
+            child: const Text(
+              "Cancel",
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
     );
-    return;
-  }
 
-//     bool verificationSuccess = false;
-//     try {
-//   // Show verification dialog and wait for user action
-//   await showDialog(
-//     context: context,
-//     builder: (context) => VerifyCode(successPage: Container()),
-//   );
+    if (!proceed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Registration process cancelled by the user.")),
+      );
+      return;
+    }
 
-//   // If the dialog was dismissed or "Cancel" was pressed, assume verification failed
-//   final localStorage = await SharedPreferences.getInstance();
-//   verificationSuccess = localStorage.getBool('activate2FA') ?? false;
-// } catch (e) {
-//   verificationSuccess = false;
-//   ScaffoldMessenger.of(context).showSnackBar(
-//     const SnackBar(content: Text("2FA verification failed or was cancelled.")),
-//   );
-//   return;
-// }
+    await Flutter2FAMySelf().activate(
+      context: context,
+      appName: 'ReadeeApp',
+      email: _emailController.text,
+    );
 
-// // Check if verification was successful
-// if (!verificationSuccess) {
-//   ScaffoldMessenger.of(context).showSnackBar(
-//     const SnackBar(content: Text("Please complete 2FA verification first.")),
-//   );
-//   return;
-// }
+    // After activation, check if the 2FA is activated in SharedPreferences
+    bool isActivated = localStorage.getBool('activate2FA') ?? false;
+    secKey = localStorage.getString('secKey');
+    recoverPhrase = localStorage.getString('recoverPhrase');
+
+    //print("This is secKey: $secKey");
+
+    if (!isActivated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please activate 2FA first.")),
+      );
+      return;
+    }
+
+     final recoverPhraseHash = sha256.convert(utf8.encode(recoverPhrase!)).toString();
 
     // Proceed with the registration logic here
     final url = Uri.parse('http://localhost:3000/createUser');
@@ -136,8 +160,10 @@ if (!isActivated) {
       "username": _usernameController.text,
       "email": _emailController.text,
       "password": _passwordController.text,
-      "ProfileUrl":"https://img.freepik.com/free-vector/cute-shiba-inu-dog-reading-book-cartoon_138676-2435.jpg",
-      "Seckey": secKey
+      "ProfileUrl":
+          "https://img.freepik.com/free-vector/cute-shiba-inu-dog-reading-book-cartoon_138676-2435.jpg",
+      "Seckey": secKey,
+      "Recoverphrase": recoverPhraseHash,
     });
 
     try {
@@ -206,9 +232,23 @@ if (!isActivated) {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Username'),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Tooltip(
+                        message: 'Username can’t change later',
+                        child: Icon(
+                          Icons.help_outline,
+                          color: Colors.grey,
+                          size: 16,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Username'),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 5),
                   TextFormField(
@@ -225,14 +265,28 @@ if (!isActivated) {
                     ),
                   ],
                   const SizedBox(height: 25),
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Email'),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Tooltip(
+                        message: 'Email should use @gmail.com or @hotmail.com',
+                        child: Icon(
+                          Icons.help_outline,
+                          color: Colors.grey,
+                          size: 16,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Email'),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 5),
                   TextFormField(
                     controller: _emailController,
-                    decoration: _inputDecoration('hello@email.com'),
+                    decoration: _inputDecoration('hello@mail.com'),
                     validator: (value) {
                       if (value?.isEmpty == true) {
                         return 'Email is required';
@@ -250,9 +304,23 @@ if (!isActivated) {
                     ),
                   ],
                   const SizedBox(height: 25),
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Password'),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [Tooltip(
+                        message:
+                            'Password should contain at least 8 characters',
+                        child: Icon(
+                          Icons.help_outline,
+                          color: Colors.grey,
+                          size: 16,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Password'),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 5),
                   PasswordFormField(
@@ -278,51 +346,51 @@ if (!isActivated) {
                     },
                   ),
                   const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: agreedToTerms,
-                        onChanged: (bool? value) {
-                          if (value != null) {
-                            setState(() {
-                              agreedToTerms = value;
-                            });
-                          }
-                        },
-                      ),
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            text: 'By registering, you are agreeing with our ',
-                            children: [
-                              TextSpan(
-                                text: 'Terms of Use',
-                                style: const TextStyle(
-                                  decoration: TextDecoration.underline,
-                                  color: Color(0xFF28A9D1),
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {},
-                              ),
-                              const TextSpan(text: ' and '),
-                              TextSpan(
-                                text: 'Privacy Policy',
-                                style: const TextStyle(
-                                  decoration: TextDecoration.underline,
-                                  color: Color(0xFF28A9D1),
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {},
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   children: [
+                  //     Checkbox(
+                  //       value: agreedToTerms,
+                  //       onChanged: (bool? value) {
+                  //         if (value != null) {
+                  //           setState(() {
+                  //             agreedToTerms = value;
+                  //           });
+                  //         }
+                  //       },
+                  //     ),
+                  //     Expanded(
+                  //       child: RichText(
+                  //         text: TextSpan(
+                  //           text: 'By registering, you are agreeing with our ',
+                  //           children: [
+                  //             TextSpan(
+                  //               text: 'Terms of Use',
+                  //               style: const TextStyle(
+                  //                 decoration: TextDecoration.underline,
+                  //                 color: Color(0xFF28A9D1),
+                  //               ),
+                  //               recognizer: TapGestureRecognizer()
+                  //                 ..onTap = () {},
+                  //             ),
+                  //             const TextSpan(text: ' and '),
+                  //             TextSpan(
+                  //               text: 'Privacy Policy',
+                  //               style: const TextStyle(
+                  //                 decoration: TextDecoration.underline,
+                  //                 color: Color(0xFF28A9D1),
+                  //               ),
+                  //               recognizer: TapGestureRecognizer()
+                  //                 ..onTap = () {},
+                  //             ),
+                  //           ],
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: agreedToTerms ? _register : null,
+                    onPressed: _register,
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
                       backgroundColor: const Color(0xFF28A9D1),
@@ -377,7 +445,14 @@ class _PasswordFormFieldState extends State<PasswordFormField> {
           },
         ),
       ),
-      validator: widget.validator,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Password is required';
+        } else if (value.length < 8) {
+          return 'Password must be at least 8 characters long';
+        }
+        return null; // No error
+      },
     );
   }
 }

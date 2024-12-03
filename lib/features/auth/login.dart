@@ -1,10 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_2fa/flutter_2fa.dart';
 import 'package:readee_app/features/auth/information.dart';
 import 'package:readee_app/features/auth/persona.dart';
 import 'package:readee_app/features/auth/register.dart';
 import 'package:readee_app/widget/bottomNav.dart';
+import 'package:readee_app/widget/flutter2FAMySelf.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
         bool verified = false;
         try {
           FutureBuilder<void>(
-            future: Flutter2FA().verify(
+            future: Flutter2FAMySelf().verify(
               context: context,
               page: ReadeeNavigationBar(userId: userId,
                         initialTab: 0,),

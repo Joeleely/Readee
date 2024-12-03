@@ -146,6 +146,7 @@ class _MatchPageState extends State<MatchPage> {
           image: AssetImage('assets/logo.png'),
           height: 50,
         ),
+        automaticallyImplyLeading: false,
         backgroundColor: const Color.fromARGB(255, 243, 252, 255),
       ),
       body: Center(

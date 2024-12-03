@@ -147,6 +147,7 @@ class _MatchListPageState extends State<MatchListPage> {
       appBar: AppBar(
         title: const Text('Your Match'),
         backgroundColor: const Color.fromARGB(255, 243, 252, 255),
+        automaticallyImplyLeading: false,
       ),
       body: isLoading // Show loading indicator while data is being fetched
           ? const Center(child: CircularProgressIndicator())
