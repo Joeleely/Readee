@@ -1,8 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:readee_app/features/auth/forgotPassword.dart';
 import 'package:readee_app/features/auth/information.dart';
 import 'package:readee_app/features/auth/persona.dart';
 import 'package:readee_app/features/auth/register.dart';
+import 'package:readee_app/features/profile/widget/pageRoute.dart';
 import 'package:readee_app/widget/bottomNav.dart';
 import 'package:readee_app/widget/flutter2FAMySelf.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -202,7 +204,7 @@ class _LoginPageState extends State<LoginPage> {
                   alignment: Alignment.centerLeft,
                   child: InkWell(
                     onTap: () {
-                      print('Forgot password? tapped');
+                      Navigator.push(context, CustomPageRoute(page: ForgotPasswordPage()));
                     },
                     child: const Text(
                       'Forgot password?',
