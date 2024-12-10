@@ -41,19 +41,32 @@ class _ChatPageState extends State<ChatPage> {
         Uri.parse('ws://localhost:3000/chat/${widget.roomId}'),
       );
 
-      _channel.stream.listen((data) {
-        final message = json.decode(data);
-        print('Received message: $message');
-        setState(() {
-          _messages.add({
-            'senderId': message['SenderId'],
-            'message': message['Message'] ?? '',
-            'imageUrl': message['ImageUrl'] ?? '',
-          });
-        });
-      }, onError: (error) {
-        _showError("WebSocket connection error: $error");
-      });
+      print('WebSocket connection established');
+      _channel.stream.listen(
+        (data) {
+          print("This is data from wbsk: $data");
+          try {
+            final message = json.decode(data);
+            print('Decoded message: $message');
+            setState(() {
+              _messages.add({
+                'senderId': message['SenderId'],
+                'message': message['Message'] ?? '',
+                'imageUrl': message['ImageUrl'] ?? '',
+              });
+            });
+          } catch (e) {
+            print('Error decoding message: $e');
+          }
+        },
+        onError: (error) {
+          print('WebSocket error: $error');
+          _showError("WebSocket connection error: $error");
+        },
+        onDone: () {
+          print('WebSocket connection closed');
+        },
+      );
     } catch (e) {
       _showError("Failed to connect to WebSocket: $e");
     }
@@ -143,6 +156,17 @@ class _ChatPageState extends State<ChatPage> {
       'Message': text, // Text message (can be null if only image is sent)
       'ImageUrl': imageUrl, // Image URL
     };
+
+    if (_channel != null) {
+    try {
+      _channel.sink.add(json.encode(messageData));
+      print('Message sent through WebSocket: $messageData');
+    } catch (e) {
+      print('Error sending WebSocket message: $e');
+    }
+  } else {
+    print('WebSocket is not connected.');
+  }
 
     print('Sending message: $messageData'); // Debug to ensure data is correct
 
