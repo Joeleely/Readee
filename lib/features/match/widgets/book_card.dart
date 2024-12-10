@@ -89,15 +89,39 @@ class _BookCardState extends State<BookCard> {
     }
   }
 
-  void _reportBook(BookDetails book) {
+  void _reportBook(BookDetails book, int userId) async {
+  final url = Uri.parse("http://localhost:3000/report/$userId/${book.bookId}");
+
+  try {
+    // Send a POST request
+    final response = await http.post(url);
+
+    // Check if the request was successful
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Successfully reported ${book.title}."),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to report ${book.title}. Error: ${response.statusCode}"),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  } catch (e) {
+    // Handle any network or other errors
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text("Reported ${book.title}"),
+        content: Text("An error occurred while reporting ${book.title}: $e"),
         duration: const Duration(seconds: 2),
       ),
     );
-    // Add logic to handle reporting the book, such as sending a request to the backend.
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +223,7 @@ class _BookCardState extends State<BookCard> {
                           onSelected: (value) {
                             if (value == 'report') {
                               // Handle report action
-                              _reportBook(book);
+                              _reportBook(book, widget.userID);
                             }
                           },
                           itemBuilder: (BuildContext context) {

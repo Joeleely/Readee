@@ -1,6 +1,7 @@
 class BookDetails {
   const BookDetails(
-      {required this.bookId,
+    {required this.isReport, 
+      required this.bookId,
       required this.isTrade,
       required this.title,
       required this.author,
@@ -16,4 +17,5 @@ class BookDetails {
   final String quality;
   final String description;
   final bool isTrade;
+  final bool isReport;
 }

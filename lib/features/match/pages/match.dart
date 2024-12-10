@@ -60,7 +60,8 @@ class _MatchPageState extends State<MatchPage> {
             return userGenreIDs.contains(book['GenreId']) &&
                 book['OwnerId'] != widget.userID &&
                 book['IsTraded'] == false &&
-                !likedBookIDs.contains(book['BookId']);
+                !likedBookIDs.contains(book['BookId']) &&
+                book['IsReported'] == false;
           }).map((book) {
             //print("bookOwnerId: ${book['OwnerId']}, userId: ${widget.userID}");
             return BookDetails(
@@ -71,7 +72,8 @@ class _MatchPageState extends State<MatchPage> {
               quality: '${book['Quality']}%',
               genre: '',
               bookId: book['BookId'],
-              isTrade: book['IsTraded']
+              isTrade: book['IsTraded'],
+              isReport: book['IsReported']
             );
           }).toList();
 
@@ -89,7 +91,8 @@ class _MatchPageState extends State<MatchPage> {
               quality: '${book['Quality']}%',
               genre: '',
               bookId: book['BookId'],
-              isTrade: book['IsTraded']
+              isTrade: book['IsTraded'],
+              isReport: book['IsReported']
             );
           }).toList();
 

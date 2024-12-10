@@ -141,7 +141,7 @@ late String profilePicture = '';
     final Map<String, dynamic> data = {
       'Firstname': editableFirstName,
       'Lastname': editableLastName,
-      'gender': editableGender,
+      'Gender': editableGender,
       'ProfileUrl': base64Image,
     };
   //   if (editableUsername != usernameController.text) {

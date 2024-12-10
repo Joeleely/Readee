@@ -4,6 +4,7 @@ import 'package:readee_app/features/profile/editGenres.dart';
 import 'package:readee_app/features/profile/editProfileScreen.dart';
 import 'package:readee_app/features/profile/history.dart';
 import 'package:readee_app/features/profile/myBook.dart';
+import 'package:readee_app/features/profile/reportedBook.dart';
 import 'package:readee_app/features/profile/review.dart';
 import 'package:readee_app/features/profile/widget/pageRoute.dart';
 import 'package:readee_app/widget/profile_menu.dart';
@@ -37,9 +38,10 @@ class _ProfilePageState extends State<ProfilePage> {
     fetchUsername(userID);
   }
 
-   Future<void> logout() async {
+  Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('user_token'); // Replace 'token' with your actual token key
+    await prefs
+        .remove('user_token'); // Replace 'token' with your actual token key
     await prefs.remove('activate2FA');
     await prefs.remove('secKey');
 
@@ -48,10 +50,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // Navigate to the login screen
     Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const LoginPage()),
-            );
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
   }
 
   Future<void> fetchUsername(int userId) async {
@@ -71,7 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
           profile = data['ProfileUrl'] ?? 'NoProfile';
         });
 
-          print("ProfileUrl: $profile");
+        print("ProfileUrl: $profile");
       } else {
         throw Exception('Failed to load user data');
       }
@@ -138,7 +139,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           context,
                           CustomPageRoute(
                             page: EditProfileScreen(
-                              userID: userID, profile: profile,
+                              userID: userID,
+                              profile: profile,
                             ),
                           ))),
                   ProfileMenuWidget(

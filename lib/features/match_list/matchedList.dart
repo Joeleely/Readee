@@ -168,6 +168,7 @@ class _MatchedListState extends State<MatchedList> {
                 quality: '${bookJson['Quality'] ?? '0'}%',
                 isTrade: bookJson['IsTraded'],
                 genre: bookJson['Genre'] ?? '',
+                isReport: bookJson['IsReported']
               );
             } else {
               print('Failed to load book for matchedBookId: $matchedBookId');
@@ -194,6 +195,7 @@ class _MatchedListState extends State<MatchedList> {
                 quality: '${bookJson['Quality'] ?? '0'}%',
                 isTrade: bookJson['IsTraded'],
                 genre: bookJson['Genre'] ?? '',
+                isReport: bookJson['IsReported']
               );
             } else {
               print('Failed to load book for ownerBookId: $ownerBookId');
