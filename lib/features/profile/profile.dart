@@ -71,8 +71,7 @@ class _ProfilePageState extends State<ProfilePage> {
           gender = data['Gender'] ?? 'ThisIsNull';
           profile = data['ProfileUrl'] ?? 'NoProfile';
         });
-
-        print("ProfileUrl: $profile");
+        // print('Profile Url: $profile');
       } else {
         throw Exception('Failed to load user data');
       }
@@ -103,9 +102,28 @@ class _ProfilePageState extends State<ProfilePage> {
                     alignment: Alignment.center,
                     child: CircleAvatar(
                       radius: 100,
-                      backgroundImage: NetworkImage(profile),
+                      backgroundColor:
+                          Colors.lightBlueAccent, // Set a default background color
+                      backgroundImage: profile.isNotEmpty &&
+                              Uri.tryParse(profile)?.hasAbsolutePath == true
+                          ? NetworkImage(profile)
+                          : null, // Use null if no profile image
+                      child: (profile.isEmpty ||
+                              !Uri.tryParse(profile)!.hasAbsolutePath == true)
+                          ? Text(
+                              username.isNotEmpty
+                                  ? username[0].toUpperCase()
+                                  : '?',
+                              style: const TextStyle(
+                                fontSize: 50, // Font size for the initial
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white, // Text color
+                              ),
+                            )
+                          : null, // No text if the image is valid
                     ),
                   ),
+
                   const SizedBox(height: 25),
                   Align(
                     alignment: Alignment.center,

@@ -136,7 +136,7 @@ class _BookCardState extends State<BookCard> {
           int currentPhoto = currentPhotoMap[book] ?? 0;
 
           return Padding(
-            padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 20),
             child: Hero(
               tag: "imageTag$i",
               child: Stack(
