@@ -40,6 +40,7 @@ class _ChatPageState extends State<ChatPage> {
 
       _channel.stream.listen((data) {
         final message = json.decode(data);
+        print('Received message: $message');
         setState(() {
           _messages.add({
             'senderId': message['SenderId'],

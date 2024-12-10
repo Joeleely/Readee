@@ -88,7 +88,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
       if (response.statusCode == 200) {
         final bookData = json.decode(response.body);
-        print(bookData);
+        //print(bookData);
         setState(() {
           book = Book2(
             title: bookData['BookName'] ?? 'ThisIsNull',
@@ -515,7 +515,7 @@ void _deleteBook(String bookId) async {
     final response = await http.get(
       Uri.parse('http://localhost:3000/getRoomId/$secondUserId/$firstUserId'),
     );
-    print("secondUserId: $secondUserId, firstUserId: $firstUserId");
+    //print("secondUserId: $secondUserId, firstUserId: $firstUserId");
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
