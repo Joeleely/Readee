@@ -246,13 +246,13 @@ class _MyBooksPageState extends State<MyBooksPage> {
                                     border: Border.all(
                                       color: books[index].isReported
                                           ? Colors.red
-                                          : Colors.cyan,
+                                          : Colors.white,
                                       width: 2,
                                     ),
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(5),
                                   ),
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(5),
                                     child: Image(
                                       image: imageProvider,
                                       fit: BoxFit.cover,

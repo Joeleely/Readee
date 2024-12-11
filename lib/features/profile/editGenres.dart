@@ -184,7 +184,8 @@ class _EditGenrePageState extends State<EditGenrePage> {
                           }
                         : null,
                     style: ButtonStyle(
-                      backgroundColor: MaterialStatePropertyAll(
+                      elevation: WidgetStatePropertyAll(1),
+                      backgroundColor: WidgetStatePropertyAll(
                         selectedGenreIds.isNotEmpty ? Colors.cyan : Colors.grey,
                       ),
                     ),
@@ -197,6 +198,7 @@ class _EditGenrePageState extends State<EditGenrePage> {
                   ),
                   const SizedBox(width: 30),
                   ElevatedButton(
+                    style: const ButtonStyle(elevation: WidgetStatePropertyAll(1)),
                     onPressed: () => {Navigator.pop(context)},
                     child: const Text('Cancel'),
                   ),
