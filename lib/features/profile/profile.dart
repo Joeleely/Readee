@@ -4,6 +4,7 @@ import 'package:readee_app/features/profile/editGenres.dart';
 import 'package:readee_app/features/profile/editProfileScreen.dart';
 import 'package:readee_app/features/profile/history.dart';
 import 'package:readee_app/features/profile/myBook.dart';
+import 'package:readee_app/features/profile/reportedBook.dart';
 import 'package:readee_app/features/profile/review.dart';
 import 'package:readee_app/features/profile/widget/pageRoute.dart';
 import 'package:readee_app/widget/profile_menu.dart';
@@ -41,6 +42,11 @@ class _ProfilePageState extends State<ProfilePage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs
         .remove('user_token'); // Replace 'token' with your actual token key
+    await prefs.remove('activate2FA');
+    await prefs.remove('secKey');
+
+    print("activate2FA: ${prefs.getBool('activate2FA')}");
+    print("Seckey: ${prefs.getString('secKey')}");
 
     // Navigate to the login screen
     Navigator.pushReplacement(

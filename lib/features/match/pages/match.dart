@@ -8,9 +8,7 @@ import 'package:readee_app/features/notification/notification_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:readee_app/features/match/widgets/book_card.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 
 import '../../profile/editGenres.dart';
 
@@ -29,13 +27,10 @@ class _MatchPageState extends State<MatchPage> {
   bool isLoading = false;
   int offset = 0;
   int limit = 10;
-  List<int> likedBookIndexes = [];
   int likeCount = 0;
   int unlikeCount = 0;
 
   final ScrollController _scrollController = ScrollController();
-  Map<String, dynamic>? adBanner;
-  List<Map<String, dynamic>> ads = [];
   Map<String, dynamic>? currentAd;
   Timer? adTimer;
 
@@ -44,51 +39,41 @@ class _MatchPageState extends State<MatchPage> {
     super.initState();
     _scrollController.addListener(_onScroll);
     fetchBooks();
-    _loadLikedBooks(); // Load liked books from shared preferences
+    fetchAdBanner();
   }
 
   void _onScroll() {
     if (_scrollController.position.pixels ==
             _scrollController.position.maxScrollExtent &&
         !isLoading) {
-      print('Reached the bottom of the list. Loading more books...');
-      fetchBooks(); // Load more books
+      fetchBooks();
     }
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    fetchAdBanner();
     adTimer?.cancel();
-        super.dispose();
+    super.dispose();
   }
-
 
   // Fetch ad banner from API
   Future<void> fetchAdBanner() async {
     try {
       final response =
           await http.get(Uri.parse('http://localhost:3000/getAllAds'));
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
       if (response.statusCode == 200) {
         List<dynamic> adData = jsonDecode(response.body);
         if (adData.isNotEmpty) {
           setState(() {
-            ads = adData.cast<Map<String, dynamic>>();
-            currentAd =
-                ads[random.nextInt(ads.length)]; // Set the first random ad
+            currentAd = adData[random.nextInt(adData.length)];
           });
 
-          // Start the timer to update the ad periodically
-          adTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
-            if (ads.isNotEmpty && mounted) {
-              setState(() {
-                currentAd = ads[random.nextInt(ads.length)];
-              });
-            }
+          // Update ad periodically
+          adTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+            setState(() {
+              currentAd = adData[random.nextInt(adData.length)];
+            });
           });
         }
       } else {
@@ -101,7 +86,7 @@ class _MatchPageState extends State<MatchPage> {
 
   void launchAdUrl(String? url) async {
     if (url == null) {
-      print('Error: URL is null');
+      print('Ad URL is null');
       return;
     }
     final Uri uri = Uri.parse(url);
@@ -114,10 +99,8 @@ class _MatchPageState extends State<MatchPage> {
 
   // Fetch books from API
   Future<void> fetchBooks() async {
-    if (isLoading) {
-      print("Already loading, skipping fetch");
-      return;
-    }
+    if (isLoading) return;
+
     setState(() {
       isLoading = true;
     });
@@ -125,26 +108,23 @@ class _MatchPageState extends State<MatchPage> {
     try {
       final response = await http.get(Uri.parse(
           'http://localhost:3000/books/recommendations/${widget.userID}?offset=$offset&limit=$limit&random=true'));
+
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
-        final List<dynamic> booksData = responseBody['data']['books'] ?? [];
+        final List<dynamic> booksData = responseBody['data']['books'];
 
-        // Check if there are new books
-        if (booksData.isEmpty) {
-          print('No more books to fetch');
-        } else {
-          List<BookDetails> newBooks =
-              booksData.map((book) => BookDetails.fromJson(book)).toList();
+        List<BookDetails> newBooks =
+            booksData.map((book) => BookDetails.fromJson(book)).toList();
 
-          setState(() {
-            books.addAll(newBooks);
-          });
-        }
+        setState(() {
+          books.addAll(newBooks);
+          offset += limit; // Increment offset for pagination
+        });
       } else {
-        print("Failed to fetch books: ${response.body}");
+        print('Failed to fetch books: ${response.body}');
       }
-    } catch (e) {
-      print("Error fetching books: $e");
+    } catch (error) {
+      print('Error fetching books: $error');
     } finally {
       setState(() {
         isLoading = false;
@@ -152,77 +132,35 @@ class _MatchPageState extends State<MatchPage> {
     }
   }
 
-  // SharedPreferences
-  Future<void> _saveLikedBooks() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('likedBooks', json.encode(bookStatuses));
-  }
-
-  // Load data from SharedPreferences
-  Future<void> _loadLikedBooks() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? likedBooksJson = prefs.getString('likedBooks');
-    if (likedBooksJson != null) {
-      List<dynamic> likedBooksList = json.decode(likedBooksJson);
-      setState(() {
-        bookStatuses = List<bool>.from(likedBooksList);
-      });
-    }
-  }
-
-  // Save the current index
-  Future<void> _saveLastIndex(int currentIndex) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setInt('lastIndex', currentIndex);
-  }
-
-  // Load the last index
-  Future<void> _loadLastIndex() async {
-    final prefs = await SharedPreferences.getInstance();
-    int lastIndex = prefs.getInt('lastIndex') ?? 0;
-    setState(() {
-      offset = lastIndex;
-    });
-  }
-
-  List<bool> bookStatuses = [];
   void handleLike(int index, bool isLiked) {
     print("Book $index is liked: $isLiked");
-    if (index >= bookStatuses.length) {
-      bookStatuses.add(isLiked);
-    } else {
-      bookStatuses[index] = isLiked;
-    }
     if (isLiked) {
       likeCount++;
     } else {
       unlikeCount++;
     }
-    _saveLikedBooks();
-    if ((likeCount + unlikeCount) == 10) {
+
+    if ((likeCount + unlikeCount) >= 10) {
       _checkGenreChange();
     }
   }
 
   void _checkGenreChange() {
     if (unlikeCount > 5) {
-      print("More than 5 books were unliked. Loading next stack...");
-      _showChangeGenreDialog("Would you like to change the genre?");
-      _loadNextStack();
+      _showChangeGenreDialog("You disliked many books. Would you like to change the genre?");
     } else {
-      print("Fewer than 5 books were unliked. Showing genre change dialog...");
-      _loadNextStack();
+      print("Continuing with current genres...");
     }
     likeCount = 0;
     unlikeCount = 0;
+    _loadNextStack();
   }
 
   void _loadNextStack() {
     setState(() {
-      offset += 0;
+      offset = 0;
       books.clear();
     });
-    print('Loading next stack with offset: $offset, limit: $limit');
     fetchBooks();
   }
 
@@ -231,7 +169,7 @@ class _MatchPageState extends State<MatchPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Change Genre'),
+          title: const Text('Change Genre'),
           content: Text(message),
           actions: [
             TextButton(
@@ -239,16 +177,17 @@ class _MatchPageState extends State<MatchPage> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => EditGenrePage(userID: widget.userID,)),
+                  MaterialPageRoute(
+                      builder: (context) => EditGenrePage(userID: widget.userID)),
                 );
               },
-              child: Text('Yes'),
+              child: const Text('Yes'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('No'),
+              child: const Text('No'),
             ),
           ],
         );
@@ -264,6 +203,7 @@ class _MatchPageState extends State<MatchPage> {
           image: AssetImage('assets/logo.png'),
           height: 50,
         ),
+        backgroundColor: const Color.fromARGB(255, 243, 252, 255),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications),
@@ -272,7 +212,7 @@ class _MatchPageState extends State<MatchPage> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => NotificationPage(
-                          userId: 2,
+                          userId: widget.userID,
                           notificationService:
                               NotificationService('http://localhost:3000'),
                         )),
@@ -280,28 +220,21 @@ class _MatchPageState extends State<MatchPage> {
             },
           ),
         ],
-        backgroundColor: const Color.fromARGB(255, 243, 252, 255),
       ),
       body: Center(
-        child: isLoading
+        child: isLoading && books.isEmpty
             ? const CircularProgressIndicator()
             : books.isEmpty
                 ? const Center(
                     child: Text(
-                      "No more books to show, wait for others to post books",
+                      "No more books to show. Wait for others to post books.",
                     ),
                   )
                 : Column(
                     children: [
                       if (currentAd != null)
                         GestureDetector(
-                          onTap: () {
-                            if (currentAd!['Link'] != null) {
-                              launchAdUrl(currentAd!['Link']);
-                            } else {
-                              print('Ad link not available');
-                            }
-                          },
+                          onTap: () => launchAdUrl(currentAd?['Link']),
                           child: Container(
                             width: MediaQuery.of(context).size.width * 0.95,
                             height: 80,
@@ -310,10 +243,9 @@ class _MatchPageState extends State<MatchPage> {
                               color: Colors.grey[200],
                               border: Border.all(color: Colors.blue),
                               borderRadius: BorderRadius.circular(8),
-                              image: currentAd!["ImageUrl"] != null
+                              image: currentAd?["ImageUrl"] != null
                                   ? DecorationImage(
-                                      image:
-                                          NetworkImage(currentAd!["ImageUrl"]),
+                                      image: NetworkImage(currentAd!["ImageUrl"]),
                                       fit: BoxFit.cover,
                                     )
                                   : null,
@@ -321,12 +253,23 @@ class _MatchPageState extends State<MatchPage> {
                           ),
                         ),
                       Expanded(
-                        child: BookCard(
-                          books: books,
-                          userID: widget.userID,
-                          onLike: handleLike,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          itemCount: books.length,
+                          itemBuilder: (context, index) {
+                            return BookCard(
+                              books: books,
+                              userID: widget.userID,
+                              onLike: (index, isLiked) => handleLike(index, isLiked),
+                            );
+                          },
                         ),
                       ),
+                      if (isLoading)
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        ),
                     ],
                   ),
       ),

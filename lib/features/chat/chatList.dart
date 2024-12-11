@@ -78,6 +78,7 @@ class ChatListPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Your Chat'),
         backgroundColor: Color.fromARGB(255, 228, 248, 255),
+        automaticallyImplyLeading: false,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: fetchChats(),

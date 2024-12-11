@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -10,6 +11,7 @@ import 'package:readee_app/features/chat/chat.dart';
 import 'package:readee_app/features/create_book/edit_book.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
 import 'package:readee_app/features/match/pages/book_info.dart';
+import 'package:readee_app/features/match_list/seeReview.dart';
 import 'package:readee_app/features/profile/history.dart';
 import 'package:readee_app/features/profile/widget/pageRoute.dart';
 import 'package:readee_app/typography.dart';
@@ -37,10 +39,12 @@ class _BookDetailPageState extends State<BookDetailPage> {
   late int timesSwap = 0;
   late double averageRate = 0.0;
   late String profile = '';
+  late String ownerId = '';
   late String otherPorfile = '';
   bool isExpanded = false;
   bool showToggle = false;
   bool isLoading = true;
+  bool isReport = false;
   String tradeRequestStatus = '';
   bool showAcceptAndRejectButton = false;
   int personSwap = 0;
@@ -84,6 +88,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
       if (response.statusCode == 200) {
         final bookData = json.decode(response.body);
+        //print(bookData);
         setState(() {
           book = Book2(
             title: bookData['BookName'] ?? 'ThisIsNull',
@@ -96,12 +101,17 @@ class _BookDetailPageState extends State<BookDetailPage> {
             description: bookData['BookDescription'] ?? 'ThisIsNull',
             ownerId: bookData['OwnerId']?.toString() ?? 'ThisIsNull',
             bookId: bookData['BookId']?.toString() ?? 'ThisIsNull',
+            isReport: bookData['IsReported'] ?? 'ThisIsNull',
           );
           _fetchOwnerData(book.ownerId); // Fetch owner’s data here
           _fetchTradeCount(book.ownerId);
           _fetchAverageRate(book.ownerId);
           _checkDescriptionLength();
           isLoading = false;
+
+          if (book.isReport == true) {
+            _showReportedDialog(DateTime.parse(bookData['ExpiredDate']), book.bookId);
+          }
         });
       } else {
         _logError('Failed to fetch book data: ${response.statusCode}');
@@ -110,6 +120,82 @@ class _BookDetailPageState extends State<BookDetailPage> {
       _logError('Error fetching book data: $e');
     }
   }
+
+  void _showReportedDialog(DateTime reportTime, String bookId) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final now = DateTime.now();
+      final deletionTime = reportTime.add(const Duration(days: 7));
+      final timeLeft = deletionTime.difference(now);
+
+    if (timeLeft.isNegative) {
+      _deleteBook(bookId);
+      Navigator.of(context).pop();
+    } else {
+      Timer(timeLeft, () {
+        _deleteBook(bookId);
+        Navigator.of(context).pop();
+      });
+    }
+    
+      String timeLeftText;
+      if (timeLeft.isNegative) {
+        timeLeftText = "Your book will be deleted very soon.";
+      } else {
+        final days = timeLeft.inDays;
+        final hours = timeLeft.inHours % 24;
+        final minutes = timeLeft.inMinutes % 60;
+        timeLeftText = "$days days, $hours hours, and $minutes minutes left.";
+      }
+      showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent closing by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Text('Alert'),
+              const SizedBox(width: 10,),
+              Tooltip(
+                        message: 'If you want to continue trading this book, you have to post your book again.',
+                        child: Icon(
+                          Icons.help_outline,
+                          color: Colors.grey,
+                          size: 16,
+                        ),
+                      ),
+            ],
+          ),
+          content: const Text(
+              'Your book has been reported too many times. It will be deleted soon.\nNote that: Other will not see this book anymore'),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Understood'),
+            ),
+          ],
+        );
+      },
+    );
+  });
+}
+
+void _deleteBook(String bookId) async {
+  final url = Uri.parse('http://localhost:3000/deleteBook/$bookId');
+
+  try {
+    final response = await http.post(url);
+    if (response.statusCode == 200) {
+      print("Book with ID $bookId successfully deleted.");
+    } else {
+      print("Failed to delete book with ID $bookId: ${response.statusCode}");
+    }
+  } catch (error) {
+    print("Error deleting book with ID $bookId: $error");
+  }
+}
 
   Future<void> _fetchOwnerData(String ownerId) async {
     try {
@@ -277,7 +363,12 @@ class _BookDetailPageState extends State<BookDetailPage> {
                 tradeRequestStatus = 'accepted';
                 showAcceptAndRejectButton = false;
               });
-              Navigator.push(context, CustomPageRoute(page: HistoryPage(userId: widget.userId,)));
+              Navigator.push(
+                  context,
+                  CustomPageRoute(
+                      page: HistoryPage(
+                    userId: widget.userId,
+                  )));
             }
 
             ScaffoldMessenger.of(context).showSnackBar(
@@ -424,7 +515,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
     final response = await http.get(
       Uri.parse('http://localhost:3000/getRoomId/$secondUserId/$firstUserId'),
     );
-    print("secondUserId: $secondUserId, firstUserId: $firstUserId");
+    //print("secondUserId: $secondUserId, firstUserId: $firstUserId");
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -497,293 +588,311 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
     int currentPhoto = 0; // Keep track of the current photo index
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 243, 252, 255),
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(LineAwesomeIcons.arrow_left),
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              book.title,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            backgroundColor: const Color.fromARGB(255, 243, 252, 255),
+            leading: IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(LineAwesomeIcons.arrow_left),
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 10),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.4),
-                  borderRadius: const BorderRadius.all(Radius.circular(10)),
-                ),
-                child: Text(
-                  "${book.quality}%",
-                  style: TypographyText.h4(Colors.white),
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          if (widget.userId == int.parse(book.ownerId) && widget.isEdit == true)
-            Padding(
-              padding: const EdgeInsets.only(right: 10.0),
-              child: IconButton(
-                icon: const Icon(Icons.edit), // Edit icon
-                onPressed: () {
-                  _navigateToEditBookPage();
-                },
-              ),
-            ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Center(
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.5,
-                    height: MediaQuery.of(context).size.height * 0.3,
-                    child: Image(
-                      image: book.img[currentPhoto].startsWith('http')
-                          ? NetworkImage(book.img[currentPhoto])
-                          : MemoryImage(
-                                  _convertBase64Image(book.img[currentPhoto]))
-                              as ImageProvider<Object>,
+                Text(
+                  book.title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.4),
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    ),
+                    child: Text(
+                      "${book.quality}%",
+                      style: TypographyText.h4(Colors.white),
                     ),
                   ),
-                ),
-                const SizedBox(height: 30),
-                Row(
-                  children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundImage: NetworkImage(otherPorfile),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(ownerName),
-                        Row(
-                          children: [
-                            Text(
-                              "$tradeCount",
-                              style: const TextStyle(color: Colors.cyan),
-                            ),
-                            const Text(" Swapped"),
-                            const SizedBox(width: 10),
-                            Text(
-                              averageRate.toStringAsFixed(2), // Displaying 5.00
-                              style: const TextStyle(color: Colors.cyan),
-                            ),
-                            const Text(" Ratings"),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    if (widget.userId != int.parse(book.ownerId))
-                      IconButton(
-                        icon: const Icon(Icons.sms),
-                        onPressed: () => _getRoomId(context),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    const Text(
-                      'Author: ',
-                      style: TextStyle(color: Colors.cyan),
-                    ),
-                    Text(book.author),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Description:',
-                  style: TextStyle(color: Colors.cyan),
-                ),
-                const SizedBox(height: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AnimatedCrossFade(
-                      firstChild: Text(
-                        book.description,
-                        maxLines: isExpanded ? null : 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      secondChild: Text(book.description),
-                      crossFadeState: isExpanded
-                          ? CrossFadeState.showSecond
-                          : CrossFadeState.showFirst,
-                      duration: const Duration(milliseconds: 200),
-                    ),
-                    if (showToggle)
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            isExpanded = !isExpanded;
-                          });
-                        },
-                        child: Text(
-                          isExpanded ? "Show less" : "Show more...",
-                          style: const TextStyle(color: Colors.blue),
-                        ),
-                      ),
-                  ],
                 ),
               ],
             ),
+            actions: [
+              if (widget.userId == int.parse(book.ownerId) &&
+                  widget.isEdit == true)
+                Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: IconButton(
+                    icon: const Icon(Icons.edit), // Edit icon
+                    onPressed: () {
+                      _navigateToEditBookPage();
+                    },
+                  ),
+                ),
+            ],
           ),
-          if (tradeRequestStatus == 'none')
-            Positioned(
-              bottom: 30,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _showRequestConfirmationDialog();
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    elevation: 5,
-                    backgroundColor: tradeRequestStatus == 'pending'
-                        ? Colors.grey
-                        : Colors.cyan,
-                  ),
-                  child: Text(
-                    tradeRequestStatus == 'pending'
-                        ? 'Already send request'
-                        : 'Request to trade',
-                    style: const TextStyle(
-                      color: Colors.white,
+          body: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        height: MediaQuery.of(context).size.height * 0.3,
+                        child: Image(
+                          image: book.img[currentPhoto].startsWith('http')
+                              ? NetworkImage(book.img[currentPhoto])
+                              : MemoryImage(_convertBase64Image(
+                                      book.img[currentPhoto]))
+                                  as ImageProvider<Object>,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    Row(
+                      children: [
+                        Align(
+                          alignment: Alignment.center,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  CustomPageRoute(
+                                      page: SeeReviewPage(
+                                    userId: book.ownerId,
+                                    OwnerName: ownerName,
+                                  )));
+                            },
+                            child: CircleAvatar(
+                              radius: 20,
+                              backgroundImage: NetworkImage(otherPorfile),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(ownerName),
+                            Row(
+                              children: [
+                                Text(
+                                  "$tradeCount",
+                                  style: const TextStyle(color: Colors.cyan),
+                                ),
+                                const Text(" Swapped"),
+                                const SizedBox(width: 10),
+                                Text(
+                                  averageRate
+                                      .toStringAsFixed(2), // Displaying 5.00
+                                  style: const TextStyle(color: Colors.cyan),
+                                ),
+                                const Text(" Ratings"),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        if (widget.userId != int.parse(book.ownerId))
+                          IconButton(
+                            icon: const Icon(Icons.sms),
+                            onPressed: () => _getRoomId(context),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        const Text(
+                          'Author: ',
+                          style: TextStyle(color: Colors.cyan),
+                        ),
+                        Text(book.author),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Description:',
+                      style: TextStyle(color: Colors.cyan),
+                    ),
+                    const SizedBox(height: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AnimatedCrossFade(
+                          firstChild: Text(
+                            book.description,
+                            maxLines: isExpanded ? null : 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          secondChild: Text(book.description),
+                          crossFadeState: isExpanded
+                              ? CrossFadeState.showSecond
+                              : CrossFadeState.showFirst,
+                          duration: const Duration(milliseconds: 200),
+                        ),
+                        if (showToggle)
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                isExpanded = !isExpanded;
+                              });
+                            },
+                            child: Text(
+                              isExpanded ? "Show less" : "Show more...",
+                              style: const TextStyle(color: Colors.blue),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              if (tradeRequestStatus == 'none')
+                Positioned(
+                  bottom: 30,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _showRequestConfirmationDialog();
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 5,
+                        backgroundColor: tradeRequestStatus == 'pending'
+                            ? Colors.grey
+                            : Colors.cyan,
+                      ),
+                      child: Text(
+                        tradeRequestStatus == 'pending'
+                            ? 'Already send request'
+                            : 'Request to trade',
+                        style: const TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          if (widget.userId == secondUserId && tradeRequestStatus == 'pending')
-            Positioned(
-              bottom: 30,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      tradeRequestStatus == 'pending'
-                          ? _showCancelRequestConfirmationDialog()
-                          : _showRequestConfirmationDialog();
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    elevation: 5,
-                    backgroundColor: tradeRequestStatus == 'pending'
-                        ? Colors.grey
-                        : Colors.cyan,
-                  ),
-                  child: Text(
-                    tradeRequestStatus == 'pending'
-                        ? 'Already send request'
-                        : 'Request to trade',
-                    style: const TextStyle(
-                      color: Colors.white,
+              if (widget.userId == secondUserId &&
+                  tradeRequestStatus == 'pending')
+                Positioned(
+                  bottom: 30,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          tradeRequestStatus == 'pending'
+                              ? _showCancelRequestConfirmationDialog()
+                              : _showRequestConfirmationDialog();
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 5,
+                        backgroundColor: tradeRequestStatus == 'pending'
+                            ? Colors.grey
+                            : Colors.cyan,
+                      ),
+                      child: Text(
+                        tradeRequestStatus == 'pending'
+                            ? 'Already send request'
+                            : 'Request to trade',
+                        style: const TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          if (showAcceptAndRejectButton && tradeRequestStatus == 'pending')
-            Positioned(
-              bottom: 30,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _showRejectConfirmationDialog();
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 5,
-                      backgroundColor: Colors.red,
-                    ),
-                    child: const Text(
-                      'Reject request',
-                      style: TextStyle(
-                        color: Colors.white,
+              if (showAcceptAndRejectButton && tradeRequestStatus == 'pending')
+                Positioned(
+                  bottom: 30,
+                  left: 0,
+                  right: 0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _showRejectConfirmationDialog();
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          elevation: 5,
+                          backgroundColor: Colors.red,
+                        ),
+                        child: const Text(
+                          'Reject request',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 30),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _showAcceptConfirmationDialog();
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 5,
-                      backgroundColor: Colors.cyan,
-                    ),
-                    child: const Text(
-                      'Accept request',
-                      style: TextStyle(
-                        color: Colors.white,
+                      const SizedBox(width: 30),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _showAcceptConfirmationDialog();
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          elevation: 5,
+                          backgroundColor: Colors.cyan,
+                        ),
+                        child: const Text(
+                          'Accept request',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          if (tradeRequestStatus == 'accepted')
-            Positioned(
-              bottom: 30,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        // Handle trade success logic
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 5,
-                      backgroundColor: Colors.green,
-                    ),
-                    child: const Text(
-                      'Trade success',
-                      style: TextStyle(
-                        color: Colors.white,
+                ),
+              if (tradeRequestStatus == 'accepted')
+                Positioned(
+                  bottom: 30,
+                  left: 0,
+                  right: 0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            // Handle trade success logic
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          elevation: 5,
+                          backgroundColor: Colors.green,
+                        ),
+                        child: const Text(
+                          'Trade success',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-        ],
-      ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -797,7 +906,8 @@ class Book2 {
       required this.quality,
       required this.ownerId,
       required this.bookId,
-      required this.description});
+      required this.description,
+      required this.isReport});
   final String title;
   final String author;
   final List<String> img;
@@ -806,4 +916,5 @@ class Book2 {
   final String description;
   final String ownerId;
   final String bookId;
+  final bool isReport;
 }

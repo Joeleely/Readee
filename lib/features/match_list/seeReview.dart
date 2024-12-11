@@ -3,16 +3,17 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-class YourRatingPage extends StatefulWidget {
-  final int userId;
+class SeeReviewPage extends StatefulWidget {
+  final String userId;
+  final String OwnerName;
 
-  YourRatingPage({Key? key, required this.userId}) : super(key: key);
+  SeeReviewPage({Key? key, required this.userId, required this.OwnerName}) : super(key: key);
 
   @override
-  State<YourRatingPage> createState() => _YourRatingPageState();
+  State<SeeReviewPage> createState() => _SeeReviewPageState();
 }
 
-class _YourRatingPageState extends State<YourRatingPage> {
+class _SeeReviewPageState extends State<SeeReviewPage> {
   late final String reviewsApiUrl;
   late final String averageRatingApiUrl;
 
@@ -21,43 +22,80 @@ class _YourRatingPageState extends State<YourRatingPage> {
   @override
   void initState() {
     super.initState();
-    reviewsApiUrl = 'http://localhost:3000/reviews/received/${widget.userId}';
-    averageRatingApiUrl = 'http://localhost:3000/avgRating/${widget.userId}';
+    //reviewsApiUrl = 'http://localhost:3000/reviews/received/${widget.userId}';
+    //averageRatingApiUrl = 'http://localhost:3000/avgRating/${widget.userId}';
 
     // Fetch the average rating when the page loads
     fetchAverageRating();
   }
 
   Future<List<Rating>> fetchReviews() async {
-    final response = await http.get(Uri.parse(reviewsApiUrl));
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body)['reviews'];
-      if (data == null || data.isEmpty) {
-        return [];
+    try {
+      print('Fetching reviews...');
+      final response = await http
+          .get(Uri.parse(
+              'http://localhost:3000/reviews/received/${widget.userId}'))
+          .timeout(const Duration(seconds: 10));
+      ;
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+
+        if (responseData.containsKey('reviews')) {
+          final List<dynamic> reviewsData = responseData['reviews'];
+          //print('Reviews found: $reviewsData');
+          return reviewsData.map((json) => Rating.fromJson(json)).toList();
+        } else if (responseData.containsKey('message')) {
+          //print('No reviews message: ${responseData['message']}');
+          return [];
+        } else {
+          throw Exception('Unexpected response format');
+        }
+      } else {
+        throw Exception(
+            'Failed to load reviews. Status code: ${response.statusCode}');
       }
-      return data.map((json) => Rating.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to load reviews');
+    } catch (e) {
+      print('Error in fetchReviews: $e');
+      return [];
     }
   }
 
   Future<void> fetchAverageRating() async {
-    final response = await http.get(Uri.parse(averageRatingApiUrl));
+  try {
+    final response = await http
+        .get(Uri.parse('http://localhost:3000/avgRating/${widget.userId}'))
+        .timeout(const Duration(seconds: 10)); // Add timeout for robustness
 
     if (response.statusCode == 200) {
       setState(() {
         averageRating = json.decode(response.body)['average_rating'] ?? 0;
+        print("averageRating: $averageRating");
       });
+    } else if (response.statusCode == 404) {
+      // Handle 404 (not found) specifically
+      setState(() {
+        averageRating = 0.0; // Default to 0.0 if no rating exists
+      });
+      print("averageRating not found for userId: ${widget.userId}");
     } else {
-      throw Exception('Failed to load average rating');
+      throw Exception('Failed to load average rating. Status code: ${response.statusCode}');
     }
+  } catch (e) {
+    print('Error fetching average rating: $e');
+    setState(() {
+      averageRating = 0.0; // Handle errors gracefully by setting default value
+    });
   }
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your rating'),
+        title: Text("${widget.OwnerName}"),
         backgroundColor: Color.fromARGB(255, 228, 248, 255),
       ),
       body: Padding(
@@ -99,19 +137,24 @@ class _YourRatingPageState extends State<YourRatingPage> {
               child: FutureBuilder<List<Rating>>(
                 future: fetchReviews(),
                 builder: (context, snapshot) {
+                  print('FutureBuilder State: ${snapshot.connectionState}');
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
+                    print('State: Error');
+                    print('Error: ${snapshot.error}');
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    print('State: No Data');
                     return const Center(
                       child: Text(
-                        'No reviews available for this user yet.',
+                        'This user hasn\'t received any reviews yet.',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                     );
                   } else {
+                    print('State: Data Found');
                     final reviews = snapshot.data!;
                     return ListView.separated(
                       itemCount: reviews.length,
@@ -140,16 +183,15 @@ class Rating {
   final String profileImageUrl;
   final String comment;
   final int rating;
-  final int score;
 
   Rating({
     required this.username,
     required this.profileImageUrl,
     required this.comment,
     required this.rating,
-    required this.score,
   });
 
+  // Factory method to create a Rating object from JSON
   factory Rating.fromJson(Map<String, dynamic> json) {
     return Rating(
       username: json['giver_name'],
@@ -203,11 +245,10 @@ class RatingCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        // Generate stars based on the rating
         Row(
           children: List.generate(5, (index) {
             return Icon(
-              index < review.score ? Icons.star : Icons.star_border,
+              index < review.rating ? Icons.star : Icons.star_border,
               color: Colors.amber,
               size: 18,
             );
