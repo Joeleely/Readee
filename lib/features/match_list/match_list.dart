@@ -22,6 +22,7 @@ class MatchListPage extends StatefulWidget {
 class _MatchListPageState extends State<MatchListPage> {
   List<BookDetails> ownerBooks = [];
   bool isLoading = true; // Loading state
+   bool isPageActive = true;
 
   late int userID;
 
@@ -59,6 +60,8 @@ class _MatchListPageState extends State<MatchListPage> {
       List<BookDetails> fetchedOwnerBooks = [];
 
       for (var match in matches) {
+          if (!isPageActive) return;
+
         // Fetch trade status for this matchId
         final matchStatusResponse = await http.get(
             Uri.parse('http://localhost:3000/getAllMatches/${match.matchId}'));
@@ -93,6 +96,7 @@ class _MatchListPageState extends State<MatchListPage> {
                 quality: int.parse(ownerBookJson['Quality'] ?? '0'),
                 isTrade: ownerBookJson['IsTraded'],
                 genre: ownerBookJson['Genre'] ?? '',
+                isReport: ownerBookJson['IsReported']
               );
 
               bool isDuplicate = fetchedOwnerBooks
@@ -100,11 +104,11 @@ class _MatchListPageState extends State<MatchListPage> {
 
               if (!isDuplicate &&
                   bookDetails.isTrade == false &&
-                  matchedBookJson['IsTraded'] == false) {
+                  matchedBookJson['IsTraded'] == false && bookDetails.isReport == false) {
                 fetchedOwnerBooks.add(bookDetails);
               } else {
                 print(
-                    'Skipping book: ${bookDetails.title} - Trade status: ${bookDetails.isTrade}');
+                    'Skipping book: ${bookDetails.title} - Trade status: ${bookDetails.isTrade} - Is Report: ${bookDetails.isReport}');
               }
             } else {
               print(
@@ -121,7 +125,7 @@ class _MatchListPageState extends State<MatchListPage> {
       }
 
       // Update the state with the fetched books
-      if (mounted) {
+      if (isPageActive && mounted) {
       setState(() {
         ownerBooks = fetchedOwnerBooks;
         isLoading = false; // Set loading to false after fetching
@@ -129,15 +133,17 @@ class _MatchListPageState extends State<MatchListPage> {
       }
     } catch (error) {
       print('Error fetching matched books: $error');
-      setState(() {
-        isLoading = false; // Ensure loading is set to false on error
-      });
+      if (isPageActive && mounted) {
+        setState(() {
+          isLoading = false; // Ensure loading is set to false on error
+        });
+      }
     }
   }
 
   @override
   void dispose() {
-    // Cancel any timers or listeners here
+    isPageActive = false;
     super.dispose();
   }
 
@@ -147,6 +153,7 @@ class _MatchListPageState extends State<MatchListPage> {
       appBar: AppBar(
         title: const Text('Your Match'),
         backgroundColor: const Color.fromARGB(255, 243, 252, 255),
+        automaticallyImplyLeading: false,
       ),
       body: isLoading // Show loading indicator while data is being fetched
           ? const Center(child: CircularProgressIndicator())

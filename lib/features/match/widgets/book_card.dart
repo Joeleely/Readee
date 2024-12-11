@@ -27,7 +27,6 @@ class _BookCardState extends State<BookCard> {
   Map<int, bool> bookStatuses = {};
   List<int> likedIndices = []; // List to store the indices of liked books
   List<int> unlikedIndices = []; // List to store the indices of unliked books
-
   MatchEngine? _matchEngine;
   Map<BookDetails, int> currentPhotoMap =
       {}; // Track currentPhoto for each book
@@ -46,13 +45,11 @@ class _BookCardState extends State<BookCard> {
             content: Text("Liked ${book.title}"),
             duration: const Duration(milliseconds: 500),
           ));
-
           setState(() {
             likedIndices.add(i);
             bookStatuses[book.bookId] = true; // Update bookStatuses
             print("Liked books indices: $likedIndices");
           });
-
           await _likeBook(widget.userID, book.bookId);
         },
         nopeAction: () async {
@@ -60,13 +57,11 @@ class _BookCardState extends State<BookCard> {
             content: Text("Nope ${book.title}"),
             duration: const Duration(milliseconds: 500),
           ));
-
           setState(() {
             unlikedIndices.add(i);
             bookStatuses[book.bookId] = false; // Update bookStatuses
             print("Unliked books indices: $unlikedIndices");
           });
-
           await _unlikeBook(widget.userID, book.bookId);
         },
       ));
@@ -106,50 +101,71 @@ class _BookCardState extends State<BookCard> {
     }
   }
 
-  Uint8List _convertBase64Image(String base64String) {
-    String base64Data = base64String.contains(',')
-        ? base64String.split(',').last
-        : base64String;
-    return base64Decode(base64Data);
-  }
+  void _reportBook(BookDetails book, int userId) async {
+    final url =
+        Uri.parse("http://localhost:3000/report/$userId/${book.bookId}");
 
-  ImageProvider<Object> _getImageProvider(String imageString) {
-    if (imageString.startsWith('http') || imageString.startsWith('https')) {
-      return NetworkImage(imageString);
-    } else {
-      try {
-        Uint8List bytes = base64Decode(imageString);
-        return MemoryImage(bytes);
-      } catch (e) {
-        print("Error decoding Base64: $e");
-        return AssetImage('assets/placeholder.png');
+    try {
+      // Send a POST request
+      final response = await http.post(url);
+
+      // Check if the request was successful
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Successfully reported ${book.title}."),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                "Failed to report ${book.title}. Error: ${response.statusCode}"),
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
+    } catch (e) {
+      // Handle any network or other errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("An error occurred while reporting ${book.title}: $e"),
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        height: MediaQuery.of(context).size.height * 0.8,
-        child: SwipeCards(
-          matchEngine: _matchEngine!,
-          itemBuilder: (context, i) {
-            BookDetails book = _swipeItems[i].content;
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
-              child: Hero(
-                tag: "imageTag$i",
-                child: Stack(
-                  children: [
-                    Container(
-                      height: MediaQuery.of(context).size.height * 0.8,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        image: DecorationImage(
-                          fit: BoxFit.cover,
-                          image: _getImageProvider(book.img),
-                        ),
+    return Scaffold(
+      body: SwipeCards(
+        matchEngine: _matchEngine!,
+        itemBuilder: (context, i) {
+          BookDetails book = _swipeItems[i].content;
+          int numberPhoto = book.img.length;
+
+          // Get current photo for this specific book
+          int currentPhoto = currentPhotoMap[book] ?? 0;
+
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 20),
+            child: Hero(
+              tag: "imageTag$i",
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        // Check if the image is a URL or base64
+                        image: book.img[currentPhoto].startsWith('http')
+                            ? NetworkImage(book.img[currentPhoto])
+                            : MemoryImage(
+                                    _convertBase64Image(book.img[currentPhoto]))
+                                as ImageProvider<Object>,
                       ),
                     ),
                     Container(
@@ -178,18 +194,141 @@ class _BookCardState extends State<BookCard> {
                             book.author,
                             style: TypographyText.b4(Colors.grey),
                           ),
-                          const SizedBox(height: 5),
-                          Text(
-                            book.description,
-                            style: TypographyText.b3(
-                                Colors.white.withOpacity(0.8)),
-                            overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    top: 15,
+                    right: 10,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior
+                          .deferToChild, // Ensures taps are passed to child widgets
+                      onTap:
+                          () {}, // Prevent GestureDetector from intercepting this area
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: PopupMenuButton<String>(
+                          onSelected: (value) {
+                            if (value == 'report') {
+                              // Handle report action
+                              _reportBook(book, widget.userID);
+                            }
+                          },
+                          itemBuilder: (BuildContext context) {
+                            return [
+                              const PopupMenuItem<String>(
+                                value: 'report',
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.warning_amber,
+                                      color: Colors.red, // Red icon color
+                                    ),
+                                    SizedBox(
+                                        width:
+                                            8), // Space between icon and text
+                                    Text(
+                                      'Report',
+                                      style: TextStyle(
+                                        color: Colors.red, // Red text color
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ];
+                          },
+                          icon: const Icon(
+                            Icons.more_vert,
+                            color: Colors.white,
                           ),
-                          const SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              ElevatedButton(
+                        ),
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width - 20,
+                        height: 5,
+                        child: ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: numberPhoto,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, int i) {
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: Container(
+                                width: ((MediaQuery.of(context).size.width -
+                                        (20 + ((numberPhoto + 1) * 8))) /
+                                    book.img.length),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                      color: Colors.white, width: 0.5),
+                                  color: currentPhoto == i
+                                      ? Colors.white
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .secondary
+                                          .withOpacity(0.5),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  book.title,
+                                  style: TypographyText.h2(Colors.white),
+                                  maxLines: 2,
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
+                                      decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.6),
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(10))),
+                                      child: Text(
+                                        book.quality,
+                                        style: TypographyText.h4(Colors.white),
+                                      )),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 30,
+                              child: IconButton(
+                                padding: EdgeInsets.zero,
+                                constraints: BoxConstraints(),
                                 onPressed: () {
                                   _matchEngine!.currentItem?.nope();
                                   // _unlikeBook(

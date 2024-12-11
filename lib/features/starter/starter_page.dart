@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:readee_app/features/auth/login.dart';
 import 'package:readee_app/features/starter/return.dart';
 import 'package:readee_app/features/starter/unavailable.dart';
 import 'package:readee_app/widget/bottomNav.dart';
@@ -60,8 +61,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
           ),
         );
       }
-    } catch (e) {
-      print('Error: $e');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+    } else {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -99,7 +103,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: CircularProgressIndicator(),
       ),
@@ -110,7 +114,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 class LocationErrorScreen extends StatelessWidget {
   final String errorMessage;
 
-  LocationErrorScreen({required this.errorMessage});
+  const LocationErrorScreen({super.key, required this.errorMessage});
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +122,7 @@ class LocationErrorScreen extends StatelessWidget {
       body: Center(
         child: Text(
           errorMessage,
-          style: TextStyle(fontSize: 18, color: Colors.red),
+          style: const TextStyle(fontSize: 18, color: Colors.red),
           textAlign: TextAlign.center,
         ),
       ),

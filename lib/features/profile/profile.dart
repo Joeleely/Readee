@@ -4,6 +4,7 @@ import 'package:readee_app/features/profile/editGenres.dart';
 import 'package:readee_app/features/profile/editProfileScreen.dart';
 import 'package:readee_app/features/profile/history.dart';
 import 'package:readee_app/features/profile/myBook.dart';
+import 'package:readee_app/features/profile/reportedBook.dart';
 import 'package:readee_app/features/profile/review.dart';
 import 'package:readee_app/features/profile/widget/pageRoute.dart';
 import 'package:readee_app/widget/profile_menu.dart';
@@ -41,6 +42,11 @@ class _ProfilePageState extends State<ProfilePage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs
         .remove('user_token'); // Replace 'token' with your actual token key
+    await prefs.remove('activate2FA');
+    await prefs.remove('secKey');
+
+    print("activate2FA: ${prefs.getBool('activate2FA')}");
+    print("Seckey: ${prefs.getString('secKey')}");
 
     // Navigate to the login screen
     Navigator.pushReplacement(
@@ -65,6 +71,7 @@ class _ProfilePageState extends State<ProfilePage> {
           gender = data['Gender'] ?? 'ThisIsNull';
           profile = data['ProfileUrl'] ?? 'NoProfile';
         });
+        // print('Profile Url: $profile');
       } else {
         throw Exception('Failed to load user data');
       }
@@ -95,9 +102,28 @@ class _ProfilePageState extends State<ProfilePage> {
                     alignment: Alignment.center,
                     child: CircleAvatar(
                       radius: 100,
-                      backgroundImage: NetworkImage(profile),
+                      backgroundColor:
+                          Colors.lightBlueAccent, // Set a default background color
+                      backgroundImage: profile.isNotEmpty &&
+                              Uri.tryParse(profile)?.hasAbsolutePath == true
+                          ? NetworkImage(profile)
+                          : null, // Use null if no profile image
+                      child: (profile.isEmpty ||
+                              !Uri.tryParse(profile)!.hasAbsolutePath == true)
+                          ? Text(
+                              username.isNotEmpty
+                                  ? username[0].toUpperCase()
+                                  : '?',
+                              style: const TextStyle(
+                                fontSize: 50, // Font size for the initial
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white, // Text color
+                              ),
+                            )
+                          : null, // No text if the image is valid
                     ),
                   ),
+
                   const SizedBox(height: 25),
                   Align(
                     alignment: Alignment.center,
