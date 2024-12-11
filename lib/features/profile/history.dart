@@ -19,7 +19,8 @@ class _HistoryPageState extends State<HistoryPage> {
         .get(Uri.parse('http://localhost:3000/history/${widget.userId}'));
 
     if (response.statusCode == 200) {
-      final List<dynamic> jsonData = json.decode(response.body)['histories'];
+      final List<dynamic> jsonData =
+          json.decode(response.body)['histories'] ?? [];
       return jsonData.map((json) => History.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load histories');
@@ -43,7 +44,8 @@ class _HistoryPageState extends State<HistoryPage> {
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No history found'));
+              return const Center(
+                  child: Text("You haven't traded with anyone yet."));
             } else {
               final histories = snapshot.data!;
               return ListView.builder(
@@ -51,40 +53,42 @@ class _HistoryPageState extends State<HistoryPage> {
                 itemBuilder: (context, index) {
                   final history = histories[index];
                   print("history.historyId: ${history.historyId}");
-                  print("history.ownerId: ${history.ownerId}, history.matchedUserId: ${history.matchedUserId}");
+                  print(
+                      "history.ownerId: ${history.ownerId}, history.matchedUserId: ${history.matchedUserId}");
                   return InkWell(
                     key: ValueKey(history.historyId),
                     onTap: () {
-                      if(history.ownerId == widget.userId) {
+                      if (history.ownerId == widget.userId) {
                         Navigator.push(
-                        context,
-                        CustomPageRoute(
-                          page: RateAndReviewPage(
-                            giverId: widget.userId,
-                            receiverId: history.matchedUserId ?? 0,
-                            bookName: history.userBookName ?? '',
-                            giverBookImage: history.userBookPicture ?? '',
-                            matchedBookName: history.matchedUserBookName ?? '',
-                            receiverBookImage:
-                                history.matchedUserBookPicture ?? '',
+                          context,
+                          CustomPageRoute(
+                            page: RateAndReviewPage(
+                              giverId: widget.userId,
+                              receiverId: history.matchedUserId ?? 0,
+                              bookName: history.userBookName ?? '',
+                              giverBookImage: history.userBookPicture ?? '',
+                              matchedBookName:
+                                  history.matchedUserBookName ?? '',
+                              receiverBookImage:
+                                  history.matchedUserBookPicture ?? '',
+                            ),
                           ),
-                        ),
-                      );
-                      }else{
+                        );
+                      } else {
                         Navigator.push(
-                        context,
-                        CustomPageRoute(
-                          page: RateAndReviewPage(
-                            giverId: history.matchedUserId?? 0,
-                            receiverId: history.ownerId ?? 0,
-                            bookName: history.matchedUserBookName ?? '',
-                            giverBookImage: history.matchedUserBookPicture ?? '',
-                            matchedBookName: history.userBookName ?? '',
-                            receiverBookImage:
-                                history.userBookPicture ?? '',
+                          context,
+                          CustomPageRoute(
+                            page: RateAndReviewPage(
+                              giverId: history.matchedUserId ?? 0,
+                              receiverId: history.ownerId ?? 0,
+                              bookName: history.matchedUserBookName ?? '',
+                              giverBookImage:
+                                  history.matchedUserBookPicture ?? '',
+                              matchedBookName: history.userBookName ?? '',
+                              receiverBookImage: history.userBookPicture ?? '',
+                            ),
                           ),
-                        ),
-                      );
+                        );
                       }
                     },
                     child: Padding(

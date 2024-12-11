@@ -20,48 +20,56 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Future<void> _initializeApp() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  isFirstTime = prefs.getBool('isFirstTime') ?? true;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    isFirstTime = prefs.getBool('isFirstTime') ?? true;
 
-  try {
-    Position position = await _determinePosition();
-    double latitude = position.latitude;
-    double longitude = position.longitude;
+    try {
+      Position position = await _determinePosition();
+      double latitude = position.latitude;
+      double longitude = position.longitude;
 
-    print('User Latitude: $latitude');
-    print('User Longitude: $longitude');
+      print('User Latitude: $latitude');
+      print('User Longitude: $longitude');
 
-    bool isInThailand = latitude >= 5.5 && latitude <= 20.5 && longitude >= 97.3 && longitude <= 105.6;
+      bool isInThailand = latitude >= 5.5 &&
+          latitude <= 20.5 &&
+          longitude >= 97.3 &&
+          longitude <= 105.6;
 
-    print('Is user in Thailand: $isInThailand');
+      print('Is user in Thailand: $isInThailand');
 
-    if (isInThailand) {
-      if (isFirstTime) {
-        await prefs.setBool('isFirstTime', false);
+      if (isInThailand) {
+        if (isFirstTime) {
+          await prefs.setBool('isFirstTime', false);
+        }
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ReadeeNavigationBar(
+                    userId: 2,
+                    initialTab: 0,
+                  )),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => isFirstTime
+                ? UnavailableScreen()
+                : ReturningUserRestrictedScreen(),
+          ),
+        );
       }
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => ReadeeNavigationBar(userId: 2)),
-      );
-    } else {
+    } catch (e) {
+      print('Error: $e');
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => isFirstTime ? UnavailableScreen() : ReturningUserRestrictedScreen(),
+          builder: (context) => LocationErrorScreen(errorMessage: e.toString()),
         ),
       );
     }
-  } catch (e) {
-    print('Error: $e');
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LocationErrorScreen(errorMessage: e.toString()),
-      ),
-    );
   }
-}
-
 
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
@@ -117,4 +125,3 @@ class LocationErrorScreen extends StatelessWidget {
     );
   }
 }
-

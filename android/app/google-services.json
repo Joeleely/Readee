@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "562749050604",
+    "project_id": "readee-d562c",
+    "storage_bucket": "readee-d562c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:562749050604:android:61e32312ed13ebd887dfc9",
+        "android_client_info": {
+          "package_name": "com.example.readee_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJL0_5EmFgrt6sYjm5NlexZw-8Wc9_-nE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

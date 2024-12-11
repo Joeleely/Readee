@@ -87,10 +87,10 @@ class _MatchListPageState extends State<MatchListPage> {
                 bookId: ownerBookJson['BookId'] ?? '',
                 title: ownerBookJson['BookName'] ?? 'Unknown Title',
                 author: ownerBookJson['Author'] ?? 'Unknown Author',
-                img: [ownerBookJson['BookPicture'] ?? ''],
+                img: ownerBookJson['BookPicture'] ?? '',
                 description: ownerBookJson['BookDescription'] ??
                     'No description available',
-                quality: '${ownerBookJson['Quality'] ?? '0'}%',
+                quality: int.parse(ownerBookJson['Quality'] ?? '0'),
                 isTrade: ownerBookJson['IsTraded'],
                 genre: ownerBookJson['Genre'] ?? '',
               );

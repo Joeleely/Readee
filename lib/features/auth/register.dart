@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_2fa/flutter_2fa.dart';
+import 'package:flutter_2fa/screens/verify_code.dart';
 import 'package:get/get.dart';
 import 'package:readee_app/features/auth/information.dart';
 import 'package:http/http.dart' as http;
 import 'package:readee_app/features/profile/widget/pageRoute.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -21,11 +24,12 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  bool agreedToTerms = true;
+  bool agreedToTerms = false;
   String? _usernameError;
   String? _emailError;
+  String? secKey;
 
-   bool _isValidEmail(String email) {
+  bool _isValidEmail(String email) {
     final RegExp emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
     return emailRegex.hasMatch(email);
   }
@@ -70,11 +74,62 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _register() async {
     // First, check for existing username/email
     await _checkUser();
-    
-    if (_usernameError != null || _emailError != null) return; // Prevent registration if there are errors
+
+    if (_usernameError != null || _emailError != null)
+      return; // Prevent registration if there are errors
 
     if (_formKey.currentState?.validate() != true) return;
 
+  SharedPreferences localStorage = await SharedPreferences.getInstance();
+  localStorage.setBool('activate2FA', true);
+
+   await Flutter2FA().activate(
+    context: context,
+    appName: 'ReadeeApp',
+    email: _emailController.text,
+  );
+
+  // After activation, check if the 2FA is activated in SharedPreferences
+  bool isActivated = localStorage.getBool('activate2FA') ?? false;
+  secKey = localStorage.getString('secKey');
+
+print("This is secKey: $secKey");
+
+if (!isActivated) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Please activate 2FA first.")),
+    );
+    return;
+  }
+
+//     bool verificationSuccess = false;
+//     try {
+//   // Show verification dialog and wait for user action
+//   await showDialog(
+//     context: context,
+//     builder: (context) => VerifyCode(successPage: Container()),
+//   );
+
+//   // If the dialog was dismissed or "Cancel" was pressed, assume verification failed
+//   final localStorage = await SharedPreferences.getInstance();
+//   verificationSuccess = localStorage.getBool('activate2FA') ?? false;
+// } catch (e) {
+//   verificationSuccess = false;
+//   ScaffoldMessenger.of(context).showSnackBar(
+//     const SnackBar(content: Text("2FA verification failed or was cancelled.")),
+//   );
+//   return;
+// }
+
+// // Check if verification was successful
+// if (!verificationSuccess) {
+//   ScaffoldMessenger.of(context).showSnackBar(
+//     const SnackBar(content: Text("Please complete 2FA verification first.")),
+//   );
+//   return;
+// }
+
+    // Proceed with the registration logic here
     final url = Uri.parse('http://localhost:3000/createUser');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
@@ -82,6 +137,7 @@ class _RegisterPageState extends State<RegisterPage> {
       "email": _emailController.text,
       "password": _passwordController.text,
       "ProfileUrl":"https://img.freepik.com/free-vector/cute-shiba-inu-dog-reading-book-cartoon_138676-2435.jpg",
+      "Seckey": secKey
     });
 
     try {
@@ -245,7 +301,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                   decoration: TextDecoration.underline,
                                   color: Color(0xFF28A9D1),
                                 ),
-                                recognizer: TapGestureRecognizer()..onTap = () {},
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {},
                               ),
                               const TextSpan(text: ' and '),
                               TextSpan(
@@ -254,7 +311,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                   decoration: TextDecoration.underline,
                                   color: Color(0xFF28A9D1),
                                 ),
-                                recognizer: TapGestureRecognizer()..onTap = () {},
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {},
                               ),
                             ],
                           ),
@@ -270,7 +328,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       backgroundColor: const Color(0xFF28A9D1),
                       minimumSize: const Size(double.infinity, 48),
                     ),
-                    child: const Text('Create Account'),
+                    child: const Text('Sign up'),
                   ),
                   const SizedBox(height: 30),
                 ],
@@ -287,7 +345,8 @@ class PasswordFormField extends StatefulWidget {
   final TextEditingController controller;
   final FormFieldValidator<String>? validator;
 
-  const PasswordFormField({Key? key, required this.controller, this.validator}) : super(key: key);
+  const PasswordFormField({Key? key, required this.controller, this.validator})
+      : super(key: key);
 
   @override
   _PasswordFormFieldState createState() => _PasswordFormFieldState();

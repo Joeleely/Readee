@@ -162,10 +162,10 @@ class _MatchedListState extends State<MatchedList> {
                 bookId: bookJson['BookId'] ?? '',
                 title: bookJson['BookName'] ?? 'Unknown Title',
                 author: bookJson['Author'] ?? 'Unknown Author',
-                img: [bookJson['BookPicture'] ?? ''],
+                img: bookJson['BookPicture'] ?? '',
                 description:
                     bookJson['BookDescription'] ?? 'No description available',
-                quality: '${bookJson['Quality'] ?? '0'}%',
+                quality: int.parse(bookJson['Quality'] ?? '0'),
                 isTrade: bookJson['IsTraded'],
                 genre: bookJson['Genre'] ?? '',
               );
@@ -188,10 +188,10 @@ class _MatchedListState extends State<MatchedList> {
                 bookId: bookJson['BookId'] ?? '',
                 title: bookJson['BookName'] ?? 'Unknown Title',
                 author: bookJson['Author'] ?? 'Unknown Author',
-                img: [bookJson['BookPicture'] ?? ''],
+                img: bookJson['BookPicture'] ?? '',
                 description:
                     bookJson['BookDescription'] ?? 'No description available',
-                quality: '${bookJson['Quality'] ?? '0'}%',
+                quality: int.parse(bookJson['Quality'] ?? '0'),
                 isTrade: bookJson['IsTraded'],
                 genre: bookJson['Genre'] ?? '',
               );

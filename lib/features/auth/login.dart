@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_2fa/flutter_2fa.dart';
 import 'package:readee_app/features/auth/information.dart';
 import 'package:readee_app/features/auth/persona.dart';
 import 'package:readee_app/features/auth/register.dart';
@@ -18,7 +19,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-   String? _errorMessage;
+  String? _errorMessage;
 
   Future<void> login() async {
     try {
@@ -36,6 +37,53 @@ class _LoginPageState extends State<LoginPage> {
         final token = data['token'];
         final userId = data['userId'];
         final firstName = data['firstname'];
+        final secKey = data['secKey'];
+
+        if (secKey == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text(
+                    "Failed to login! Please make sure you have an account")),
+          );
+          return; // Stop execution if `secKey` is null
+        }
+
+        SharedPreferences localStorage = await SharedPreferences.getInstance();
+        localStorage.setBool('activate2FA', true);
+        localStorage.setString('secKey', secKey);
+
+        //print("activate2FA: ${localStorage.getBool('activate2FA')}");
+        //print("Seckey: $secKey");
+
+        // Perform 2FA verification
+        bool verified = false;
+        try {
+          FutureBuilder<void>(
+            future: Flutter2FA().verify(
+              context: context,
+              page: ReadeeNavigationBar(userId: userId,
+                        initialTab: 0,),
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                verified = true; // Verification succeeded
+                Navigator.pop(context); // Close the dialog
+              }
+              return Center(
+                child: snapshot.connectionState != ConnectionState.done
+                    ? Container()
+                    : const SizedBox.shrink(),
+              );
+            },
+          );
+        } catch (e) {
+          print('2FA Verification failed: $e');
+          return; // Stop execution if verification fails
+        }
+        if (!verified) {
+          print('2FA Verification canceled or failed.');
+          return; // Stop execution if canceled or not verified
+        }
 
         // Store token in SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -64,7 +112,10 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (context) => ReadeeNavigationBar(userId: userId, initialTab: 0,)),
+                  builder: (context) => ReadeeNavigationBar(
+                        userId: userId,
+                        initialTab: 0,
+                      )),
             );
           } else {
             // Handle other possible errors (e.g., server error)
@@ -88,29 +139,6 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
   }
-
-  // Future<UserCredential?> loginWithGoogle() async {
-  //   try {
-  //     // Initialize Google Sign-In
-  //     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-  //     // Get authentication details from the Google account
-  //     final GoogleSignInAuthentication? googleAuth =
-  //         await googleUser?.authentication;
-
-  //     // Create a new credential
-  //     final credential = GoogleAuthProvider.credential(
-  //       accessToken: googleAuth?.accessToken,
-  //       idToken: googleAuth?.idToken,
-  //     );
-
-  //     // Use the credential to sign in to Firebase
-  //     return await FirebaseAuth.instance.signInWithCredential(credential);
-  //   } catch (e) {
-  //     print(e.toString());
-  //     return null;
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {

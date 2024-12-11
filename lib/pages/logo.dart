@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:readee_app/features/auth/login.dart';
+import 'package:readee_app/features/starter/starter_page.dart';
 
 class LogoPage extends StatelessWidget {
   const LogoPage({super.key});
@@ -8,7 +9,7 @@ class LogoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(      
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             // Replace this with your logo
@@ -18,7 +19,7 @@ class LogoPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                  MaterialPageRoute(builder: (context) => LoadingScreen()),
                 );
               },
               child: const Text('Start'),
