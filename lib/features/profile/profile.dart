@@ -37,16 +37,16 @@ class _ProfilePageState extends State<ProfilePage> {
     fetchUsername(userID);
   }
 
-   Future<void> logout() async {
+  Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('user_token'); // Replace 'token' with your actual token key
+    await prefs
+        .remove('user_token'); // Replace 'token' with your actual token key
 
     // Navigate to the login screen
     Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const LoginPage()),
-            );
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
   }
 
   Future<void> fetchUsername(int userId) async {
@@ -131,7 +131,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           context,
                           CustomPageRoute(
                             page: EditProfileScreen(
-                              userID: userID, profile: profile,
+                              userID: userID,
+                              profile: profile,
                             ),
                           ))),
                   ProfileMenuWidget(

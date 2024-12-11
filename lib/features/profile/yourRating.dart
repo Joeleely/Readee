@@ -30,7 +30,7 @@ class _YourRatingPageState extends State<YourRatingPage> {
   Future<List<Rating>> fetchReviews() async {
     final response = await http.get(Uri.parse(reviewsApiUrl));
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body)['reviews'];
+      final List<dynamic> data = json.decode(response.body)['reviews'] ?? [];
       List<Rating> reviews = data.map((json) => Rating.fromJson(json)).toList();
       // Debugging to check values
       for (var review in reviews) {
@@ -106,7 +106,9 @@ class _YourRatingPageState extends State<YourRatingPage> {
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No reviews available'));
+                    return const Center(
+                        child: Text(
+                            'You currently have no reviews or ratings \n from other users.'));
                   } else {
                     final reviews = snapshot.data!;
                     return ListView.separated(

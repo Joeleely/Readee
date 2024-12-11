@@ -26,7 +26,7 @@ class _YourReviewPageState extends State<YourReviewPage> {
         .get(Uri.parse('http://localhost:3000/reviews/given/${widget.userId}'));
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body)['reviews'];
+      final List<dynamic> data = json.decode(response.body)['reviews'] ?? [];
       return data.map((json) => Review.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load reviews');
@@ -50,7 +50,8 @@ class _YourReviewPageState extends State<YourReviewPage> {
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No reviews available'));
+              return const Center(
+                  child: Text("You haven't left any reviews for others yet."));
             } else {
               final reviews = snapshot.data!;
               return ListView.separated(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:readee_app/features/auth/func/test2fac.dart';
 import 'package:readee_app/features/auth/login.dart';
 import 'package:readee_app/features/auth/persona.dart';
 import 'package:readee_app/features/create_book/create_book.dart';
@@ -7,6 +6,7 @@ import 'package:readee_app/features/match/pages/match.dart';
 import 'package:readee_app/features/match/widgets/book_card.dart';
 import 'package:readee_app/features/match_list/bookDetail.dart';
 import 'package:readee_app/features/profile/profile.dart';
+import 'package:readee_app/pages/logo.dart';
 import 'package:readee_app/widget/bottomNav.dart';
 
 class HomePage extends StatelessWidget {
@@ -15,17 +15,17 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 140, 226, 255)),
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color.fromARGB(255, 243, 252, 255),
-      ),
-      home: const LoginPage()
-      //Test2FAC()
-      //const ReadeeNavigationBar(userId: 7, initialTab: 3,),
-    );
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color.fromARGB(255, 140, 226, 255)),
+          useMaterial3: true,
+          scaffoldBackgroundColor: const Color.fromARGB(255, 243, 252, 255),
+        ),
+        home: const LogoPage()
+        //Test2FAC()
+        //const ReadeeNavigationBar(userId: 7, initialTab: 3,),
+        );
   }
 }
