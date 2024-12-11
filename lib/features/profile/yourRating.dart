@@ -21,8 +21,10 @@ class _YourRatingPageState extends State<YourRatingPage> {
   @override
   void initState() {
     super.initState();
-    reviewsApiUrl = 'http://localhost:3000/reviews/received/${widget.userId}';
-    averageRatingApiUrl = 'http://localhost:3000/avgRating/${widget.userId}';
+    reviewsApiUrl =
+        'https://readee-api.stthi.com/reviews/received/${widget.userId}';
+    averageRatingApiUrl =
+        'https://readee-api.stthi.com/avgRating/${widget.userId}';
 
     // Fetch the average rating when the page loads
     fetchAverageRating();

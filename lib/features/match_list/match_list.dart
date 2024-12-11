@@ -1,11 +1,8 @@
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
-import 'package:readee_app/features/match/pages/book_info.dart';
-import 'package:readee_app/features/match_list/bookDetail.dart';
 import 'package:readee_app/features/match_list/matchedList.dart';
 import 'package:readee_app/features/match_list/model/matches.dart';
 import 'package:readee_app/features/profile/widget/pageRoute.dart';
@@ -20,9 +17,9 @@ class MatchListPage extends StatefulWidget {
 }
 
 class _MatchListPageState extends State<MatchListPage> {
-  List<BookDetails> ownerBooks = [];
-  bool isLoading = true; // Loading state
-   bool isPageActive = true;
+  List<BookDetails> userBooks = [];
+  bool isLoading = true;
+  bool isPageActive = true;
 
   late int userID;
 
@@ -37,105 +34,105 @@ class _MatchListPageState extends State<MatchListPage> {
   void initState() {
     super.initState();
     userID = widget.userId;
-    fetchMatchedBooks();
+    fetchUserBooks();
   }
 
-  Future<void> fetchMatchedBooks() async {
+  Future<void> fetchUserBooks() async {
     try {
-      // Step 1: Get matches for the user
-      final matchesResponse =
-          await http.get(Uri.parse('http://localhost:3000/getMatches/$userID'));
-      List<Matches> matches = [];
+      final matchesResponse = await http.get(
+        Uri.parse('https://readee-api.stthi.com/getMatches/$userID'),
+      );
 
       if (matchesResponse.statusCode == 200) {
         final matchesData = json.decode(matchesResponse.body);
-        matches = (matchesData['matches'] as List)
+        final matches = (matchesData['matches'] as List)
             .map((matchJson) => Matches.fromJson(matchJson))
             .toList();
-      } else {
-        throw Exception('Failed to load matches');
-      }
 
-      // Step 2: Fetch valid matches based on TradeRequestStatus
-      List<BookDetails> fetchedOwnerBooks = [];
+        List<BookDetails> fetchedBooks = [];
 
-      for (var match in matches) {
+        for (var match in matches) {
           if (!isPageActive) return;
 
-        // Fetch trade status for this matchId
-        final matchStatusResponse = await http.get(
-            Uri.parse('http://localhost:3000/getAllMatches/${match.matchId}'));
+          final matchStatusResponse = await http.get(
+            Uri.parse(
+                'https://readee-api.stthi.com/getAllMatches/${match.matchId}'),
+          );
 
-        if (matchStatusResponse.statusCode == 200) {
-          final matchStatusData = json.decode(matchStatusResponse.body);
-          var matchTradeStatus = matchStatusData['TradeRequestStatus'];
+          if (matchStatusResponse.statusCode == 200) {
+            final matchStatusData = json.decode(matchStatusResponse.body);
+            final matchTradeStatus = matchStatusData['TradeRequestStatus'];
+            final ownerId = matchStatusData['OwnerId'];
+            final matchedUserId = matchStatusData['MatchedUserId'];
+            final ownerBookId = matchStatusData['OwnerBookId'];
+            final matchedBookId = matchStatusData['MatchedBookId'];
 
-          //print(matchStatusResponse.body);
-          // Debugging logs to help trace the issue
-          //print('Checking matchId: ${match.matchId}, TradeRequestStatus: $matchTradeStatus');
+            // Ensure the trade status is not rejected
+            if (matchTradeStatus == 'rejected') {
+              continue;
+            }
 
-          if (matchTradeStatus != 'rejected' && matchTradeStatus != 'accepted') {
-            // Fetch books for valid matches
-            final ownerBookResponse = await http.get(Uri.parse(
-                'http://localhost:3000/getBook/${match.ownerBookId}'));
-            final matchedBookResponse = await http.get(Uri.parse(
-                'http://localhost:3000/getBook/${match.matchedBookId}'));
+            // Determine which book to fetch based on current user's role
+            int bookIdToFetch;
+            if (userID == ownerId) {
+              bookIdToFetch = ownerBookId;
+            } else if (userID == matchedUserId) {
+              bookIdToFetch = matchedBookId;
+            } else {
+              continue; // Skip if current user is neither owner nor matched user
+            }
 
-            if (ownerBookResponse.statusCode == 200 &&
-                matchedBookResponse.statusCode == 200) {
-              final ownerBookJson = json.decode(ownerBookResponse.body);
-              final matchedBookJson = json.decode(matchedBookResponse.body);
+            // Fetch book details
+            final bookResponse = await http.get(
+              Uri.parse('https://readee-api.stthi.com/getBook/$bookIdToFetch'),
+            );
+
+            if (bookResponse.statusCode == 200) {
+              final bookJson = json.decode(bookResponse.body);
 
               var bookDetails = BookDetails(
-                bookId: ownerBookJson['BookId'] ?? '',
-                title: ownerBookJson['BookName'] ?? 'Unknown Title',
-                author: ownerBookJson['Author'] ?? 'Unknown Author',
-                img: [ownerBookJson['BookPicture'] ?? ''],
-                description: ownerBookJson['BookDescription'] ??
-                    'No description available',
-                quality: '${ownerBookJson['Quality'] ?? '0'}%',
-                isTrade: ownerBookJson['IsTraded'],
-                genre: ownerBookJson['Genre'] ?? '',
-                isReport: ownerBookJson['IsReported']
+                bookId: bookJson['BookId'] ?? '',
+                title: bookJson['BookName'] ?? 'Unknown Title',
+                author: bookJson['Author'] ?? 'Unknown Author',
+                img: [bookJson['BookPicture'] ?? ''],
+                description:
+                    bookJson['BookDescription'] ?? 'No description available',
+                quality: '${bookJson['Quality'] ?? '0'}%',
+                isTrade: bookJson['IsTraded'],
+                genre: bookJson['Genre'] ?? '',
+                isReport: bookJson['IsReported'],
               );
 
-              bool isDuplicate = fetchedOwnerBooks
-                  .any((book) => book.bookId == bookDetails.bookId);
-
-              if (!isDuplicate &&
-                  bookDetails.isTrade == false &&
-                  matchedBookJson['IsTraded'] == false && bookDetails.isReport == false) {
-                fetchedOwnerBooks.add(bookDetails);
-              } else {
-                print(
-                    'Skipping book: ${bookDetails.title} - Trade status: ${bookDetails.isTrade} - Is Report: ${bookDetails.isReport}');
+              // Ensure no duplicates and valid book
+              if (!fetchedBooks
+                      .any((book) => book.bookId == bookDetails.bookId) &&
+                  !bookDetails.isTrade &&
+                  !bookDetails.isReport) {
+                fetchedBooks.add(bookDetails);
               }
             } else {
-              print(
-                  'Failed to load book for ID: ${match.ownerBookId} or ${match.matchedBookId}');
+              print('Failed to load book for ID: $bookIdToFetch');
             }
           } else {
             print(
-                'Skipping matchId: ${match.matchId} - TradeRequestStatus: $matchTradeStatus');
+                'Failed to load TradeRequestStatus for matchId: ${match.matchId}');
           }
-        } else {
-          print(
-              'Failed to load TradeRequestStatus for matchId: ${match.matchId}');
         }
-      }
 
-      // Update the state with the fetched books
-      if (isPageActive && mounted) {
-      setState(() {
-        ownerBooks = fetchedOwnerBooks;
-        isLoading = false; // Set loading to false after fetching
-      });
+        if (isPageActive && mounted) {
+          setState(() {
+            userBooks = fetchedBooks;
+            isLoading = false;
+          });
+        }
+      } else {
+        throw Exception('Failed to load matches');
       }
     } catch (error) {
-      print('Error fetching matched books: $error');
+      print('Error fetching user books: $error');
       if (isPageActive && mounted) {
         setState(() {
-          isLoading = false; // Ensure loading is set to false on error
+          isLoading = false;
         });
       }
     }
@@ -155,26 +152,27 @@ class _MatchListPageState extends State<MatchListPage> {
         backgroundColor: const Color.fromARGB(255, 243, 252, 255),
         automaticallyImplyLeading: false,
       ),
-      body: isLoading // Show loading indicator while data is being fetched
+      body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ownerBooks.isEmpty
+          : userBooks.isEmpty
               ? const Center(child: Text("You have no book match right now"))
               : Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: ListView.builder(
-                    itemCount: ownerBooks.length,
+                    itemCount: userBooks.length,
                     itemBuilder: (context, index) {
-                      final book = ownerBooks[index];
+                      final book = userBooks[index];
                       return Column(
                         children: [
                           InkWell(
                             onTap: () => Navigator.push(
                               context,
                               CustomPageRoute(
-                                  page: MatchedList(
-                                userId: widget.userId,
-                                bookId: book.bookId,
-                              )),
+                                page: MatchedList(
+                                  userId: widget.userId,
+                                  bookId: book.bookId,
+                                ),
+                              ),
                             ),
                             child: ListTile(
                               leading: Container(

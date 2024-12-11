@@ -26,7 +26,8 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> login() async {
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:3000/login'), // Adjust the URL if needed
+        Uri.parse(
+            'https://readee-api.stthi.com/login'), // Adjust the URL if needed
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "emailOrUsername": _emailController.text,
@@ -63,8 +64,10 @@ class _LoginPageState extends State<LoginPage> {
           FutureBuilder<void>(
             future: Flutter2FAMySelf().verify(
               context: context,
-              page: ReadeeNavigationBar(userId: userId,
-                        initialTab: 0,),
+              page: ReadeeNavigationBar(
+                userId: userId,
+                initialTab: 0,
+              ),
             ),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
@@ -99,8 +102,8 @@ class _LoginPageState extends State<LoginPage> {
           );
         } else {
           // Check user genres
-          final genresResponse = await http
-              .get(Uri.parse('http://localhost:3000/userGenres/$userId'));
+          final genresResponse = await http.get(
+              Uri.parse('https://readee-api.stthi.com/userGenres/$userId'));
 
           if (genresResponse.statusCode == 404) {
             // If genres not found, navigate to PersonaPage
@@ -204,7 +207,8 @@ class _LoginPageState extends State<LoginPage> {
                   alignment: Alignment.centerLeft,
                   child: InkWell(
                     onTap: () {
-                      Navigator.push(context, CustomPageRoute(page: ForgotPasswordPage()));
+                      Navigator.push(
+                          context, CustomPageRoute(page: ForgotPasswordPage()));
                     },
                     child: const Text(
                       'Forgot password?',

@@ -47,31 +47,33 @@ class _MatchedListState extends State<MatchedList> {
   }
 
   void checkForExpiry() {
-  final now = DateTime.now();
-  for (var match in validMatches) {
-    // Ensure that matchedTime is not null before using it
-    if (match.matchTime != null) {
-      final matchTime = match.matchTime; // Assuming matchedTime is of type DateTime
-      if (now.difference(matchTime).inDays >= 7) {
-        rejectMatch(match.matchId, match.matchedBookId, widget.userId);
+    final now = DateTime.now();
+    for (var match in validMatches) {
+      // Ensure that matchedTime is not null before using it
+      if (match.matchTime != null) {
+        final matchTime =
+            match.matchTime; // Assuming matchedTime is of type DateTime
+        if (now.difference(matchTime).inDays >= 7) {
+          rejectMatch(match.matchId, match.matchedBookId, widget.userId);
+        }
+      } else {
+        print('Matched time is null for matchId: ${match.matchId}');
       }
-    } else {
-      print('Matched time is null for matchId: ${match.matchId}');
     }
   }
-}
 
   Future<void> rejectMatch(int matchId, int matchedBookId, int userId,
       {bool silent = false}) async {
     // First, reject the match
     final response = await http.post(
-      Uri.parse('http://localhost:3000/trades/$matchId/reject'),
+      Uri.parse('https://readee-api.stthi.com/trades/$matchId/reject'),
     );
 
     if (response.statusCode == 200) {
       // Second, log the unlike action after rejection
       final unlikeResponse = await http.post(
-        Uri.parse('http://localhost:3000/unlikeLogs/$matchedBookId/$userId'),
+        Uri.parse(
+            'https://readee-api.stthi.com/unlikeLogs/$matchedBookId/$userId'),
       );
 
       if (unlikeResponse.statusCode == 200) {
@@ -131,91 +133,102 @@ class _MatchedListState extends State<MatchedList> {
 
   Future<BookDetails?> getMatchedBookIfOwnerMatches(int matchId) async {
     try {
+      // Fetch match details from the API
       final matchDataResponse = await http.get(
-        Uri.parse('http://localhost:3000/getAllMatches/$matchId'),
+        Uri.parse('https://readee-api.stthi.com/getAllMatches/$matchId'),
       );
 
-      if (matchDataResponse.statusCode == 200) {
-        final matchDataJson = json.decode(matchDataResponse.body);
-        var matchTradeStatus = matchDataJson['TradeRequestStatus'];
-        var ownerBookId = matchDataJson['OwnerBookId'];
-        var matchedBookId = matchDataJson['MatchedBookId'];
-        var ownerId = matchDataJson['OwnerId'];
+      if (matchDataResponse.statusCode != 200) {
+        print('Failed to load match data for matchId: $matchId');
+        return null;
+      }
 
-        // print('Match ID: $matchId');
-        // print('Owner ID: $ownerId, Matched User ID: $matchedUserId');
-        // print('Owner Book ID: $ownerBookId, Matched Book ID: $matchedBookId');
-        // print('This is widget.userId: ${widget.userId}');
-        // print("this is matchTime: $matchTime");
+      final matchDataJson = json.decode(matchDataResponse.body);
+      final matchTradeStatus = matchDataJson['TradeRequestStatus'];
+      final ownerBookId = matchDataJson['OwnerBookId'];
+      final matchedBookId = matchDataJson['MatchedBookId'];
+      final ownerId = matchDataJson['OwnerId'];
+      final matchUserId = matchDataJson['MatchedUserId'];
 
-        // Check if ownerId matches widget.userId
-        if (ownerId == widget.userId && matchTradeStatus != 'rejected') {
-          if (widget.bookId == ownerBookId) {
-            final matchBookResponse = await http.get(
-              Uri.parse('http://localhost:3000/getBook/$matchedBookId'),
-            );
+      // Debugging information
+      print('Match ID: $matchId');
+      print('Owner ID: $ownerId, Matched User ID: $matchUserId');
+      print('Owner Book ID: $ownerBookId, Matched Book ID: $matchedBookId');
+      print('Trade Request Status: $matchTradeStatus');
+      print('Current User ID: ${widget.userId}');
 
-            if (matchBookResponse.statusCode == 200) {
-              final bookJson = json.decode(matchBookResponse.body);
+      // Ensure trade status is not "rejected"
+      if (matchTradeStatus == 'rejected') {
+        print('Trade status is rejected for matchId: $matchId');
+        return null;
+      }
 
-              return BookDetails(
-                bookId: bookJson['BookId'] ?? '',
-                title: bookJson['BookName'] ?? 'Unknown Title',
-                author: bookJson['Author'] ?? 'Unknown Author',
-                img: [bookJson['BookPicture'] ?? ''],
-                description:
-                    bookJson['BookDescription'] ?? 'No description available',
-                quality: '${bookJson['Quality'] ?? '0'}%',
-                isTrade: bookJson['IsTraded'],
-                genre: bookJson['Genre'] ?? '',
-                isReport: bookJson['IsReported']
-              );
-            } else {
-              print('Failed to load book for matchedBookId: $matchedBookId');
-            }
-          }
-          // Owner is the current user, fetch matched book
+      // Case 1: Current user is the owner
+      if (widget.userId == ownerId) {
+        // Fetch the matched book (book belonging to the matched user)
+        final matchBookResponse = await http.get(
+          Uri.parse('https://readee-api.stthi.com/getBook/$matchedBookId'),
+        );
+
+        if (matchBookResponse.statusCode == 200) {
+          final bookJson = json.decode(matchBookResponse.body);
+
+          return BookDetails(
+            bookId: bookJson['BookId'] ?? '',
+            title: bookJson['BookName'] ?? 'Unknown Title',
+            author: bookJson['Author'] ?? 'Unknown Author',
+            img: [bookJson['BookPicture'] ?? ''],
+            description:
+                bookJson['BookDescription'] ?? 'No description available',
+            quality: '${bookJson['Quality'] ?? '0'}%',
+            isTrade: bookJson['IsTraded'],
+            genre: bookJson['Genre'] ?? '',
+            isReport: bookJson['IsReported'],
+          );
         } else {
-          if (widget.bookId == matchedBookId &&
-              matchTradeStatus != 'rejected') {
-            final matchBookResponse = await http.get(
-              Uri.parse('http://localhost:3000/getBook/$ownerBookId'),
-            );
+          print('Failed to load book for matchedBookId: $matchedBookId');
+        }
+      }
+      // Case 2: Current user is the matched user
+      else if (widget.userId == matchUserId) {
+        // Fetch the owner's book (book belonging to the owner)
+        final ownerBookResponse = await http.get(
+          Uri.parse('https://readee-api.stthi.com/getBook/$ownerBookId'),
+        );
 
-            if (matchBookResponse.statusCode == 200) {
-              final bookJson = json.decode(matchBookResponse.body);
+        if (ownerBookResponse.statusCode == 200) {
+          final bookJson = json.decode(ownerBookResponse.body);
 
-              return BookDetails(
-                bookId: bookJson['BookId'] ?? '',
-                title: bookJson['BookName'] ?? 'Unknown Title',
-                author: bookJson['Author'] ?? 'Unknown Author',
-                img: [bookJson['BookPicture'] ?? ''],
-                description:
-                    bookJson['BookDescription'] ?? 'No description available',
-                quality: '${bookJson['Quality'] ?? '0'}%',
-                isTrade: bookJson['IsTraded'],
-                genre: bookJson['Genre'] ?? '',
-                isReport: bookJson['IsReported']
-              );
-            } else {
-              print('Failed to load book for ownerBookId: $ownerBookId');
-            }
-          }
-          // Current user is the matched user, fetch owner's book
+          return BookDetails(
+            bookId: bookJson['BookId'] ?? '',
+            title: bookJson['BookName'] ?? 'Unknown Title',
+            author: bookJson['Author'] ?? 'Unknown Author',
+            img: [bookJson['BookPicture'] ?? ''],
+            description:
+                bookJson['BookDescription'] ?? 'No description available',
+            quality: '${bookJson['Quality'] ?? '0'}%',
+            isTrade: bookJson['IsTraded'],
+            genre: bookJson['Genre'] ?? '',
+            isReport: bookJson['IsReported'],
+          );
+        } else {
+          print('Failed to load book for ownerBookId: $ownerBookId');
         }
       } else {
-        print('Failed to load match data for matchId: $matchId');
+        // Neither owner nor matched user
+        print('Current user is not part of this match: $matchId');
       }
     } catch (error) {
       print('Error fetching matched book: $error');
     }
+
     return null;
   }
 
   Future<void> fetchMatchedBooks() async {
     try {
       final matchesResponse = await http.get(
-        Uri.parse('http://localhost:3000/getMatches/${widget.userId}'),
+        Uri.parse('https://readee-api.stthi.com/getMatches/${widget.userId}'),
       );
 
       if (matchesResponse.statusCode == 200) {

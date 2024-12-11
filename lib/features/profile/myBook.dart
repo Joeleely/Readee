@@ -27,8 +27,8 @@ class _MyBooksPageState extends State<MyBooksPage> {
 
   Future<void> fetchBooks() async {
     try {
-      final response = await http.get(
-          Uri.parse('http://localhost:3000/getBookByUser/${widget.userId}'));
+      final response = await http.get(Uri.parse(
+          'https://readee-api.stthi.com/getBookByUser/${widget.userId}'));
       if (response.statusCode == 200) {
         final List<dynamic> bookJson = json.decode(response.body);
         setState(() {
@@ -102,7 +102,7 @@ class _MyBooksPageState extends State<MyBooksPage> {
     String bookName = books[index].bookName;
     try {
       final response = await http.delete(
-        Uri.parse('http://localhost:3000/deleteBook/$bookId'),
+        Uri.parse('https://readee-api.stthi.com/deleteBook/$bookId'),
       );
 
       if (response.statusCode == 200) {

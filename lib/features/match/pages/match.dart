@@ -49,7 +49,7 @@ class _MatchPageState extends State<MatchPage> {
   Future<void> fetchAdBanner() async {
     try {
       final response =
-          await http.get(Uri.parse('http://localhost:3000/getAllAds'));
+          await http.get(Uri.parse('https://readee-api.stthi.com/getAllAds'));
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
 
@@ -96,7 +96,7 @@ class _MatchPageState extends State<MatchPage> {
   Future<void> fetchBooks() async {
     try {
       final response = await http.get(Uri.parse(
-          'http://localhost:3000/books/recommendations/${widget.userID}?offset=0&limit=10&random=true'));
+          'https://readee-api.stthi.com/books/recommendations/${widget.userID}?offset=0&limit=10&random=true'));
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
         final List<dynamic> booksData = responseBody['data']['books'] ?? [];
@@ -301,7 +301,8 @@ class _MatchPageState extends State<MatchPage> {
                       Expanded(
                         child: BookCard(
                           books: books,
-                          userID: widget.userID, onLike: handleLike,
+                          userID: widget.userID,
+                          onLike: handleLike,
                         ),
                       ),
                     ],

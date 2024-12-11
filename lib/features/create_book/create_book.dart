@@ -101,13 +101,16 @@ class _CreateBookPageState extends State<CreateBookPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ReadeeNavigationBar(userId: widget.userId, initialTab: 0,),
+            builder: (context) => ReadeeNavigationBar(
+              userId: widget.userId,
+              initialTab: 0,
+            ),
           ),
         );
       } else {
         // Make the POST request
         final response = await http.post(
-          Uri.parse('http://localhost:3000/createBook'),
+          Uri.parse('https://readee-api.stthi.com/createBook'),
           headers: {
             'Content-Type': 'application/json',
           },
@@ -119,7 +122,10 @@ class _CreateBookPageState extends State<CreateBookPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => ReadeeNavigationBar(userId: widget.userId, initialTab: 0,)),
+                builder: (context) => ReadeeNavigationBar(
+                      userId: widget.userId,
+                      initialTab: 0,
+                    )),
           );
         } else {
           print('Failed to create book: ${response.body}');

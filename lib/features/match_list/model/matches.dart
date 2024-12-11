@@ -13,17 +13,17 @@ class Matches { //use in match_list
 
   factory Matches.fromJson(Map<String, dynamic> json) {
 
-final matchTimeString = json['matchTime'];
+final matchTimeString = json['MatchTime'];
   //print('MatchTime String: $matchTimeString');
 
-    if (json['matchTime'] == null || json['matchTime'].isEmpty) {
+    if (json['MatchTime'] == null || json['MatchTime'].isEmpty) {
       throw ArgumentError('MatchTime cannot be null or empty');
     }
 
     return Matches(
-      ownerBookId: json['ownerBookId'] ?? 0,
-      matchedBookId: json['matchedBookId'] ?? 0,
-      matchId: json['matchId'] ?? 0,
+      ownerBookId: json['OwnerBookId'] ?? 0,
+      matchedBookId: json['MatchedBookId'] ?? 0,
+      matchId: json['MatchId'] ?? 0,
       //matchTime: json['matchTime'] != null ? DateTime.parse(json['matchTime']) : DateTime.now(),
       matchTime: DateTime.parse(matchTimeString)
     );

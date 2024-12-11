@@ -75,7 +75,8 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _fetchMessages() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/getAllMessage/${widget.roomId}'),
+        Uri.parse(
+            'https://readee-api.stthi.com/getAllMessage/${widget.roomId}'),
       );
 
       if (response.statusCode == 200) {
@@ -107,7 +108,8 @@ class _ChatPageState extends State<ChatPage> {
     // Create a request to upload the image
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://localhost:3000/uploadImage'), // Backend API endpoint
+      Uri.parse(
+          'https://readee-api.stthi.com/uploadImage'), // Backend API endpoint
     );
 
     request.files.add(
@@ -158,22 +160,22 @@ class _ChatPageState extends State<ChatPage> {
     };
 
     if (_channel != null) {
-    try {
-      _channel.sink.add(json.encode(messageData));
-      print('Message sent through WebSocket: $messageData');
-    } catch (e) {
-      print('Error sending WebSocket message: $e');
+      try {
+        _channel.sink.add(json.encode(messageData));
+        print('Message sent through WebSocket: $messageData');
+      } catch (e) {
+        print('Error sending WebSocket message: $e');
+      }
+    } else {
+      print('WebSocket is not connected.');
     }
-  } else {
-    print('WebSocket is not connected.');
-  }
 
     print('Sending message: $messageData'); // Debug to ensure data is correct
 
     try {
       final response = await http.post(
         Uri.parse(
-            'http://localhost:3000/createMessage'), // Backend API endpoint
+            'https://readee-api.stthi.com/createMessage'), // Backend API endpoint
         headers: {'Content-Type': 'application/json'},
         body: json.encode(messageData), // JSON-encoded body
       );

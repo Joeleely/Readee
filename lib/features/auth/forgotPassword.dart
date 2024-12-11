@@ -36,7 +36,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     try {
       // HTTP POST request to fetch user info by email
       final response = await http.post(
-        Uri.parse('http://localhost:3000/getUserInfoByEmail'),
+        Uri.parse('https://readee-api.stthi.com/getUserInfoByEmail'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -83,7 +83,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           print('2FA Verification canceled or failed.');
           return; // Stop execution if canceled or not verified
         }
-
       } else if (response.statusCode == 404) {
         setState(() {
           _errorMessage = 'No user found with this email.';
@@ -166,8 +165,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     ? const CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       )
-                    : const Text('Verify',
-                    style: TextStyle(color: Colors.white),),
+                    : const Text(
+                        'Verify',
+                        style: TextStyle(color: Colors.white),
+                      ),
               ),
             ],
           ),
