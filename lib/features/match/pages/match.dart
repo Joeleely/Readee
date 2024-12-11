@@ -61,13 +61,9 @@ class _MatchPageState extends State<MatchPage> {
     _scrollController.dispose();
     super.dispose();
     fetchAdBanner();
+    adTimer?.cancel();
   }
 
-  @override
-  void dispose() {
-    adTimer?.cancel(); // Cancel the timer when the widget is disposed
-    super.dispose();
-  }
 
   // Fetch ad banner from API
   Future<void> fetchAdBanner() async {
@@ -328,6 +324,7 @@ class _MatchPageState extends State<MatchPage> {
                         child: BookCard(
                           books: books,
                           userID: widget.userID,
+                          onLike: handleLike,
                         ),
                       ),
                     ],
