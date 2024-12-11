@@ -773,7 +773,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
                         });
                       },
                       style: ElevatedButton.styleFrom(
-                        elevation: 5,
+                        elevation: 0,
                         backgroundColor: tradeRequestStatus == 'pending'
                             ? Colors.grey
                             : Colors.cyan,
@@ -805,7 +805,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
                         });
                       },
                       style: ElevatedButton.styleFrom(
-                        elevation: 5,
+                        elevation: 0,
                         backgroundColor: tradeRequestStatus == 'pending'
                             ? Colors.grey
                             : Colors.cyan,
@@ -836,7 +836,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          elevation: 5,
+                          elevation: 0,
                           backgroundColor: Colors.red,
                         ),
                         child: const Text(
@@ -854,7 +854,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          elevation: 5,
+                          elevation: 0,
                           backgroundColor: Colors.cyan,
                         ),
                         child: const Text(
@@ -882,7 +882,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          elevation: 5,
+                          elevation: 0,
                           backgroundColor: Colors.green,
                         ),
                         child: const Text(
