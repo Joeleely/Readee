@@ -40,7 +40,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
       if (isInThailand) {
         if (isFirstTime) {
-          await prefs.setBool('isFirstTime', false);
+          await prefs.setBool('isFirstTime', true);
         }
         Navigator.pushReplacement(
           context,

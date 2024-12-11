@@ -59,9 +59,9 @@ class _MatchPageState extends State<MatchPage> {
   @override
   void dispose() {
     _scrollController.dispose();
-    super.dispose();
     fetchAdBanner();
     adTimer?.cancel();
+        super.dispose();
   }
 
 
