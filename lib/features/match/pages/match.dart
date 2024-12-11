@@ -3,6 +3,8 @@ import 'dart:math';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:readee_app/features/notification/notification.dart';
+import 'package:readee_app/features/notification/notification_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:readee_app/features/match/widgets/book_card.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
@@ -200,6 +202,22 @@ class _MatchPageState extends State<MatchPage> {
           image: AssetImage('assets/logo.png'),
           height: 50,
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => NotificationPage(
+                          userId: 2,
+                          notificationService:
+                              NotificationService('http://localhost:3000'),
+                        )),
+              );
+            },
+          ),
+        ],
         backgroundColor: const Color.fromARGB(255, 243, 252, 255),
       ),
       body: Center(
