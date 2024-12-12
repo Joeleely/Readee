@@ -36,7 +36,8 @@ class _EditGenrePageState extends State<EditGenrePage> {
   }
 
   Future<void> fetchGenres() async {
-    final response = await http.get(Uri.parse('http://localhost:3000/genres'));
+    final response =
+        await http.get(Uri.parse('https://readee-api.stthi.com/genres'));
 
     if (response.statusCode == 200) {
       List<dynamic> jsonData = json.decode(response.body);
@@ -49,8 +50,8 @@ class _EditGenrePageState extends State<EditGenrePage> {
   }
 
   Future<void> fetchUserGenres() async {
-    final response = await http
-        .get(Uri.parse('http://localhost:3000/userGenres/${widget.userID}'));
+    final response = await http.get(
+        Uri.parse('https://readee-api.stthi.com/userGenres/${widget.userID}'));
 
     if (response.statusCode == 200) {
       List<dynamic> jsonData = json.decode(response.body);
@@ -65,7 +66,7 @@ class _EditGenrePageState extends State<EditGenrePage> {
   }
 
   Future<void> saveUserGenres() async {
-    final url = Uri.parse('http://localhost:3000/userGenre/edit');
+    final url = Uri.parse('https://readee-api.stthi.com/userGenre/edit');
     final headers = {"Content-Type": "application/json"};
     final body = json.encode({
       "User_user_id": widget.userID,
@@ -177,17 +178,17 @@ class _EditGenrePageState extends State<EditGenrePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed:
-                      selectedGenreIds.isNotEmpty
-                      ? () {
-                          saveUserGenres();
-                        }
-                      : null,
+                    onPressed: selectedGenreIds.isNotEmpty
+                        ? () {
+                            saveUserGenres();
+                          }
+                        : null,
                     style: ButtonStyle(
-                        backgroundColor: MaterialStatePropertyAll(
-                          selectedGenreIds.isNotEmpty ? Colors.cyan : Colors.grey,
-                          ),
-                        ),
+                      elevation: WidgetStatePropertyAll(1),
+                      backgroundColor: WidgetStatePropertyAll(
+                        selectedGenreIds.isNotEmpty ? Colors.cyan : Colors.grey,
+                      ),
+                    ),
                     child: const Text(
                       'Save',
                       style: TextStyle(
@@ -197,6 +198,7 @@ class _EditGenrePageState extends State<EditGenrePage> {
                   ),
                   const SizedBox(width: 30),
                   ElevatedButton(
+                    style: const ButtonStyle(elevation: WidgetStatePropertyAll(1)),
                     onPressed: () => {Navigator.pop(context)},
                     child: const Text('Cancel'),
                   ),

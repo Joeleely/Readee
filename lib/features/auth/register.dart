@@ -39,7 +39,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _checkUser() async {
-    final url = Uri.parse('http://localhost:3000/checkUser');
+    final url = Uri.parse('https://readee-api.stthi.com/checkUser');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
       "username": _usernameController.text,
@@ -151,10 +151,11 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-     final recoverPhraseHash = sha256.convert(utf8.encode(recoverPhrase!)).toString();
+    final recoverPhraseHash =
+        sha256.convert(utf8.encode(recoverPhrase!)).toString();
 
     // Proceed with the registration logic here
-    final url = Uri.parse('http://localhost:3000/createUser');
+    final url = Uri.parse('https://readee-api.stthi.com/createUser');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
       "username": _usernameController.text,
@@ -306,7 +307,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 25),
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.start,
-                    children: [Tooltip(
+                    children: [
+                      Tooltip(
                         message:
                             'Password should contain at least 8 characters',
                         child: Icon(

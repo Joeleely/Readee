@@ -52,7 +52,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     try {
       final response = await http.patch(
-        Uri.parse('http://localhost:3000/user/resetPassword/${widget.userId}'),
+        Uri.parse(
+            'https://readee-api.stthi.com/user/resetPassword/${widget.userId}'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -63,8 +64,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password reset successfully!'),
-          backgroundColor: Colors.green),
+          const SnackBar(
+              content: Text('Password reset successfully!'),
+              backgroundColor: Colors.green),
         );
         Navigator.push(context, CustomPageRoute(page: const LoginPage()));
       } else {

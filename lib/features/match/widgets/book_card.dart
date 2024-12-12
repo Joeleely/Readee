@@ -9,9 +9,14 @@ import 'package:swipe_cards/swipe_cards.dart';
 import 'package:http/http.dart' as http;
 
 class BookCard extends StatefulWidget {
-  const BookCard({super.key, required this.books, required this.userID});
+  const BookCard(
+      {super.key,
+      required this.books,
+      required this.userID,
+      required this.onLike});
   final List<BookDetails> books;
   final int userID;
+  final Function(int, bool) onLike;
 
   @override
   State<BookCard> createState() => _BookCardState();
@@ -19,6 +24,9 @@ class BookCard extends StatefulWidget {
 
 class _BookCardState extends State<BookCard> {
   final List<SwipeItem> _swipeItems = <SwipeItem>[];
+  Map<int, bool> bookStatuses = {};
+  List<int> likedIndices = []; // List to store the indices of liked books
+  List<int> unlikedIndices = []; // List to store the indices of unliked books
   MatchEngine? _matchEngine;
   Map<BookDetails, int> currentPhotoMap =
       {}; // Track currentPhoto for each book
@@ -28,7 +36,8 @@ class _BookCardState extends State<BookCard> {
     super.initState();
 
     // Initialize SwipeItems with Book details
-    for (var book in widget.books) {
+    for (var i = 0; i < widget.books.length; i++) {
+      BookDetails book = widget.books[i];
       _swipeItems.add(SwipeItem(
         content: book,
         likeAction: () async {
@@ -36,6 +45,11 @@ class _BookCardState extends State<BookCard> {
             content: Text("Liked ${book.title}"),
             duration: const Duration(milliseconds: 500),
           ));
+          setState(() {
+            likedIndices.add(i);
+            bookStatuses[book.bookId] = true; // Update bookStatuses
+            print("Liked books indices: $likedIndices");
+          });
           await _likeBook(widget.userID, book.bookId);
         },
         nopeAction: () async {
@@ -43,6 +57,11 @@ class _BookCardState extends State<BookCard> {
             content: Text("Nope ${book.title}"),
             duration: const Duration(milliseconds: 500),
           ));
+          setState(() {
+            unlikedIndices.add(i);
+            bookStatuses[book.bookId] = false; // Update bookStatuses
+            print("Unliked books indices: $unlikedIndices");
+          });
           await _unlikeBook(widget.userID, book.bookId);
         },
       ));
@@ -62,7 +81,9 @@ class _BookCardState extends State<BookCard> {
   }
 
   Future<void> _likeBook(int userId, int bookId) async {
-    final url = Uri.parse('http://localhost:3000/books/$bookId/like/$userId');
+    widget.onLike(bookId, true);
+    final url =
+        Uri.parse('https://readee-api.stthi.com/books/$bookId/like/$userId');
     try {
       final response = await http.post(url);
       if (response.statusCode == 201) {
@@ -76,7 +97,9 @@ class _BookCardState extends State<BookCard> {
   }
 
   Future<void> _unlikeBook(int userId, int bookId) async {
-    final url = Uri.parse('http://localhost:3000/books/$bookId/unlike/$userId');
+    widget.onLike(bookId, false);
+    final url =
+        Uri.parse('https://readee-api.stthi.com/books/$bookId/unlike/$userId');
     try {
       final response = await http.post(url);
       if (response.statusCode == 201) {
@@ -90,38 +113,40 @@ class _BookCardState extends State<BookCard> {
   }
 
   void _reportBook(BookDetails book, int userId) async {
-  final url = Uri.parse("http://localhost:3000/report/$userId/${book.bookId}");
+    final url =
+        Uri.parse("https://readee-api.stthi.com/report/$userId/${book.bookId}");
 
-  try {
-    // Send a POST request
-    final response = await http.post(url);
+    try {
+      // Send a POST request
+      final response = await http.post(url);
 
-    // Check if the request was successful
-    if (response.statusCode == 201) {
+      // Check if the request was successful
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Successfully reported ${book.title}."),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                "Failed to report ${book.title}. Error: ${response.statusCode}"),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      // Handle any network or other errors
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Successfully reported ${book.title}."),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Failed to report ${book.title}. Error: ${response.statusCode}"),
+          content: Text("An error occurred while reporting ${book.title}: $e"),
           duration: const Duration(seconds: 2),
         ),
       );
     }
-  } catch (e) {
-    // Handle any network or other errors
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("An error occurred while reporting ${book.title}: $e"),
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -237,8 +262,10 @@ class _BookCardState extends State<BookCard> {
                                       color: Colors.red, // Red icon color
                                     ),
                                     SizedBox(
-                                        width: 8), // Space between icon and text
-                                    Text('Report',
+                                        width:
+                                            8), // Space between icon and text
+                                    Text(
+                                      'Report',
                                       style: TextStyle(
                                         color: Colors.red, // Red text color
                                         fontWeight: FontWeight.bold,

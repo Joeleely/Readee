@@ -3,6 +3,8 @@ import 'dart:math';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:readee_app/features/profile/editGenres.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:readee_app/features/match/widgets/book_card.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
@@ -24,6 +26,11 @@ class _MatchPageState extends State<MatchPage> {
   List<Map<String, dynamic>> ads = [];
   Map<String, dynamic>? currentAd;
   Timer? adTimer;
+  int offset = 0;
+  int limit = 10;
+  List<int> likedBookIndexes = [];
+  int likeCount = 0;
+  int unlikeCount = 0;
 
   @override
   void initState() {
@@ -42,7 +49,7 @@ class _MatchPageState extends State<MatchPage> {
   Future<void> fetchAdBanner() async {
     try {
       final response =
-          await http.get(Uri.parse('http://localhost:3000/getAllAds'));
+          await http.get(Uri.parse('https://readee-api.stthi.com/getAllAds'));
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
 
@@ -88,112 +95,159 @@ class _MatchPageState extends State<MatchPage> {
   // Fetch books from API
   Future<void> fetchBooks() async {
     try {
-      // Step 1: Get user genres
-      final genreResponse = await http.get(Uri.parse(
-          'http://localhost:3000/userGenres?userID=${widget.userID}'));
-      if (genreResponse.statusCode == 200) {
-        List<dynamic> genresData = jsonDecode(genreResponse.body);
-
-        List<int> userGenreIDs =
-            genresData.map((genre) => genre['Genre_genre_id'] as int).toList();
-
-        // Step 2: Get user logs to filter out liked books
-        final logsResponse = await http
-            .get(Uri.parse('http://localhost:3000/getLogs/${widget.userID}'));
-        List<int> likedBookIDs = [];
-        if (logsResponse.statusCode == 200) {
-          List<dynamic> logsData = jsonDecode(logsResponse.body);
-          likedBookIDs =
-              logsData.map((log) => log['BookLikeId'] as int).toList();
-        }
-
-        // Step 3: Get books
-        final bookResponse =
-            await http.get(Uri.parse('http://localhost:3000/getBooks'));
-        if (bookResponse.statusCode == 200) {
-          List<dynamic> booksData = jsonDecode(bookResponse.body);
-
-          List<BookDetails> matchingBooks = booksData.where((book) {
-            return userGenreIDs.contains(book['GenreId']) &&
-                book['OwnerId'] != widget.userID &&
-                book['IsTraded'] == false &&
-                !likedBookIDs.contains(book['BookId']) &&
-                book['IsReported'] == false;
-          }).map((book) {
-            return BookDetails(
-              title: book['BookName'],
-              author: book['Author'],
-              description: book['BookDescription'],
-              img: [book['BookPicture']],
-              quality: '${book['Quality']}%',
-              genre: '',
-              bookId: book['BookId'],
-              isTrade: book['IsTraded'],
-              isReport: book['IsReported']
-            );
-          }).toList();
-
-          List<BookDetails> nonMatchingBooks = booksData.where((book) {
-            return !userGenreIDs.contains(book['GenreId']) &&
-                book['OwnerId'] != widget.userID &&
-                book['IsTraded'] == false &&
-                !likedBookIDs.contains(book['BookId']);
-          }).map((book) {
-            return BookDetails(
-              title: book['BookName'],
-              author: book['Author'],
-              description: book['BookDescription'],
-              img: [book['BookPicture']],
-              quality: '${book['Quality']}%',
-              genre: '',
-              bookId: book['BookId'],
-              isTrade: book['IsTraded'],
-              isReport: book['IsReported']
-            );
-          }).toList();
-
-          // Step 4: Randomly select 70% matching and 30% non-matching books
-          int matchingBooksCount = (booksData.length * 0.7).toInt();
-          int nonMatchingBooksCount = booksData.length - matchingBooksCount;
-
-          List<BookDetails> selectedMatchingBooks =
-              _getRandomBooks(matchingBooks, matchingBooksCount);
-          List<BookDetails> selectedNonMatchingBooks =
-              _getRandomBooks(nonMatchingBooks, nonMatchingBooksCount);
-
-          // Step 5: Combine and shuffle books
-          List<BookDetails> combinedBooks = [
-            ...selectedMatchingBooks,
-            ...selectedNonMatchingBooks
-          ];
-
-          combinedBooks.shuffle(random);
-
-          if (mounted) {
-            setState(() {
-              books = combinedBooks;
-              isLoading = false;
-            });
-          }
+      final response = await http.get(Uri.parse(
+          'https://readee-api.stthi.com/books/recommendations/${widget.userID}?offset=0&limit=10&random=true'));
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        final List<dynamic> booksData = responseBody['data']['books'] ?? [];
+        // Check if there are new books
+        if (booksData.isEmpty) {
+          print('No more books to fetch');
         } else {
-          throw Exception('Failed to load books');
+          List<BookDetails> newBooks = booksData.map((book) {
+            return BookDetails(
+                title: book['BookName'],
+                author: book['Author'],
+                description: book['BookDescription'],
+                img: [book['BookPicture']],
+                quality: '${book['Quality']}%',
+                genre: '',
+                bookId: book['BookId'],
+                isTrade: book['IsTraded'],
+                isReport: book['IsReported']);
+          }).toList();
+
+          setState(() {
+            books.addAll(newBooks);
+          });
         }
       } else {
-        throw Exception('Failed to load user genres');
+        print("Failed to fetch books: ${response.body}");
       }
-    } catch (error) {
-      print('Error fetching data: $error');
+    } catch (e) {
+      print("Error fetching books: $e");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
+  }
+
+  // SharedPreferences
+  Future<void> _saveLikedBooks() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('likedBooks', json.encode(bookStatuses));
+  }
+
+  // Load data from SharedPreferences
+  Future<void> _loadLikedBooks() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? likedBooksJson = prefs.getString('likedBooks');
+    if (likedBooksJson != null) {
+      List<dynamic> likedBooksList = json.decode(likedBooksJson);
+      setState(() {
+        bookStatuses = List<bool>.from(likedBooksList);
+      });
+    }
+  }
+
+  // Save the current index
+  Future<void> _saveLastIndex(int currentIndex) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('lastIndex', currentIndex);
+  }
+
+  // Load the last index
+  Future<void> _loadLastIndex() async {
+    final prefs = await SharedPreferences.getInstance();
+    int lastIndex = prefs.getInt('lastIndex') ?? 0;
+    setState(() {
+      offset = lastIndex;
+    });
+  }
+
+  List<bool> bookStatuses = [];
+  void handleLike(int index, bool isLiked) {
+    print("Book $index is liked: $isLiked");
+    if (index >= bookStatuses.length) {
+      bookStatuses.add(isLiked);
+    } else {
+      bookStatuses[index] = isLiked;
+    }
+    if (isLiked) {
+      likeCount++;
+    } else {
+      unlikeCount++;
+    }
+    _saveLikedBooks();
+    if ((likeCount + unlikeCount) == 10) {
+      _checkGenreChange();
+    }
+  }
+
+  void _checkGenreChange() {
+    if (unlikeCount > 5) {
+      print("More than 5 books were unliked. Loading next stack...");
+      _showChangeGenreDialog("Would you like to change the genre?");
+      _loadNextStack();
+    } else {
+      print("Fewer than 5 books were unliked. Showing genre change dialog...");
+      _loadNextStack();
+    }
+    likeCount = 0;
+    unlikeCount = 0;
+  }
+
+  void _loadNextStack() {
+    setState(() {
+      offset += 0;
+      books.clear();
+    });
+    print('Loading next stack with offset: $offset, limit: $limit');
+    fetchBooks();
+  }
+
+  void _showChangeGenreDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Change Genre'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => EditGenrePage(
+                            userID: widget.userID,
+                          )),
+                );
+              },
+              child: Text('Yes'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('No'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Helper to get random books
-  List<BookDetails> _getRandomBooks(List<BookDetails> booksList, int count) {
-    if (booksList.length <= count) {
-      return booksList;
-    }
-    booksList.shuffle(random);
-    return booksList.sublist(0, count);
-  }
+  // List<BookDetails> _getRandomBooks(List<BookDetails> booksList, int count) {
+  //   if (booksList.length <= count) {
+  //     return booksList;
+  //   }
+  //   booksList.shuffle(random);
+  //   return booksList.sublist(0, count);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -248,6 +302,7 @@ class _MatchPageState extends State<MatchPage> {
                         child: BookCard(
                           books: books,
                           userID: widget.userID,
+                          onLike: handleLike,
                         ),
                       ),
                     ],

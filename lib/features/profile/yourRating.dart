@@ -21,8 +21,10 @@ class _YourRatingPageState extends State<YourRatingPage> {
   @override
   void initState() {
     super.initState();
-    reviewsApiUrl = 'http://localhost:3000/reviews/received/${widget.userId}';
-    averageRatingApiUrl = 'http://localhost:3000/avgRating/${widget.userId}';
+    reviewsApiUrl =
+        'https://readee-api.stthi.com/reviews/received/${widget.userId}';
+    averageRatingApiUrl =
+        'https://readee-api.stthi.com/avgRating/${widget.userId}';
 
     // Fetch the average rating when the page loads
     fetchAverageRating();
@@ -30,13 +32,14 @@ class _YourRatingPageState extends State<YourRatingPage> {
 
   Future<List<Rating>> fetchReviews() async {
     final response = await http.get(Uri.parse(reviewsApiUrl));
-
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body)['reviews'];
-      if (data == null || data.isEmpty) {
-        return [];
+      final List<dynamic> data = json.decode(response.body)['reviews'] ?? [];
+      List<Rating> reviews = data.map((json) => Rating.fromJson(json)).toList();
+      // Debugging to check values
+      for (var review in reviews) {
+        print("Review Rating: ${review.rating}");
       }
-      return data.map((json) => Rating.fromJson(json)).toList();
+      return reviews;
     } else {
       throw Exception('Failed to load reviews');
     }
@@ -47,7 +50,8 @@ class _YourRatingPageState extends State<YourRatingPage> {
 
     if (response.statusCode == 200) {
       setState(() {
-        averageRating = json.decode(response.body)['average_rating'] ?? 0;
+        averageRating =
+            (json.decode(response.body)['average_rating'] ?? 0.0).toDouble();
       });
     } else {
       throw Exception('Failed to load average rating');
@@ -106,12 +110,8 @@ class _YourRatingPageState extends State<YourRatingPage> {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return const Center(
-                      child: Text(
-                        'No reviews available for this user yet.',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
-                      ),
-                    );
+                        child: Text(
+                            'You currently have no reviews or ratings \n from other users.'));
                   } else {
                     final reviews = snapshot.data!;
                     return ListView.separated(
@@ -141,22 +141,24 @@ class Rating {
   final String profileImageUrl;
   final String comment;
   final int rating;
+  final int score;
 
   Rating({
     required this.username,
     required this.profileImageUrl,
     required this.comment,
     required this.rating,
+    required this.score,
   });
 
-  // Factory method to create a Rating object from JSON
   factory Rating.fromJson(Map<String, dynamic> json) {
     return Rating(
-      username: json['giver_name'],
+      username: json['giver_name'] ?? 'Unknown User',
       profileImageUrl:
           json['giver_picture'] ?? 'https://example.com/placeholder.jpg',
       comment: json['review'] ?? '',
-      rating: json['score'] ?? 0,
+      rating: (json['rating'] ?? 0),
+      score: (json['score'] ?? 0),
     );
   }
 }
@@ -203,10 +205,11 @@ class RatingCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
+        // Generate stars based on the rating
         Row(
           children: List.generate(5, (index) {
             return Icon(
-              index < review.rating ? Icons.star : Icons.star_border,
+              index < review.score ? Icons.star : Icons.star_border,
               color: Colors.amber,
               size: 18,
             );

@@ -109,7 +109,8 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _fetchMessages() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/getAllMessage/${widget.roomId}'),
+        Uri.parse(
+            'https://readee-api.stthi.com/getAllMessage/${widget.roomId}'),
       );
 
       if (response.statusCode == 200) {
@@ -142,7 +143,8 @@ class _ChatPageState extends State<ChatPage> {
     // Create a request to upload the image
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://localhost:3000/uploadImage'), // Backend API endpoint
+      Uri.parse(
+          'https://readee-api.stthi.com/uploadImage'), // Backend API endpoint
     );
 
     request.files.add(
@@ -192,17 +194,30 @@ class _ChatPageState extends State<ChatPage> {
       'ImageUrl': imageUrl, // Image URL
     };
 
-    try {
-      if (_channel != null) {
-        _channel.sink.add(json.encode(messageData)); // Send the message
+    if (_channel != null) {
+      try {
+        _channel.sink.add(json.encode(messageData));
         print('Message sent through WebSocket: $messageData');
+      } catch (e) {
+        print('Error sending WebSocket message: $e');
+      }
+    } else {
+      print('WebSocket is not connected.');
+    }
 
-        _scrollToBottom(); // Scroll to the latest message
+    print('Sending message: $messageData'); // Debug to ensure data is correct
 
-        // Trigger a single rebuild for the new message
-        setState(() {
-          _controller.clear(); // Clear the input field
-        });
+    try {
+      final response = await http.post(
+        Uri.parse(
+            'https://readee-api.stthi.com/createMessage'), // Backend API endpoint
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(messageData), // JSON-encoded body
+      );
+
+      if (response.statusCode == 201) {
+        _controller.clear(); // Clear the text field (if applicable)
+        print('Message sent successfully');
       } else {
         print('WebSocket is not connected.');
       }

@@ -18,4 +18,5 @@ class BookDetails {
   final String description;
   final bool isTrade;
   final bool isReport;
+  
 }

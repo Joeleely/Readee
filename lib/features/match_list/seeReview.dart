@@ -7,7 +7,8 @@ class SeeReviewPage extends StatefulWidget {
   final String userId;
   final String OwnerName;
 
-  SeeReviewPage({Key? key, required this.userId, required this.OwnerName}) : super(key: key);
+  SeeReviewPage({Key? key, required this.userId, required this.OwnerName})
+      : super(key: key);
 
   @override
   State<SeeReviewPage> createState() => _SeeReviewPageState();
@@ -22,8 +23,8 @@ class _SeeReviewPageState extends State<SeeReviewPage> {
   @override
   void initState() {
     super.initState();
-    //reviewsApiUrl = 'http://localhost:3000/reviews/received/${widget.userId}';
-    //averageRatingApiUrl = 'http://localhost:3000/avgRating/${widget.userId}';
+    //reviewsApiUrl = 'https://readee-api.stthi.com/reviews/received/${widget.userId}';
+    //averageRatingApiUrl = 'https://readee-api.stthi.com/avgRating/${widget.userId}';
 
     // Fetch the average rating when the page loads
     fetchAverageRating();
@@ -34,7 +35,7 @@ class _SeeReviewPageState extends State<SeeReviewPage> {
       print('Fetching reviews...');
       final response = await http
           .get(Uri.parse(
-              'http://localhost:3000/reviews/received/${widget.userId}'))
+              'https://readee-api.stthi.com/reviews/received/${widget.userId}'))
           .timeout(const Duration(seconds: 10));
       ;
       print('Response status: ${response.statusCode}');
@@ -64,32 +65,35 @@ class _SeeReviewPageState extends State<SeeReviewPage> {
   }
 
   Future<void> fetchAverageRating() async {
-  try {
-    final response = await http
-        .get(Uri.parse('http://localhost:3000/avgRating/${widget.userId}'))
-        .timeout(const Duration(seconds: 10)); // Add timeout for robustness
+    try {
+      final response = await http
+          .get(Uri.parse(
+              'https://readee-api.stthi.com/avgRating/${widget.userId}'))
+          .timeout(const Duration(seconds: 10)); // Add timeout for robustness
 
-    if (response.statusCode == 200) {
+      if (response.statusCode == 200) {
+        setState(() {
+          averageRating = json.decode(response.body)['average_rating'] ?? 0;
+          print("averageRating: $averageRating");
+        });
+      } else if (response.statusCode == 404) {
+        // Handle 404 (not found) specifically
+        setState(() {
+          averageRating = 0.0; // Default to 0.0 if no rating exists
+        });
+        print("averageRating not found for userId: ${widget.userId}");
+      } else {
+        throw Exception(
+            'Failed to load average rating. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching average rating: $e');
       setState(() {
-        averageRating = json.decode(response.body)['average_rating'] ?? 0;
-        print("averageRating: $averageRating");
+        averageRating =
+            0.0; // Handle errors gracefully by setting default value
       });
-    } else if (response.statusCode == 404) {
-      // Handle 404 (not found) specifically
-      setState(() {
-        averageRating = 0.0; // Default to 0.0 if no rating exists
-      });
-      print("averageRating not found for userId: ${widget.userId}");
-    } else {
-      throw Exception('Failed to load average rating. Status code: ${response.statusCode}');
     }
-  } catch (e) {
-    print('Error fetching average rating: $e');
-    setState(() {
-      averageRating = 0.0; // Handle errors gracefully by setting default value
-    });
   }
-}
 
   @override
   Widget build(BuildContext context) {

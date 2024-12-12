@@ -35,7 +35,8 @@ class _PersonaPageState extends State<PersonaPage> {
   }
 
   Future<void> fetchGenres() async {
-    final response = await http.get(Uri.parse('http://localhost:3000/genres'));
+    final response =
+        await http.get(Uri.parse('https://readee-api.stthi.com/genres'));
 
     if (response.statusCode == 200) {
       List<dynamic> jsonData = json.decode(response.body);
@@ -71,29 +72,37 @@ class _PersonaPageState extends State<PersonaPage> {
   }
 
   Future<void> checkUserBooksAndNavigate(int userId) async {
-  final response = await http.get(Uri.parse('http://localhost:3000/getBookByUser/$userId'));
+    final response = await http
+        .get(Uri.parse('https://readee-api.stthi.com/getBookByUser/$userId'));
 
-  if (response.statusCode == 200) {
-    // Assuming the response body contains a list of books
-    List<dynamic> books = json.decode(response.body);
-    
-    if (books.isNotEmpty) {
-      // Navigate to ReadeeNavigationBar if books are found
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ReadeeNavigationBar(userId: widget.userId, initialTab: 0,)),
-      );
+    if (response.statusCode == 200) {
+      // Assuming the response body contains a list of books
+      List<dynamic> books = json.decode(response.body);
+
+      if (books.isNotEmpty) {
+        // Navigate to ReadeeNavigationBar if books are found
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ReadeeNavigationBar(
+                    userId: widget.userId,
+                    initialTab: 0,
+                  )),
+        );
+      } else {
+        // Navigate to CreateBookPage if no books are found
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => CreateBookPage(
+                    userId: widget.userId,
+                  )), // Replace CreateBookPage with the correct import
+        );
+      }
     } else {
-      // Navigate to CreateBookPage if no books are found
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => CreateBookPage(userId: widget.userId,)), // Replace CreateBookPage with the correct import
-      );
+      throw Exception('Failed to load books');
     }
-  } else {
-    throw Exception('Failed to load books');
   }
-}
 
   Future<void> submitSelectedGenres(int userId) async {
     print(selectedGenreIds);
@@ -104,7 +113,7 @@ class _PersonaPageState extends State<PersonaPage> {
     };
 
     final response = await http.post(
-      Uri.parse('http://localhost:3000/createUserGenres'),
+      Uri.parse('https://readee-api.stthi.com/createUserGenres'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(postData),
     );
@@ -113,7 +122,11 @@ class _PersonaPageState extends State<PersonaPage> {
       print('Data submitted successfully');
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ReadeeNavigationBar(userId: widget.userId, initialTab: 0,)),
+        MaterialPageRoute(
+            builder: (context) => ReadeeNavigationBar(
+                  userId: widget.userId,
+                  initialTab: 0,
+                )),
       );
       //await checkUserBooksAndNavigate(userId);
     } else {

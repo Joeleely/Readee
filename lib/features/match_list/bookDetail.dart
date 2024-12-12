@@ -62,8 +62,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
   Future<void> _fetchUserData() async {
     try {
-      final response = await http
-          .get(Uri.parse('http://localhost:3000/users/${widget.userId}'));
+      final response = await http.get(
+          Uri.parse('https://readee-api.stthi.com/users/${widget.userId}'));
 
       print("This is matchID: ${widget.matchId}");
       if (response.statusCode == 200) {
@@ -83,8 +83,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
   Future<void> _fetchBookData() async {
     try {
-      final response = await http
-          .get(Uri.parse('http://localhost:3000/getBook/${widget.bookId}'));
+      final response = await http.get(
+          Uri.parse('https://readee-api.stthi.com/getBook/${widget.bookId}'));
 
       if (response.statusCode == 200) {
         final bookData = json.decode(response.body);
@@ -110,7 +110,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
           isLoading = false;
 
           if (book.isReport == true) {
-            _showReportedDialog(DateTime.parse(bookData['ExpiredDate']), book.bookId);
+            _showReportedDialog(
+                DateTime.parse(bookData['ExpiredDate']), book.bookId);
           }
         });
       } else {
@@ -127,16 +128,16 @@ class _BookDetailPageState extends State<BookDetailPage> {
       final deletionTime = reportTime.add(const Duration(days: 7));
       final timeLeft = deletionTime.difference(now);
 
-    if (timeLeft.isNegative) {
-      _deleteBook(bookId);
-      Navigator.of(context).pop();
-    } else {
-      Timer(timeLeft, () {
+      if (timeLeft.isNegative) {
         _deleteBook(bookId);
         Navigator.of(context).pop();
-      });
-    }
-    
+      } else {
+        Timer(timeLeft, () {
+          _deleteBook(bookId);
+          Navigator.of(context).pop();
+        });
+      }
+
       String timeLeftText;
       if (timeLeft.isNegative) {
         timeLeftText = "Your book will be deleted very soon.";
@@ -147,60 +148,63 @@ class _BookDetailPageState extends State<BookDetailPage> {
         timeLeftText = "$days days, $hours hours, and $minutes minutes left.";
       }
       showDialog(
-      context: context,
-      barrierDismissible: false, // Prevent closing by tapping outside
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Row(
-            children: [
-              Text('Alert'),
-              const SizedBox(width: 10,),
-              Tooltip(
-                        message: 'If you want to continue trading this book, you have to post your book again.',
-                        child: Icon(
-                          Icons.help_outline,
-                          color: Colors.grey,
-                          size: 16,
-                        ),
-                      ),
-            ],
-          ),
-          content: const Text(
-              'Your book has been reported too many times. It will be deleted soon.\nNote that: Other will not see this book anymore'),
-          actions: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              child: const Text('Understood'),
+        context: context,
+        barrierDismissible: false, // Prevent closing by tapping outside
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Row(
+              children: [
+                Text('Alert'),
+                const SizedBox(
+                  width: 10,
+                ),
+                Tooltip(
+                  message:
+                      'If you want to continue trading this book, you have to post your book again.',
+                  child: Icon(
+                    Icons.help_outline,
+                    color: Colors.grey,
+                    size: 16,
+                  ),
+                ),
+              ],
             ),
-          ],
-        );
-      },
-    );
-  });
-}
-
-void _deleteBook(String bookId) async {
-  final url = Uri.parse('http://localhost:3000/deleteBook/$bookId');
-
-  try {
-    final response = await http.post(url);
-    if (response.statusCode == 200) {
-      print("Book with ID $bookId successfully deleted.");
-    } else {
-      print("Failed to delete book with ID $bookId: ${response.statusCode}");
-    }
-  } catch (error) {
-    print("Error deleting book with ID $bookId: $error");
+            content: const Text(
+                'Your book has been reported too many times. It will be deleted soon.\nNote that: Other will not see this book anymore'),
+            actions: <Widget>[
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Understood'),
+              ),
+            ],
+          );
+        },
+      );
+    });
   }
-}
+
+  void _deleteBook(String bookId) async {
+    final url = Uri.parse('https://readee-api.stthi.com/deleteBook/$bookId');
+
+    try {
+      final response = await http.post(url);
+      if (response.statusCode == 200) {
+        print("Book with ID $bookId successfully deleted.");
+      } else {
+        print("Failed to delete book with ID $bookId: ${response.statusCode}");
+      }
+    } catch (error) {
+      print("Error deleting book with ID $bookId: $error");
+    }
+  }
 
   Future<void> _fetchOwnerData(String ownerId) async {
     try {
-      final response =
-          await http.get(Uri.parse('http://localhost:3000/users/$ownerId'));
+      final response = await http
+          .get(Uri.parse('https://readee-api.stthi.com/users/$ownerId'));
 
       if (response.statusCode == 200) {
         final ownerData = json.decode(response.body);
@@ -219,7 +223,7 @@ void _deleteBook(String bookId) async {
   Future<void> _fetchTradeCount(String ownerId) async {
     try {
       final response = await http
-          .get(Uri.parse('http://localhost:3000/tradeCount/$ownerId'));
+          .get(Uri.parse('https://readee-api.stthi.com/tradeCount/$ownerId'));
 
       if (response.statusCode == 200) {
         final tradeCountData = json.decode(response.body);
@@ -236,8 +240,8 @@ void _deleteBook(String bookId) async {
 
   Future<void> _fetchAverageRate(String ownerId) async {
     try {
-      final response = await http
-          .get(Uri.parse('http://localhost:3000/getAverageRate/$ownerId'));
+      final response = await http.get(
+          Uri.parse('https://readee-api.stthi.com/getAverageRate/$ownerId'));
 
       if (response.statusCode == 200) {
         final averageRateData = json.decode(response.body);
@@ -257,7 +261,8 @@ void _deleteBook(String bookId) async {
   Future<void> _checkTradeRequestStatus() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/getAllMatches/${widget.matchId}'),
+        Uri.parse(
+            'https://readee-api.stthi.com/getAllMatches/${widget.matchId}'),
       );
 
       if (response.statusCode == 200) {
@@ -351,8 +356,8 @@ void _deleteBook(String bookId) async {
       'Confirm accept',
       'Are you sure to accept the request?',
       () async {
-        final url =
-            Uri.parse('http://localhost:3000/trades/${widget.matchId}/accept');
+        final url = Uri.parse(
+            'https://readee-api.stthi.com/trades/${widget.matchId}/accept');
 
         try {
           final response = await http.post(url);
@@ -390,8 +395,8 @@ void _deleteBook(String bookId) async {
       'Confirm reject',
       'Are you sure to reject the request?',
       () async {
-        final url =
-            Uri.parse('http://localhost:3000/trades/${widget.matchId}/reject');
+        final url = Uri.parse(
+            'https://readee-api.stthi.com/trades/${widget.matchId}/reject');
 
         try {
           final response = await http.post(url);
@@ -411,7 +416,7 @@ void _deleteBook(String bookId) async {
             );
 
             final unlikeUrl = Uri.parse(
-                'http://localhost:3000/unlikeLogs/${widget.bookId}/${widget.userId}');
+                'https://readee-api.stthi.com/unlikeLogs/${widget.bookId}/${widget.userId}');
             final unlikeResponse = await http.post(unlikeUrl);
             //print(widget.bookId);
             //print(widget.userId);
@@ -459,7 +464,7 @@ void _deleteBook(String bookId) async {
 
   Future<void> _sendTradeRequest() async {
     final url = Uri.parse(
-        'http://localhost:3000/trades/${widget.matchId}/send-request/${widget.userId}');
+        'https://readee-api.stthi.com/trades/${widget.matchId}/send-request/${widget.userId}');
     try {
       final response = await http.post(url);
 
@@ -487,7 +492,7 @@ void _deleteBook(String bookId) async {
 
   Future<void> cancelTradeRequest() async {
     final url = Uri.parse(
-        'http://localhost:3000/trades/${widget.matchId}/cancel-request');
+        'https://readee-api.stthi.com/trades/${widget.matchId}/cancel-request');
 
     try {
       final response = await http.post(
@@ -513,7 +518,8 @@ void _deleteBook(String bookId) async {
 
   Future<void> _getRoomId(BuildContext context) async {
     final response = await http.get(
-      Uri.parse('http://localhost:3000/getRoomId/$secondUserId/$firstUserId'),
+      Uri.parse(
+          'https://readee-api.stthi.com/getRoomId/$secondUserId/$firstUserId'),
     );
     //print("secondUserId: $secondUserId, firstUserId: $firstUserId");
 
@@ -540,7 +546,7 @@ void _deleteBook(String bookId) async {
       // Room does not exist, create a new room
       final createResponse = await http.post(
         Uri.parse(
-            'http://localhost:3000/createRoom/$firstUserId/$secondUserId'),
+            'https://readee-api.stthi.com/createRoom/$firstUserId/$secondUserId'),
       );
 
       if (createResponse.statusCode == 200) {
@@ -767,7 +773,7 @@ void _deleteBook(String bookId) async {
                         });
                       },
                       style: ElevatedButton.styleFrom(
-                        elevation: 5,
+                        elevation: 0,
                         backgroundColor: tradeRequestStatus == 'pending'
                             ? Colors.grey
                             : Colors.cyan,
@@ -799,7 +805,7 @@ void _deleteBook(String bookId) async {
                         });
                       },
                       style: ElevatedButton.styleFrom(
-                        elevation: 5,
+                        elevation: 0,
                         backgroundColor: tradeRequestStatus == 'pending'
                             ? Colors.grey
                             : Colors.cyan,
@@ -830,7 +836,7 @@ void _deleteBook(String bookId) async {
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          elevation: 5,
+                          elevation: 0,
                           backgroundColor: Colors.red,
                         ),
                         child: const Text(
@@ -848,7 +854,7 @@ void _deleteBook(String bookId) async {
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          elevation: 5,
+                          elevation: 0,
                           backgroundColor: Colors.cyan,
                         ),
                         child: const Text(
@@ -876,7 +882,7 @@ void _deleteBook(String bookId) async {
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          elevation: 5,
+                          elevation: 0,
                           backgroundColor: Colors.green,
                         ),
                         child: const Text(

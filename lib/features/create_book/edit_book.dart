@@ -54,7 +54,7 @@ class _EditBookPageState extends State<EditBookPage> {
   Future<void> _fetchBookData() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/getBook/${widget.bookId}'),
+        Uri.parse('https://readee-api.stthi.com/getBook/${widget.bookId}'),
       );
 
       if (response.statusCode == 200) {
@@ -122,19 +122,19 @@ class _EditBookPageState extends State<EditBookPage> {
   }
 
   Future<String?> _fetchNetworkImageAsBase64(String url) async {
-  try {
-    final response = await http.get(Uri.parse(url));
-    if (response.statusCode == 200) {
-      return base64Encode(response.bodyBytes);
-    } else {
-      print('Failed to fetch image: ${response.body}');
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        return base64Encode(response.bodyBytes);
+      } else {
+        print('Failed to fetch image: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching network image: $e');
       return null;
     }
-  } catch (e) {
-    print('Error fetching network image: $e');
-    return null;
   }
-}
 
   Future<void> _saveBook() async {
     setState(() {
@@ -153,18 +153,18 @@ class _EditBookPageState extends State<EditBookPage> {
 
       // If a new image is selected, convert it to base64
       if (_selectedImage != null) {
-      final bytes = await _selectedImage!.readAsBytes();
-      base64Image = base64Encode(bytes);
-    } else if (_existingImage != null) {
-      // Use the existing local image if no new image is selected
-      base64Image = base64Encode(_existingImage!);
-    } else if (_existingImageUrl != null) {
-      // If no new image is selected and there's no existing local image, use the existing image URL
-      base64Image = await _fetchNetworkImageAsBase64(_existingImageUrl!);
-    } else {
-      // Fallback if no image is available
-      base64Image = null; // or assign a default image if needed
-    }
+        final bytes = await _selectedImage!.readAsBytes();
+        base64Image = base64Encode(bytes);
+      } else if (_existingImage != null) {
+        // Use the existing local image if no new image is selected
+        base64Image = base64Encode(_existingImage!);
+      } else if (_existingImageUrl != null) {
+        // If no new image is selected and there's no existing local image, use the existing image URL
+        base64Image = await _fetchNetworkImageAsBase64(_existingImageUrl!);
+      } else {
+        // Fallback if no image is available
+        base64Image = null; // or assign a default image if needed
+      }
 
       final Map<String, dynamic> bookData = {
         'BookName': _titleController.text,
@@ -177,7 +177,7 @@ class _EditBookPageState extends State<EditBookPage> {
 
       // Make the PUT request to update the book
       final response = await http.patch(
-        Uri.parse('http://localhost:3000/editBook/${widget.bookId}'),
+        Uri.parse('https://readee-api.stthi.com/editBook/${widget.bookId}'),
         headers: {
           'Content-Type': 'application/json',
         },

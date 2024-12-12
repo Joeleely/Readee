@@ -14,7 +14,8 @@ class EditProfileScreen extends StatefulWidget {
   final int userID;
   final String profile;
 
-  const EditProfileScreen({super.key, required this.userID, required this.profile});
+  const EditProfileScreen(
+      {super.key, required this.userID, required this.profile});
 
   @override
   _EditProfileScreenState createState() => _EditProfileScreenState();
@@ -29,12 +30,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController genderController;
 
   // Local variables to hold the editable values
-late String editableFirstName = '';
-late String editableLastName = '';
-late String editableUsername = '';
-late String editableEmail = '';
-late String editableGender = '';
-late String profilePicture = '';
+  late String editableFirstName = '';
+  late String editableLastName = '';
+  late String editableUsername = '';
+  late String editableEmail = '';
+  late String editableGender = '';
+  late String profilePicture = '';
 
   String? _usernameError;
   String? base64Image;
@@ -52,7 +53,7 @@ late String profilePicture = '';
     _fetchUserData(); // Fetch user data on initialization
   }
 
-   Future<void> _pickImage() async {
+  Future<void> _pickImage() async {
     try {
       final image = await _picker.pickImage(source: ImageSource.gallery);
       if (image == null) return;
@@ -88,7 +89,7 @@ late String profilePicture = '';
   Future<void> _fetchUserData() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/users/${widget.userID}'),
+        Uri.parse('https://readee-api.stthi.com/users/${widget.userID}'),
       );
 
       if (response.statusCode == 200) {
@@ -144,18 +145,18 @@ late String profilePicture = '';
       'Gender': editableGender,
       'ProfileUrl': base64Image,
     };
-  //   if (editableUsername != usernameController.text) {
-  //   data['Username'] = editableUsername;
-  // }
+    //   if (editableUsername != usernameController.text) {
+    //   data['Username'] = editableUsername;
+    // }
 
-  // setState(() {
-  //     _usernameError = null;
-  //   });
+    // setState(() {
+    //     _usernameError = null;
+    //   });
 
     // Perform the HTTP POST request
     try {
       final response = await http.patch(
-        Uri.parse('http://localhost:3000/user/edit/${widget.userID}'),
+        Uri.parse('https://readee-api.stthi.com/user/edit/${widget.userID}'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -190,7 +191,7 @@ late String profilePicture = '';
   }
 
   // Future<void> _checkUser(String beforeName, String afterName) async {
-  //   final url = Uri.parse('http://localhost:3000/checkUser');
+  //   final url = Uri.parse('https://readee-api.stthi.com/checkUser');
   //   final headers = {'Content-Type': 'application/json'};
   //   final body = jsonEncode({
   //     "username": usernameController.text,
@@ -229,198 +230,202 @@ late String profilePicture = '';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 243, 252, 255),
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(LineAwesomeIcons.arrow_left),
-        ),
-        title: const Text('Edit Profile', style: TextStyle(fontSize: 20)),
-        actions: isEditing
-            ? null
-            : [
-                Padding(
-                  padding: const EdgeInsets.only(right: 10.0),
-                  child: IconButton(
-                    onPressed: toggleEdit,
-                    icon: const Icon(LineAwesomeIcons.alternate_pencil),
-                  ),
-                ),
-              ],
-      ),
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: GestureDetector(
-              onTap: () {
-                FocusScope.of(context).unfocus();
-              },
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 10),
-                  GestureDetector(
-                    onTap: _pickImage,
-                    child: CircleAvatar(
-                      radius: 100,
-                      backgroundImage: _selectedImage != null
-                          ? FileImage(File(_selectedImage!.path))
-                          : NetworkImage(widget.profile) as ImageProvider,
-                      child: _selectedImage == null
-                          ? const Icon(Icons.camera_alt, size: 40, color: Colors.white54)
-                          : null,
+        appBar: AppBar(
+          centerTitle: true,
+          backgroundColor: const Color.fromARGB(255, 243, 252, 255),
+          leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(LineAwesomeIcons.arrow_left),
+          ),
+          title: const Text('Edit Profile', style: TextStyle(fontSize: 20)),
+          actions: isEditing
+              ? null
+              : [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: IconButton(
+                      onPressed: toggleEdit,
+                      icon: const Icon(LineAwesomeIcons.alternate_pencil),
                     ),
                   ),
-                  const SizedBox(height: 40),
-
-                  // First Name and Last Name in one line
-                  Row(
-                    children: [
-                      Flexible(
-                        child: isEditing
-                            ? TextField(
-                                controller: firstNameController,
-                                decoration: const InputDecoration(
-                                  contentPadding: EdgeInsets.only(bottom: 3),
-                                  labelText: tFirstName,
-                                  floatingLabelBehavior:
-                                      FloatingLabelBehavior.always,
-                                ),
-                              )
-                            : ListTile(
-                                title: const Text(tFirstName),
-                                subtitle: Text(editableFirstName),
-                              ),
-                      ),
-                      const SizedBox(width: 20),
-                      Flexible(
-                        child: isEditing
-                            ? TextField(
-                                controller: lastNameController,
-                                decoration: const InputDecoration(
-                                  contentPadding: EdgeInsets.only(bottom: 3),
-                                  labelText: tLastName,
-                                  floatingLabelBehavior:
-                                      FloatingLabelBehavior.always,
-                                ),
-                              )
-                            : ListTile(
-                                title: const Text(tLastName),
-                                subtitle: Text(editableLastName),
-                              ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // Username
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Flexible(
-                    child: isEditing
-                        ? Container(
-                            color: Colors.grey[300],
-                            child: ListTile(
-                              title: const Text(tUsername),
-                              subtitle: Text(editableUsername),
-                            ),
-                          )
-                        : ListTile(
-                            title: const Text(tUsername),
-                            subtitle: Text(editableUsername),
-                          ),
-                  ),
-
-                  const SizedBox(height: 10),
-                  Flexible(
-                    child: isEditing
-                        ? Container(
-                            color: Colors.grey[300],
-                            child: ListTile(
-                              title: const Text(tEmail),
-                              subtitle: Text(editableEmail),
-                            ),
-                          )
-                        : ListTile(
-                            title: const Text(tEmail),
-                            subtitle: Text(editableEmail),
-                          ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  Flexible(
-                    child: isEditing
-                        ? DropdownButtonFormField<String>(
-                            value: editableGender.isNotEmpty &&
-                                    ['Male', 'Female', 'Other']
-                                        .contains(editableGender)
-                                ? editableGender
-                                : null,
-                            decoration: const InputDecoration(
-                              labelText: tGender,
-                              contentPadding: EdgeInsets.only(bottom: 3),
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
-                            ),
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                editableGender = newValue!;
-                                genderController.text = newValue;
-                              });
-                            },
-                            items: <String>['Male', 'Female', 'Other']
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                          )
-                        : ListTile(
-                            title: const Text(tGender),
-                            subtitle: Text(editableGender),
-                          ),
-                  ),
-                  const SizedBox(height: 30),
-                  if (isEditing) ...[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: saveProfile,
-                          style: const ButtonStyle(
-                              backgroundColor:
-                                  MaterialStatePropertyAll(Colors.cyan)),
-                          child: const Text(
-                            'Save',
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 30),
-                        ElevatedButton(
-                          onPressed: cancelEdit,
-                          child: const Text('Cancel'),
-                        ),
-                      ],
-                    ),
-                  ],
                 ],
-              ),
-            ),
-                ]
-          )
         ),
-      ),
-    ),
-      )
-    );
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: GestureDetector(
+                  onTap: () {
+                    FocusScope.of(context).unfocus();
+                  },
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 10),
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: CircleAvatar(
+                            radius: 100,
+                            backgroundImage: _selectedImage != null
+                                ? FileImage(File(_selectedImage!.path))
+                                : NetworkImage(widget.profile) as ImageProvider,
+                            child: _selectedImage == null
+                                ? const Icon(Icons.camera_alt,
+                                    size: 40, color: Colors.white54)
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+
+                        // First Name and Last Name in one line
+                        Row(
+                          children: [
+                            Flexible(
+                              child: isEditing
+                                  ? TextField(
+                                      controller: firstNameController,
+                                      decoration: const InputDecoration(
+                                        contentPadding:
+                                            EdgeInsets.only(bottom: 3),
+                                        labelText: tFirstName,
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.always,
+                                      ),
+                                    )
+                                  : ListTile(
+                                      title: const Text(tFirstName),
+                                      subtitle: Text(editableFirstName),
+                                    ),
+                            ),
+                            const SizedBox(width: 20),
+                            Flexible(
+                              child: isEditing
+                                  ? TextField(
+                                      controller: lastNameController,
+                                      decoration: const InputDecoration(
+                                        contentPadding:
+                                            EdgeInsets.only(bottom: 3),
+                                        labelText: tLastName,
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.always,
+                                      ),
+                                    )
+                                  : ListTile(
+                                      title: const Text(tLastName),
+                                      subtitle: Text(editableLastName),
+                                    ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // Username
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Flexible(
+                                child: isEditing
+                                    ? Container(
+                                        color: Colors.grey[300],
+                                        child: ListTile(
+                                          title: const Text(tUsername),
+                                          subtitle: Text(editableUsername),
+                                        ),
+                                      )
+                                    : ListTile(
+                                        title: const Text(tUsername),
+                                        subtitle: Text(editableUsername),
+                                      ),
+                              ),
+                              const SizedBox(height: 10),
+                              Flexible(
+                                child: isEditing
+                                    ? Container(
+                                        color: Colors.grey[300],
+                                        child: ListTile(
+                                          title: const Text(tEmail),
+                                          subtitle: Text(editableEmail),
+                                        ),
+                                      )
+                                    : ListTile(
+                                        title: const Text(tEmail),
+                                        subtitle: Text(editableEmail),
+                                      ),
+                              ),
+                              const SizedBox(height: 10),
+                              Flexible(
+                                child: isEditing
+                                    ? DropdownButtonFormField<String>(
+                                        value: editableGender.isNotEmpty &&
+                                                ['Male', 'Female', 'Other']
+                                                    .contains(editableGender)
+                                            ? editableGender
+                                            : null,
+                                        decoration: const InputDecoration(
+                                          labelText: tGender,
+                                          contentPadding:
+                                              EdgeInsets.only(bottom: 3),
+                                          floatingLabelBehavior:
+                                              FloatingLabelBehavior.always,
+                                        ),
+                                        onChanged: (String? newValue) {
+                                          setState(() {
+                                            editableGender = newValue!;
+                                            genderController.text = newValue;
+                                          });
+                                        },
+                                        items: <String>[
+                                          'Male',
+                                          'Female',
+                                          'Other'
+                                        ].map<DropdownMenuItem<String>>(
+                                            (String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Text(value),
+                                          );
+                                        }).toList(),
+                                      )
+                                    : ListTile(
+                                        title: const Text(tGender),
+                                        subtitle: Text(editableGender),
+                                      ),
+                              ),
+                              const SizedBox(height: 30),
+                              if (isEditing) ...[
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: saveProfile,
+                                      style: const ButtonStyle(
+                                          backgroundColor:
+                                              MaterialStatePropertyAll(
+                                                  Colors.cyan)),
+                                      child: const Text(
+                                        'Save',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 30),
+                                    ElevatedButton(
+                                      onPressed: cancelEdit,
+                                      child: const Text('Cancel'),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ])),
+            ),
+          ),
+        ));
   }
 }
