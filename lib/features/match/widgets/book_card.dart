@@ -41,10 +41,10 @@ class _BookCardState extends State<BookCard> {
       _swipeItems.add(SwipeItem(
         content: book,
         likeAction: () async {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text("Liked ${book.title}"),
-            duration: const Duration(milliseconds: 500),
-          ));
+          // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          //   content: Text("Liked ${book.title}"),
+          //   duration: const Duration(milliseconds: 500),
+          // ));
           setState(() {
             likedIndices.add(i);
             bookStatuses[book.bookId] = true; // Update bookStatuses
@@ -53,10 +53,10 @@ class _BookCardState extends State<BookCard> {
           await _likeBook(widget.userID, book.bookId);
         },
         nopeAction: () async {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text("Nope ${book.title}"),
-            duration: const Duration(milliseconds: 500),
-          ));
+          // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          //   content: Text("Nope ${book.title}"),
+          //   duration: const Duration(milliseconds: 500),
+          // ));
           setState(() {
             unlikedIndices.add(i);
             bookStatuses[book.bookId] = false; // Update bookStatuses

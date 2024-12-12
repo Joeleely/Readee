@@ -207,29 +207,10 @@ class _ChatPageState extends State<ChatPage> {
 
     print('Sending message: $messageData'); // Debug to ensure data is correct
 
-    try {
-      final response = await http.post(
-        Uri.parse(
-            'https://readee-api.stthi.com/createMessage'), // Backend API endpoint
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(messageData), // JSON-encoded body
-      );
-
-      if (response.statusCode == 201) {
-        _controller.clear(); // Clear the text field (if applicable)
-        print('Message sent successfully');
-      } else {
-        print('WebSocket is not connected.');
-      }
-    } catch (e) {
-      print('Error sending WebSocket message: $e');
-      _showError('Error sending message: $e');
-    }
-
     // try {
     //   final response = await http.post(
     //     Uri.parse(
-    //         'http://localhost:3000/createMessage'), // Backend API endpoint
+    //         'https://readee-api.stthi.com/createMessage'), // Backend API endpoint
     //     headers: {'Content-Type': 'application/json'},
     //     body: json.encode(messageData), // JSON-encoded body
     //   );
