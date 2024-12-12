@@ -46,10 +46,10 @@ class _VerifyCodeMySelfState extends State<VerifyCodeMySelf> {
         secKey, DateTime.now().millisecondsSinceEpoch,
         algorithm: Algorithm.SHA1, isGoogle: true);
     if (code == generatedCode) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        backgroundColor: Colors.green,
-        content: Text('Code verified'),
-      ));
+      // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      //   backgroundColor: Colors.green,
+      //   content: Text('Code verified'),
+      // ));
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => widget.successPage));
     } else {
