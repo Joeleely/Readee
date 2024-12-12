@@ -242,23 +242,35 @@ class _MatchedListState extends State<MatchedList> {
 
       Set<String> rejectedBookIds = {};
       List<BookDetails> fetchedMatchedBooks = [];
+      Set<String> processedBookIds = {};
 
       for (var match in matches) {
         BookDetails? bookDetails =
             await getMatchedBookIfOwnerMatches(match.matchId);
 
+
         if (bookDetails != null) {
-          if (bookDetails.isTrade == false &&
-              !rejectedBookIds.contains(bookDetails.bookId.toString())) {
+          String bookIdStr =
+              bookDetails.bookId.toString(); // Ensure consistent representation
+
+          if (!bookDetails.isTrade &&
+              !rejectedBookIds.contains(bookIdStr) &&
+              !processedBookIds.contains(bookIdStr)) {
             fetchedMatchedBooks.add(bookDetails);
             validMatches.add(match);
+            processedBookIds.add(bookIdStr);
+
             print(
-                "Added book: ${bookDetails.title}, BookId: ${bookDetails.bookId}, MatchId: ${match.matchId}");
+                "Added book: ${bookDetails.title}, BookId: ${bookIdStr}, MatchId: ${match.matchId}");
           } else {
             print(
-                'Skipped book: ${bookDetails.title}, Trade Status: ${bookDetails.isTrade}, Duplicate: ');
+                'Skipped book: ${bookDetails.title}, Trade Status: ${bookDetails.isTrade}, Duplicate or Rejected. BookId: ${bookIdStr}');
           }
         }
+
+// Debugging step: Check for duplicates after processing
+        print('Processed Book IDs: $processedBookIds');
+        print('Fetched Books Count: ${fetchedMatchedBooks.length}');
       }
 
       setState(() {
