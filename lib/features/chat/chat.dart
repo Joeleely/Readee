@@ -25,10 +25,8 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   List<Map<String, dynamic>> _messages = [];
   final TextEditingController _controller = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
   late WebSocketChannel _channel;
   final ImagePicker _picker = ImagePicker();
-  bool _isWebSocketConnected = false;
 
   @override
   void initState() {
@@ -38,44 +36,27 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _connectToWebSocket() {
-    print("Attempting WebSocket connection...");
-    if (_isWebSocketConnected) {
-      print("WebSocket already connected. Skipping...");
-      return;
-    }
     try {
       _channel = WebSocketChannel.connect(
         Uri.parse('ws://localhost:3000/chat/${widget.roomId}'),
       );
 
-      _isWebSocketConnected = true;
-
       print('WebSocket connection established');
       _channel.stream.listen(
         (data) {
-          print("Received data: $data");
+          print("This is data from wbsk: $data");
           try {
             final message = json.decode(data);
-            print("Decoded message: $message");
-            if (message['SenderId'] != null && message['Message'] != null) {
-              // Prevent duplicates if already in the list
-              final isDuplicate = _messages.any((m) =>
-                  m['senderId'] == message['SenderId'] &&
-                  m['message'] == message['Message']);
-
-              if (!isDuplicate) {
-                setState(() {
-                  _messages.add({
-                    'senderId': message['SenderId'],
-                    'message': message['Message'],
-                    'imageUrl': message['ImageUrl'] ?? '',
-                  });
-                });
-                _scrollToBottom();
-              }
-            }
+            print('Decoded message: $message');
+            setState(() {
+              _messages.add({
+                'senderId': message['SenderId'],
+                'message': message['Message'] ?? '',
+                'imageUrl': message['ImageUrl'] ?? '',
+              });
+            });
           } catch (e) {
-            print("Error decoding message: $e");
+            print('Error decoding message: $e');
           }
         },
         onError: (error) {
@@ -84,25 +65,10 @@ class _ChatPageState extends State<ChatPage> {
         },
         onDone: () {
           print('WebSocket connection closed');
-          _isWebSocketConnected = false; // Allow reconnection if closed
         },
       );
     } catch (e) {
       _showError("Failed to connect to WebSocket: $e");
-    }
-  }
-
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      Future.microtask(() {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      });
-    } else {
-      print("ScrollController has no clients.");
     }
   }
 
@@ -124,7 +90,6 @@ class _ChatPageState extends State<ChatPage> {
             };
           }).toList();
         });
-        _scrollToBottom();
       } else {
         throw Exception('Failed to load messages');
       }
@@ -238,8 +203,6 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void dispose() {
     _channel.sink.close();
-    _isWebSocketConnected = false;
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -279,7 +242,6 @@ class _ChatPageState extends State<ChatPage> {
           const SizedBox(height: 10),
           Expanded(
             child: ListView.builder(
-              controller: _scrollController,
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final message = _messages[index];
@@ -321,21 +283,7 @@ class _ChatPageState extends State<ChatPage> {
                           ),
                           child: message['imageUrl'] != null &&
                                   message['imageUrl'].isNotEmpty
-                              ? Image.network(
-                                  message['imageUrl'],
-                                  errorBuilder: (context, error, stackTrace) {
-                                    print("error in image: $error");
-                                    print(message['imageUrl']);
-                                    return Text(
-                                      "{Failed to load image}",
-                                      style: TextStyle(
-                                        color: isSentByMe
-                                            ? Colors.white
-                                            : Colors.black,
-                                      ),
-                                    );
-                                  },
-                                )
+                              ? Image.network(message['imageUrl'])
                               : Text(
                                   message['message'] ?? "Null",
                                   style: TextStyle(
