@@ -81,6 +81,31 @@ class _BookDetailPageState extends State<BookDetailPage> {
     }
   }
 
+  Future<void> _deleteReportBook(String bookId) async {
+  final String url = 'http://localhost:3000/deleteReport/$bookId';
+
+  try {
+    final response = await http.delete(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      print("success delete report book");
+      // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      //   content: Text('Book and associated reports deleted successfully.'),
+      // ));
+    } else {
+      final error = json.decode(response.body)['error'];
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Error: $error'),
+      ));
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('An error occurred: $e'),
+    ));
+  }
+}
+
+
   Future<void> _fetchBookData() async {
     try {
       final response = await http.get(
@@ -135,6 +160,9 @@ class _BookDetailPageState extends State<BookDetailPage> {
         Timer(timeLeft, () {
           _deleteBook(bookId);
           Navigator.of(context).pop();
+          setState(() {
+            _fetchBookData();
+          });
         });
       }
 
@@ -174,6 +202,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
             actions: <Widget>[
               ElevatedButton(
                 onPressed: () {
+                  _deleteReportBook(bookId);
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 },
