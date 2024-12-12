@@ -58,7 +58,7 @@ class _InformationPageState extends State<InformationPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: EdgeInsets.fromLTRB(20, 100, 20, 20),
               child: Form(
                 key: _formKey,
                 child: Column(
