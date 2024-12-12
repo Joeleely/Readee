@@ -63,8 +63,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password reset successfully!'),
-          backgroundColor: Colors.green),
+          const SnackBar(
+              content: Text('Password reset successfully!'),
+              backgroundColor: Colors.green),
         );
         Navigator.push(context, CustomPageRoute(page: const LoginPage()));
       } else {

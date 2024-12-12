@@ -158,15 +158,15 @@ class _ChatPageState extends State<ChatPage> {
     };
 
     if (_channel != null) {
-    try {
-      _channel.sink.add(json.encode(messageData));
-      print('Message sent through WebSocket: $messageData');
-    } catch (e) {
-      print('Error sending WebSocket message: $e');
+      try {
+        _channel.sink.add(json.encode(messageData));
+        print('Message sent through WebSocket: $messageData');
+      } catch (e) {
+        print('Error sending WebSocket message: $e');
+      }
+    } else {
+      print('WebSocket is not connected.');
     }
-  } else {
-    print('WebSocket is not connected.');
-  }
 
     print('Sending message: $messageData'); // Debug to ensure data is correct
 

@@ -63,8 +63,10 @@ class _LoginPageState extends State<LoginPage> {
           FutureBuilder<void>(
             future: Flutter2FAMySelf().verify(
               context: context,
-              page: ReadeeNavigationBar(userId: userId,
-                        initialTab: 0,),
+              page: ReadeeNavigationBar(
+                userId: userId,
+                initialTab: 0,
+              ),
             ),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
@@ -204,7 +206,8 @@ class _LoginPageState extends State<LoginPage> {
                   alignment: Alignment.centerLeft,
                   child: InkWell(
                     onTap: () {
-                      Navigator.push(context, CustomPageRoute(page: ForgotPasswordPage()));
+                      Navigator.push(
+                          context, CustomPageRoute(page: ForgotPasswordPage()));
                     },
                     child: const Text(
                       'Forgot password?',

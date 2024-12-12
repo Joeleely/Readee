@@ -68,7 +68,16 @@ class _BookCardState extends State<BookCard> {
       // Initialize currentPhoto for each book to 0
       currentPhotoMap[book] = 0;
     }
+
     _matchEngine = MatchEngine(swipeItems: _swipeItems);
+  }
+
+  Uint8List _convertBase64Image(String base64String) {
+    // Remove the prefix if it exists
+    String base64Data = base64String.contains(',')
+        ? base64String.split(',').last
+        : base64String;
+    return base64Decode(base64Data);
   }
 
   Future<void> _likeBook(int userId, int bookId) async {
@@ -168,31 +177,54 @@ class _BookCardState extends State<BookCard> {
                                 as ImageProvider<Object>,
                       ),
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        gradient: const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.transparent, Colors.black87],
-                        ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      gradient: const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, Colors.black87],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            book.title,
-                            style: TypographyText.h2(Colors.white),
-                            maxLines: 2,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            print('Left Tapped');
+                            if (book.img.length > 1 && currentPhoto > 0) {
+                              setState(() {
+                                currentPhotoMap[book] = currentPhoto - 1;
+                                print(
+                                    'numberPhoto: $numberPhoto, currentPhoto: $currentPhoto');
+                              });
+                            }
+                          },
+                          child: Container(
+                            decoration:
+                                const BoxDecoration(color: Colors.transparent),
                           ),
-                          SizedBox(height: 10),
-                          Text(
-                            book.author,
-                            style: TypographyText.b4(Colors.grey),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            print('current photo index $currentPhoto');
+                            print('Right Tapped');
+                            if (book.img.length > 1) {
+                              setState(() {
+                                currentPhotoMap[book] =
+                                    (currentPhoto + 1) % numberPhoto;
+                                print(
+                                    'numberPhoto: $numberPhoto, currentPhoto: ${currentPhotoMap[book]}');
+                              });
+                            }
+                          },
+                          child: Container(
+                            decoration:
+                                const BoxDecoration(color: Colors.transparent),
                           ),
                         ),
                       ),
@@ -330,58 +362,99 @@ class _BookCardState extends State<BookCard> {
                                 padding: EdgeInsets.zero,
                                 constraints: BoxConstraints(),
                                 onPressed: () {
-                                  _matchEngine!.currentItem?.nope();
-                                  // _unlikeBook(
-                                  //     widget.userID,
-                                  //     MatchEngine()
-                                  //         .currentItem!
-                                  //         .content
-                                  //         .bookId);
+                                  Navigator.of(context)
+                                      .push(_createRoute(book));
                                 },
-                                style: ElevatedButton.styleFrom(
-                                  shape: CircleBorder(),
-                                  padding: EdgeInsets.all(15),
-                                  backgroundColor: Colors.white,
+                                icon: const Icon(
+                                  Icons.info_rounded,
+                                  color: Colors.white,
                                 ),
-                                child: const Icon(Icons.close,
-                                    color: Colors.red, size: 40),
                               ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  _matchEngine!.currentItem?.like();
-                                  // _likeBook(
-                                  //     widget.userID,
-                                  //     MatchEngine()
-                                  //         .currentItem!
-                                  //         .content
-                                  //         .bookId);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  shape: const CircleBorder(),
-                                  padding: const EdgeInsets.all(15),
-                                  backgroundColor: Colors.white,
-                                ),
-                                child: Icon(Icons.favorite,
-                                    color: Colors.greenAccent[400], size: 40),
+                            )
+                          ],
+                        ),
+                        Text(
+                          book.author,
+                          style: TypographyText.b4(Colors.grey),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          book.description,
+                          style:
+                              TypographyText.b3(Colors.white.withOpacity(0.8)),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                _matchEngine!.currentItem?.nope();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                shape: CircleBorder(),
+                                padding: EdgeInsets.all(15),
+                                backgroundColor: Colors.white,
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
+                              child: const Icon(Icons.close,
+                                  color: Colors.red, size: 40),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                _matchEngine!.currentItem?.like();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                shape: const CircleBorder(),
+                                padding: const EdgeInsets.all(15),
+                                backgroundColor: Colors.white,
+                              ),
+                              child: Icon(Icons.favorite,
+                                  color: Colors.greenAccent[400], size: 40),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          },
-          onStackFinished: () {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("Stack Finished"),
-              duration: Duration(milliseconds: 500),
-            ));
-          },
-        ),
+            ),
+          );
+        },
+        onStackFinished: () {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Stack Finished"),
+            duration: Duration(milliseconds: 500),
+          ));
+        },
+        itemChanged: (SwipeItem item, int index) {
+          print("Book: ${item.content.title}, index: $index");
+        },
+        leftSwipeAllowed: true,
+        rightSwipeAllowed: true,
+        upSwipeAllowed: false,
+        fillSpace: true,
       ),
     );
   }
+}
+
+Route _createRoute(BookDetails book) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) =>
+        BookInfoPage(book: book),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(0.0, 1.0);
+      const end = Offset.zero;
+      const curve = Curves.ease;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
 }

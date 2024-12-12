@@ -79,17 +79,18 @@ class _Recover2FAPageState extends State<Recover2FAPage> {
 
     if (isValid) {
       await Flutter2FAMySelf().activate(
-      context: context,
-      appName: 'ReadeeApp',
-      email: _emailController.text,
-    );
-    SharedPreferences localStorage = await SharedPreferences.getInstance();
-    String? secKey = localStorage.getString('secKey');
-    String? recoverPhrase = localStorage.getString('recoverPhrase');
+        context: context,
+        appName: 'ReadeeApp',
+        email: _emailController.text,
+      );
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      String? secKey = localStorage.getString('secKey');
+      String? recoverPhrase = localStorage.getString('recoverPhrase');
 
-    final recoverPhraseHash = sha256.convert(utf8.encode(recoverPhrase!)).toString();
+      final recoverPhraseHash =
+          sha256.convert(utf8.encode(recoverPhrase!)).toString();
 
-    final url = Uri.parse('http://localhost:3000/user/edit/$userId');
+      final url = Uri.parse('http://localhost:3000/user/edit/$userId');
       final response = await http.patch(
         url,
         headers: {
@@ -107,7 +108,6 @@ class _Recover2FAPageState extends State<Recover2FAPage> {
       } else {
         print("Failed to update user information: ${response.body}");
       }
-
     } else {
       setState(() {
         _errorMessage = "Invalid recovery phrase or email. Please try again.";
@@ -176,4 +176,3 @@ class _Recover2FAPageState extends State<Recover2FAPage> {
     super.dispose();
   }
 }
-

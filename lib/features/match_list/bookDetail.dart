@@ -110,7 +110,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
           isLoading = false;
 
           if (book.isReport == true) {
-            _showReportedDialog(DateTime.parse(bookData['ExpiredDate']), book.bookId);
+            _showReportedDialog(
+                DateTime.parse(bookData['ExpiredDate']), book.bookId);
           }
         });
       } else {
@@ -127,16 +128,16 @@ class _BookDetailPageState extends State<BookDetailPage> {
       final deletionTime = reportTime.add(const Duration(days: 7));
       final timeLeft = deletionTime.difference(now);
 
-    if (timeLeft.isNegative) {
-      _deleteBook(bookId);
-      Navigator.of(context).pop();
-    } else {
-      Timer(timeLeft, () {
+      if (timeLeft.isNegative) {
         _deleteBook(bookId);
         Navigator.of(context).pop();
-      });
-    }
-    
+      } else {
+        Timer(timeLeft, () {
+          _deleteBook(bookId);
+          Navigator.of(context).pop();
+        });
+      }
+
       String timeLeftText;
       if (timeLeft.isNegative) {
         timeLeftText = "Your book will be deleted very soon.";
@@ -147,55 +148,58 @@ class _BookDetailPageState extends State<BookDetailPage> {
         timeLeftText = "$days days, $hours hours, and $minutes minutes left.";
       }
       showDialog(
-      context: context,
-      barrierDismissible: false, // Prevent closing by tapping outside
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Row(
-            children: [
-              Text('Alert'),
-              const SizedBox(width: 10,),
-              Tooltip(
-                        message: 'If you want to continue trading this book, you have to post your book again.',
-                        child: Icon(
-                          Icons.help_outline,
-                          color: Colors.grey,
-                          size: 16,
-                        ),
-                      ),
-            ],
-          ),
-          content: const Text(
-              'Your book has been reported too many times. It will be deleted soon.\nNote that: Other will not see this book anymore'),
-          actions: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              child: const Text('Understood'),
+        context: context,
+        barrierDismissible: false, // Prevent closing by tapping outside
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Row(
+              children: [
+                Text('Alert'),
+                const SizedBox(
+                  width: 10,
+                ),
+                Tooltip(
+                  message:
+                      'If you want to continue trading this book, you have to post your book again.',
+                  child: Icon(
+                    Icons.help_outline,
+                    color: Colors.grey,
+                    size: 16,
+                  ),
+                ),
+              ],
             ),
-          ],
-        );
-      },
-    );
-  });
-}
-
-void _deleteBook(String bookId) async {
-  final url = Uri.parse('http://localhost:3000/deleteBook/$bookId');
-
-  try {
-    final response = await http.post(url);
-    if (response.statusCode == 200) {
-      print("Book with ID $bookId successfully deleted.");
-    } else {
-      print("Failed to delete book with ID $bookId: ${response.statusCode}");
-    }
-  } catch (error) {
-    print("Error deleting book with ID $bookId: $error");
+            content: const Text(
+                'Your book has been reported too many times. It will be deleted soon.\nNote that: Other will not see this book anymore'),
+            actions: <Widget>[
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Understood'),
+              ),
+            ],
+          );
+        },
+      );
+    });
   }
-}
+
+  void _deleteBook(String bookId) async {
+    final url = Uri.parse('http://localhost:3000/deleteBook/$bookId');
+
+    try {
+      final response = await http.post(url);
+      if (response.statusCode == 200) {
+        print("Book with ID $bookId successfully deleted.");
+      } else {
+        print("Failed to delete book with ID $bookId: ${response.statusCode}");
+      }
+    } catch (error) {
+      print("Error deleting book with ID $bookId: $error");
+    }
+  }
 
   Future<void> _fetchOwnerData(String ownerId) async {
     try {

@@ -22,7 +22,7 @@ class MatchListPage extends StatefulWidget {
 class _MatchListPageState extends State<MatchListPage> {
   List<BookDetails> ownerBooks = [];
   bool isLoading = true; // Loading state
-   bool isPageActive = true;
+  bool isPageActive = true;
 
   late int userID;
 
@@ -48,7 +48,8 @@ class _MatchListPageState extends State<MatchListPage> {
       List<Matches> matches = [];
 
       if (matchesResponse.statusCode == 200) {
-        final matchesData = json.decode(matchesResponse.body);
+        final Map<String, dynamic> matchesData =
+            json.decode(matchesResponse.body);
         matches = (matchesData['matches'] as List)
             .map((matchJson) => Matches.fromJson(matchJson))
             .toList();
@@ -60,7 +61,7 @@ class _MatchListPageState extends State<MatchListPage> {
       List<BookDetails> fetchedOwnerBooks = [];
 
       for (var match in matches) {
-          if (!isPageActive) return;
+        if (!isPageActive) return;
 
         // Fetch trade status for this matchId
         final matchStatusResponse = await http.get(
@@ -74,7 +75,8 @@ class _MatchListPageState extends State<MatchListPage> {
           // Debugging logs to help trace the issue
           //print('Checking matchId: ${match.matchId}, TradeRequestStatus: $matchTradeStatus');
 
-          if (matchTradeStatus != 'rejected' && matchTradeStatus != 'accepted') {
+          if (matchTradeStatus != 'rejected' &&
+              matchTradeStatus != 'accepted') {
             // Fetch books for valid matches
             final ownerBookResponse = await http.get(Uri.parse(
                 'http://localhost:3000/getBook/${match.ownerBookId}'));
@@ -87,24 +89,24 @@ class _MatchListPageState extends State<MatchListPage> {
               final matchedBookJson = json.decode(matchedBookResponse.body);
 
               var bookDetails = BookDetails(
-                bookId: ownerBookJson['BookId'] ?? '',
-                title: ownerBookJson['BookName'] ?? 'Unknown Title',
-                author: ownerBookJson['Author'] ?? 'Unknown Author',
-                img: ownerBookJson['BookPicture'] ?? '',
-                description: ownerBookJson['BookDescription'] ??
-                    'No description available',
-                quality: int.parse(ownerBookJson['Quality'] ?? '0'),
-                isTrade: ownerBookJson['IsTraded'],
-                genre: ownerBookJson['Genre'] ?? '',
-                isReport: ownerBookJson['IsReported']
-              );
+                  bookId: ownerBookJson['BookId'] ?? '',
+                  title: ownerBookJson['BookName'] ?? 'Unknown Title',
+                  author: ownerBookJson['Author'] ?? 'Unknown Author',
+                  img: ownerBookJson['BookPicture'] ?? '',
+                  description: ownerBookJson['BookDescription'] ??
+                      'No description available',
+                  quality: '${ownerBookJson['Quality'] ?? '0'}%',
+                  isTrade: ownerBookJson['IsTraded'],
+                  genre: ownerBookJson['Genre'] ?? '',
+                  isReport: ownerBookJson['IsReported']);
 
               bool isDuplicate = fetchedOwnerBooks
                   .any((book) => book.bookId == bookDetails.bookId);
 
               if (!isDuplicate &&
                   bookDetails.isTrade == false &&
-                  matchedBookJson['IsTraded'] == false && bookDetails.isReport == false) {
+                  matchedBookJson['IsTraded'] == false &&
+                  bookDetails.isReport == false) {
                 fetchedOwnerBooks.add(bookDetails);
               } else {
                 print(
@@ -126,10 +128,10 @@ class _MatchListPageState extends State<MatchListPage> {
 
       // Update the state with the fetched books
       if (isPageActive && mounted) {
-      setState(() {
-        ownerBooks = fetchedOwnerBooks;
-        isLoading = false; // Set loading to false after fetching
-      });
+        setState(() {
+          ownerBooks = fetchedOwnerBooks;
+          isLoading = false; // Set loading to false after fetching
+        });
       }
     } catch (error) {
       print('Error fetching matched books: $error');

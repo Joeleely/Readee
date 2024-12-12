@@ -95,8 +95,8 @@ class _ReportedBookPageState extends State<ReportedBookPage> {
                                   )
                                 : const Icon(Icons.book, size: 50),
                             title: Text(book['BookName'] ?? 'Unnamed Book'),
-                            subtitle: Text(
-                                'Author: ${book['Author'] ?? 'Unknown'}'),
+                            subtitle:
+                                Text('Author: ${book['Author'] ?? 'Unknown'}'),
                           ),
                         );
                       },

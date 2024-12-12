@@ -151,7 +151,8 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-     final recoverPhraseHash = sha256.convert(utf8.encode(recoverPhrase!)).toString();
+    final recoverPhraseHash =
+        sha256.convert(utf8.encode(recoverPhrase!)).toString();
 
     // Proceed with the registration logic here
     final url = Uri.parse('http://localhost:3000/createUser');
@@ -306,7 +307,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 25),
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.start,
-                    children: [Tooltip(
+                    children: [
+                      Tooltip(
                         message:
                             'Password should contain at least 8 characters',
                         child: Icon(

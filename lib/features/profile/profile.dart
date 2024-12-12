@@ -102,8 +102,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     alignment: Alignment.center,
                     child: CircleAvatar(
                       radius: 100,
-                      backgroundColor:
-                          Colors.lightBlueAccent, // Set a default background color
+                      backgroundColor: Colors
+                          .lightBlueAccent, // Set a default background color
                       backgroundImage: profile.isNotEmpty &&
                               Uri.tryParse(profile)?.hasAbsolutePath == true
                           ? NetworkImage(profile)

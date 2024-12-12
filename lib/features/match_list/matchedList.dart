@@ -47,19 +47,20 @@ class _MatchedListState extends State<MatchedList> {
   }
 
   void checkForExpiry() {
-  final now = DateTime.now();
-  for (var match in validMatches) {
-    // Ensure that matchedTime is not null before using it
-    if (match.matchTime != null) {
-      final matchTime = match.matchTime; // Assuming matchedTime is of type DateTime
-      if (now.difference(matchTime).inDays >= 7) {
-        rejectMatch(match.matchId, match.matchedBookId, widget.userId);
+    final now = DateTime.now();
+    for (var match in validMatches) {
+      // Ensure that matchedTime is not null before using it
+      if (match.matchTime != null) {
+        final matchTime =
+            match.matchTime; // Assuming matchedTime is of type DateTime
+        if (now.difference(matchTime).inDays >= 7) {
+          rejectMatch(match.matchId, match.matchedBookId, widget.userId);
+        }
+      } else {
+        print('Matched time is null for matchId: ${match.matchId}');
       }
-    } else {
-      print('Matched time is null for matchId: ${match.matchId}');
     }
   }
-}
 
   Future<void> rejectMatch(int matchId, int matchedBookId, int userId,
       {bool silent = false}) async {
@@ -159,17 +160,16 @@ class _MatchedListState extends State<MatchedList> {
               final bookJson = json.decode(matchBookResponse.body);
 
               return BookDetails(
-                bookId: bookJson['BookId'] ?? '',
-                title: bookJson['BookName'] ?? 'Unknown Title',
-                author: bookJson['Author'] ?? 'Unknown Author',
-                img: bookJson['BookPicture'] ?? '',
-                description:
-                    bookJson['BookDescription'] ?? 'No description available',
-                quality: int.parse(bookJson['Quality'] ?? '0'),
-                isTrade: bookJson['IsTraded'],
-                genre: bookJson['Genre'] ?? '',
-                isReport: bookJson['IsReported']
-              );
+                  bookId: bookJson['BookId'] ?? '',
+                  title: bookJson['BookName'] ?? 'Unknown Title',
+                  author: bookJson['Author'] ?? 'Unknown Author',
+                  img: bookJson['BookPicture'] ?? '',
+                  description:
+                      bookJson['BookDescription'] ?? 'No description available',
+                  quality: '${bookJson['Quality'] ?? '0'}%',
+                  isTrade: bookJson['IsTraded'],
+                  genre: bookJson['Genre'] ?? '',
+                  isReport: bookJson['IsReported']);
             } else {
               print('Failed to load book for matchedBookId: $matchedBookId');
             }
@@ -186,17 +186,16 @@ class _MatchedListState extends State<MatchedList> {
               final bookJson = json.decode(matchBookResponse.body);
 
               return BookDetails(
-                bookId: bookJson['BookId'] ?? '',
-                title: bookJson['BookName'] ?? 'Unknown Title',
-                author: bookJson['Author'] ?? 'Unknown Author',
-                img: bookJson['BookPicture'] ?? '',
-                description:
-                    bookJson['BookDescription'] ?? 'No description available',
-                quality: int.parse(bookJson['Quality'] ?? '0'),
-                isTrade: bookJson['IsTraded'],
-                genre: bookJson['Genre'] ?? '',
-                isReport: bookJson['IsReported']
-              );
+                  bookId: bookJson['BookId'] ?? '',
+                  title: bookJson['BookName'] ?? 'Unknown Title',
+                  author: bookJson['Author'] ?? 'Unknown Author',
+                  img: bookJson['BookPicture'] ?? '',
+                  description:
+                      bookJson['BookDescription'] ?? 'No description available',
+                  quality: '${bookJson['Quality'] ?? '0'}%',
+                  isTrade: bookJson['IsTraded'],
+                  genre: bookJson['Genre'] ?? '',
+                  isReport: bookJson['IsReported']);
             } else {
               print('Failed to load book for ownerBookId: $ownerBookId');
             }

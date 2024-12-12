@@ -177,17 +177,16 @@ class _EditGenrePageState extends State<EditGenrePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed:
-                      selectedGenreIds.isNotEmpty
-                      ? () {
-                          saveUserGenres();
-                        }
-                      : null,
+                    onPressed: selectedGenreIds.isNotEmpty
+                        ? () {
+                            saveUserGenres();
+                          }
+                        : null,
                     style: ButtonStyle(
-                        backgroundColor: MaterialStatePropertyAll(
-                          selectedGenreIds.isNotEmpty ? Colors.cyan : Colors.grey,
-                          ),
-                        ),
+                      backgroundColor: MaterialStatePropertyAll(
+                        selectedGenreIds.isNotEmpty ? Colors.cyan : Colors.grey,
+                      ),
+                    ),
                     child: const Text(
                       'Save',
                       style: TextStyle(

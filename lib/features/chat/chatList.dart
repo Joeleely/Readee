@@ -22,12 +22,14 @@ class ChatListPage extends StatelessWidget {
 
         // Fetch names for each chat based on SenderId/ReceiverId
         for (var chat in chats) {
-        final otherUserId = (chat['SenderId'] == userId) ? chat['ReceiverId'] : chat['SenderId'];
-        final userDetails = await fetchUserDetails(otherUserId);
-        chat['otherUserName'] = userDetails['Username'];
-        chat['otherUserRating'] = await fetchUserRating(otherUserId);
-        chat['otherUserProfileUrl'] = userDetails['ProfileUrl'];
-      }
+          final otherUserId = (chat['SenderId'] == userId)
+              ? chat['ReceiverId']
+              : chat['SenderId'];
+          final userDetails = await fetchUserDetails(otherUserId);
+          chat['otherUserName'] = userDetails['Username'];
+          chat['otherUserRating'] = await fetchUserRating(otherUserId);
+          chat['otherUserProfileUrl'] = userDetails['ProfileUrl'];
+        }
 
         return chats;
       } else {
@@ -39,28 +41,30 @@ class ChatListPage extends StatelessWidget {
   }
 
   Future<Map<String, String>> fetchUserDetails(int userId) async {
-  final response = await http.get(Uri.parse('http://localhost:3000/users/$userId'));
+    final response =
+        await http.get(Uri.parse('http://localhost:3000/users/$userId'));
 
-  if (response.statusCode == 200) {
-    final Map<String, dynamic> data = json.decode(response.body);
-    return {
-      'Username': data['Username'] ?? 'Unknown',
-      'ProfileUrl': data['ProfileUrl'] ?? '', // Assuming ProfileUrl is a field in the response
-    };
-  } else {
-    throw Exception('Failed to load user details');
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      return {
+        'Username': data['Username'] ?? 'Unknown',
+        'ProfileUrl': data['ProfileUrl'] ??
+            '', // Assuming ProfileUrl is a field in the response
+      };
+    } else {
+      throw Exception('Failed to load user details');
+    }
   }
-}
 
   Future<String> fetchUserRating(int userId) async {
     try {
-      final response =
-          await http.get(Uri.parse('http://localhost:3000/getAverageRate/$userId'));
+      final response = await http
+          .get(Uri.parse('http://localhost:3000/getAverageRate/$userId'));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
-        double rating =
-            double.tryParse(data['averageScore']?? '0.00') ?? 0.0; // Parse rating as double
+        double rating = double.tryParse(data['averageScore'] ?? '0.00') ??
+            0.0; // Parse rating as double
         return rating.toStringAsFixed(2); // Format to two decimal places
       } else {
         // Return a default message if the user does not have a rating
@@ -97,13 +101,16 @@ class ChatListPage extends StatelessWidget {
                 final chat = chats[index];
                 return ListTile(
                   leading: CircleAvatar(
-                  backgroundImage: chat['otherUserProfileUrl'] != ''
-                      ? NetworkImage(chat['otherUserProfileUrl']) 
-                      : null,
-                  child: chat['otherUserProfileUrl'] == ''
-                      ? Text(chat['otherUserName'].toString().substring(0, 1).toUpperCase())
-                      : null,
-                ),
+                    backgroundImage: chat['otherUserProfileUrl'] != ''
+                        ? NetworkImage(chat['otherUserProfileUrl'])
+                        : null,
+                    child: chat['otherUserProfileUrl'] == ''
+                        ? Text(chat['otherUserName']
+                            .toString()
+                            .substring(0, 1)
+                            .toUpperCase())
+                        : null,
+                  ),
                   title: Text(chat['otherUserName']),
                   subtitle: Text('Rating: ${chat['otherUserRating']}'),
                   onTap: () {
@@ -113,7 +120,8 @@ class ChatListPage extends StatelessWidget {
                         page: ChatPage(
                           userId: userId,
                           roomId: chat['RoomId'],
-                          otherName: chat['otherUserName'], otherPorfile: chat['otherUserProfileUrl'],
+                          otherName: chat['otherUserName'],
+                          otherPorfile: chat['otherUserProfileUrl'],
                         ),
                       ),
                     );

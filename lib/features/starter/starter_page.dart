@@ -45,11 +45,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         }
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-              builder: (context) => ReadeeNavigationBar(
-                    userId: 2,
-                    initialTab: 0,
-                  )),
+          MaterialPageRoute(builder: (context) => const LoginPage()),
         );
       } else {
         Navigator.pushReplacement(
@@ -61,11 +57,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
           ),
         );
       }
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
-    } else {
+    } catch (e) {
+      print('Error: $e');
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

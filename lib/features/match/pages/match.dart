@@ -9,8 +9,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:readee_app/features/match/widgets/book_card.dart';
 import 'package:readee_app/features/match/model/book_details.dart';
 
-import '../../profile/editGenres.dart';
-
 class MatchPage extends StatefulWidget {
   final int userID;
 
@@ -37,7 +35,6 @@ class _MatchPageState extends State<MatchPage> {
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
     fetchBooks();
     fetchAdBanner();
   }
@@ -304,7 +301,8 @@ class _MatchPageState extends State<MatchPage> {
                       Expanded(
                         child: BookCard(
                           books: books,
-                          userID: widget.userID, onLike: handleLike,
+                          userID: widget.userID,
+                          onLike: handleLike,
                         ),
                       ),
                     ],
