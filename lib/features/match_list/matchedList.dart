@@ -66,14 +66,13 @@ class _MatchedListState extends State<MatchedList> {
       {bool silent = false}) async {
     // First, reject the match
     final response = await http.post(
-      Uri.parse('https://readee-api.stthi.com/trades/$matchId/reject'),
+      Uri.parse('http://localhost:3000/trades/$matchId/reject'),
     );
 
     if (response.statusCode == 200) {
       // Second, log the unlike action after rejection
       final unlikeResponse = await http.post(
-        Uri.parse(
-            'https://readee-api.stthi.com/unlikeLogs/$matchedBookId/$userId'),
+        Uri.parse('http://localhost:3000/unlikeLogs/$matchedBookId/$userId'),
       );
 
       if (unlikeResponse.statusCode == 200) {
@@ -135,7 +134,7 @@ class _MatchedListState extends State<MatchedList> {
     try {
       // Fetch match details from the API
       final matchDataResponse = await http.get(
-        Uri.parse('https://readee-api.stthi.com/getAllMatches/$matchId'),
+        Uri.parse('http://localhost:3000/getAllMatches/$matchId'),
       );
 
       if (matchDataResponse.statusCode != 200) {
@@ -167,7 +166,7 @@ class _MatchedListState extends State<MatchedList> {
       if (widget.userId == ownerId) {
         // Fetch the matched book (book belonging to the matched user)
         final matchBookResponse = await http.get(
-          Uri.parse('https://readee-api.stthi.com/getBook/$matchedBookId'),
+          Uri.parse('http://localhost:3000/getBook/$matchedBookId'),
         );
 
         if (matchBookResponse.statusCode == 200) {
@@ -193,7 +192,7 @@ class _MatchedListState extends State<MatchedList> {
       else if (widget.userId == matchUserId) {
         // Fetch the owner's book (book belonging to the owner)
         final matchBookResponse = await http.get(
-          Uri.parse('https://readee-api.stthi.com/getBook/$ownerBookId'),
+          Uri.parse('http://localhost:3000/getBook/$ownerBookId'),
         );
 
         if (matchBookResponse.statusCode == 200) {
@@ -228,7 +227,7 @@ class _MatchedListState extends State<MatchedList> {
   Future<void> fetchMatchedBooks() async {
     try {
       final matchesResponse = await http.get(
-        Uri.parse('https://readee-api.stthi.com/getMatches/${widget.userId}'),
+        Uri.parse('http://localhost:3000/getMatches/${widget.userId}'),
       );
 
       if (matchesResponse.statusCode == 200) {
@@ -247,7 +246,6 @@ class _MatchedListState extends State<MatchedList> {
       for (var match in matches) {
         BookDetails? bookDetails =
             await getMatchedBookIfOwnerMatches(match.matchId);
-
 
         if (bookDetails != null) {
           String bookIdStr =

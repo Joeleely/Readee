@@ -35,8 +35,7 @@ class _PersonaPageState extends State<PersonaPage> {
   }
 
   Future<void> fetchGenres() async {
-    final response =
-        await http.get(Uri.parse('https://readee-api.stthi.com/genres'));
+    final response = await http.get(Uri.parse('http://localhost:3000/genres'));
 
     if (response.statusCode == 200) {
       List<dynamic> jsonData = json.decode(response.body);
@@ -73,7 +72,7 @@ class _PersonaPageState extends State<PersonaPage> {
 
   Future<void> checkUserBooksAndNavigate(int userId) async {
     final response = await http
-        .get(Uri.parse('https://readee-api.stthi.com/getBookByUser/$userId'));
+        .get(Uri.parse('http://localhost:3000/getBookByUser/$userId'));
 
     if (response.statusCode == 200) {
       // Assuming the response body contains a list of books
@@ -113,7 +112,7 @@ class _PersonaPageState extends State<PersonaPage> {
     };
 
     final response = await http.post(
-      Uri.parse('https://readee-api.stthi.com/createUserGenres'),
+      Uri.parse('http://localhost:3000/createUserGenres'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(postData),
     );

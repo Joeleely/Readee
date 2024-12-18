@@ -39,7 +39,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _checkUser() async {
-    final url = Uri.parse('https://readee-api.stthi.com/checkUser');
+    final url = Uri.parse('http://localhost:3000/checkUser');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
       "username": _usernameController.text,
@@ -155,7 +155,7 @@ class _RegisterPageState extends State<RegisterPage> {
         sha256.convert(utf8.encode(recoverPhrase!)).toString();
 
     // Proceed with the registration logic here
-    final url = Uri.parse('https://readee-api.stthi.com/createUser');
+    final url = Uri.parse('http://localhost:3000/createUser');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
       "username": _usernameController.text,

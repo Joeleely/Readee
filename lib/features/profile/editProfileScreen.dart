@@ -89,7 +89,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _fetchUserData() async {
     try {
       final response = await http.get(
-        Uri.parse('https://readee-api.stthi.com/users/${widget.userID}'),
+        Uri.parse('http://localhost:3000/users/${widget.userID}'),
       );
 
       if (response.statusCode == 200) {
@@ -156,7 +156,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     // Perform the HTTP POST request
     try {
       final response = await http.patch(
-        Uri.parse('https://readee-api.stthi.com/user/edit/${widget.userID}'),
+        Uri.parse('http://localhost:3000/user/edit/${widget.userID}'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -191,7 +191,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   // Future<void> _checkUser(String beforeName, String afterName) async {
-  //   final url = Uri.parse('https://readee-api.stthi.com/checkUser');
+  //   final url = Uri.parse('http://localhost:3000/checkUser');
   //   final headers = {'Content-Type': 'application/json'};
   //   final body = jsonEncode({
   //     "username": usernameController.text,

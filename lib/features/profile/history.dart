@@ -15,8 +15,8 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   Future<List<History>> fetchHistories() async {
-    final response = await http.get(
-        Uri.parse('https://readee-api.stthi.com/history/${widget.userId}'));
+    final response = await http
+        .get(Uri.parse('http://localhost:3000/history/${widget.userId}'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData =

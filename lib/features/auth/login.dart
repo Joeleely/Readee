@@ -26,8 +26,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> login() async {
     try {
       final response = await http.post(
-        Uri.parse(
-            'https://readee-api.stthi.com/login'), // Adjust the URL if needed
+        Uri.parse('http://localhost:3000/login'), // Adjust the URL if needed
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "emailOrUsername": _emailController.text,
@@ -102,8 +101,8 @@ class _LoginPageState extends State<LoginPage> {
           );
         } else {
           // Check user genres
-          final genresResponse = await http.get(
-              Uri.parse('https://readee-api.stthi.com/userGenres/$userId'));
+          final genresResponse = await http
+              .get(Uri.parse('http://localhost:3000/userGenres/$userId'));
 
           if (genresResponse.statusCode == 404) {
             // If genres not found, navigate to PersonaPage

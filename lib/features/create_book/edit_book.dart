@@ -54,7 +54,7 @@ class _EditBookPageState extends State<EditBookPage> {
   Future<void> _fetchBookData() async {
     try {
       final response = await http.get(
-        Uri.parse('https://readee-api.stthi.com/getBook/${widget.bookId}'),
+        Uri.parse('http://localhost:3000/getBook/${widget.bookId}'),
       );
 
       if (response.statusCode == 200) {
@@ -177,7 +177,7 @@ class _EditBookPageState extends State<EditBookPage> {
 
       // Make the PUT request to update the book
       final response = await http.patch(
-        Uri.parse('https://readee-api.stthi.com/editBook/${widget.bookId}'),
+        Uri.parse('http://localhost:3000/editBook/${widget.bookId}'),
         headers: {
           'Content-Type': 'application/json',
         },

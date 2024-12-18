@@ -36,8 +36,7 @@ class _EditGenrePageState extends State<EditGenrePage> {
   }
 
   Future<void> fetchGenres() async {
-    final response =
-        await http.get(Uri.parse('https://readee-api.stthi.com/genres'));
+    final response = await http.get(Uri.parse('http://localhost:3000/genres'));
 
     if (response.statusCode == 200) {
       List<dynamic> jsonData = json.decode(response.body);
@@ -50,8 +49,8 @@ class _EditGenrePageState extends State<EditGenrePage> {
   }
 
   Future<void> fetchUserGenres() async {
-    final response = await http.get(
-        Uri.parse('https://readee-api.stthi.com/userGenres/${widget.userID}'));
+    final response = await http
+        .get(Uri.parse('http://localhost:3000/userGenres/${widget.userID}'));
 
     if (response.statusCode == 200) {
       List<dynamic> jsonData = json.decode(response.body);
@@ -66,7 +65,7 @@ class _EditGenrePageState extends State<EditGenrePage> {
   }
 
   Future<void> saveUserGenres() async {
-    final url = Uri.parse('https://readee-api.stthi.com/userGenre/edit');
+    final url = Uri.parse('http://localhost:3000/userGenre/edit');
     final headers = {"Content-Type": "application/json"};
     final body = json.encode({
       "User_user_id": widget.userID,
@@ -198,7 +197,8 @@ class _EditGenrePageState extends State<EditGenrePage> {
                   ),
                   const SizedBox(width: 30),
                   ElevatedButton(
-                    style: const ButtonStyle(elevation: WidgetStatePropertyAll(1)),
+                    style:
+                        const ButtonStyle(elevation: WidgetStatePropertyAll(1)),
                     onPressed: () => {Navigator.pop(context)},
                     child: const Text('Cancel'),
                   ),

@@ -23,8 +23,8 @@ class _SeeReviewPageState extends State<SeeReviewPage> {
   @override
   void initState() {
     super.initState();
-    //reviewsApiUrl = 'https://readee-api.stthi.com/reviews/received/${widget.userId}';
-    //averageRatingApiUrl = 'https://readee-api.stthi.com/avgRating/${widget.userId}';
+    //reviewsApiUrl = 'http://localhost:3000/reviews/received/${widget.userId}';
+    //averageRatingApiUrl = 'http://localhost:3000/avgRating/${widget.userId}';
 
     // Fetch the average rating when the page loads
     fetchAverageRating();
@@ -35,7 +35,7 @@ class _SeeReviewPageState extends State<SeeReviewPage> {
       print('Fetching reviews...');
       final response = await http
           .get(Uri.parse(
-              'https://readee-api.stthi.com/reviews/received/${widget.userId}'))
+              'http://localhost:3000/reviews/received/${widget.userId}'))
           .timeout(const Duration(seconds: 10));
       ;
       print('Response status: ${response.statusCode}');
@@ -67,8 +67,7 @@ class _SeeReviewPageState extends State<SeeReviewPage> {
   Future<void> fetchAverageRating() async {
     try {
       final response = await http
-          .get(Uri.parse(
-              'https://readee-api.stthi.com/avgRating/${widget.userId}'))
+          .get(Uri.parse('http://localhost:3000/avgRating/${widget.userId}'))
           .timeout(const Duration(seconds: 10)); // Add timeout for robustness
 
       if (response.statusCode == 200) {

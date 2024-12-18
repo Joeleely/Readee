@@ -82,8 +82,7 @@ class _BookCardState extends State<BookCard> {
 
   Future<void> _likeBook(int userId, int bookId) async {
     widget.onLike(bookId, true);
-    final url =
-        Uri.parse('https://readee-api.stthi.com/books/$bookId/like/$userId');
+    final url = Uri.parse('http://localhost:3000/books/$bookId/like/$userId');
     try {
       final response = await http.post(url);
       if (response.statusCode == 201) {
@@ -98,8 +97,7 @@ class _BookCardState extends State<BookCard> {
 
   Future<void> _unlikeBook(int userId, int bookId) async {
     widget.onLike(bookId, false);
-    final url =
-        Uri.parse('https://readee-api.stthi.com/books/$bookId/unlike/$userId');
+    final url = Uri.parse('http://localhost:3000/books/$bookId/unlike/$userId');
     try {
       final response = await http.post(url);
       if (response.statusCode == 201) {
@@ -114,7 +112,7 @@ class _BookCardState extends State<BookCard> {
 
   void _reportBook(BookDetails book, int userId) async {
     final url =
-        Uri.parse("https://readee-api.stthi.com/report/$userId/${book.bookId}");
+        Uri.parse("http://localhost:3000/report/$userId/${book.bookId}");
 
     try {
       // Send a POST request

@@ -36,7 +36,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     try {
       // HTTP POST request to fetch user info by email
       final response = await http.post(
-        Uri.parse('https://readee-api.stthi.com/getUserInfoByEmail'),
+        Uri.parse('http://localhost:3000/getUserInfoByEmail'),
         headers: {
           'Content-Type': 'application/json',
         },

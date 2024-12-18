@@ -62,8 +62,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
   Future<void> _fetchUserData() async {
     try {
-      final response = await http.get(
-          Uri.parse('https://readee-api.stthi.com/users/${widget.userId}'));
+      final response = await http
+          .get(Uri.parse('http://localhost:3000/users/${widget.userId}'));
 
       print("This is matchID: ${widget.matchId}");
       if (response.statusCode == 200) {
@@ -82,34 +82,33 @@ class _BookDetailPageState extends State<BookDetailPage> {
   }
 
   Future<void> _deleteReportBook(String bookId) async {
-  final String url = 'http://localhost:3000/deleteReport/$bookId';
+    final String url = 'http://localhost:3000/deleteReport/$bookId';
 
-  try {
-    final response = await http.delete(Uri.parse(url));
+    try {
+      final response = await http.delete(Uri.parse(url));
 
-    if (response.statusCode == 200) {
-      print("success delete report book");
-      // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      //   content: Text('Book and associated reports deleted successfully.'),
-      // ));
-    } else {
-      final error = json.decode(response.body)['error'];
+      if (response.statusCode == 200) {
+        print("success delete report book");
+        // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        //   content: Text('Book and associated reports deleted successfully.'),
+        // ));
+      } else {
+        final error = json.decode(response.body)['error'];
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error: $error'),
+        ));
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Error: $error'),
+        content: Text('An error occurred: $e'),
       ));
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('An error occurred: $e'),
-    ));
   }
-}
-
 
   Future<void> _fetchBookData() async {
     try {
-      final response = await http.get(
-          Uri.parse('https://readee-api.stthi.com/getBook/${widget.bookId}'));
+      final response = await http
+          .get(Uri.parse('http://localhost:3000/getBook/${widget.bookId}'));
 
       if (response.statusCode == 200) {
         final bookData = json.decode(response.body);
@@ -216,7 +215,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
   }
 
   void _deleteBook(String bookId) async {
-    final url = Uri.parse('https://readee-api.stthi.com/deleteBook/$bookId');
+    final url = Uri.parse('http://localhost:3000/deleteBook/$bookId');
 
     try {
       final response = await http.post(url);
@@ -232,8 +231,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
   Future<void> _fetchOwnerData(String ownerId) async {
     try {
-      final response = await http
-          .get(Uri.parse('https://readee-api.stthi.com/users/$ownerId'));
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/users/$ownerId'));
 
       if (response.statusCode == 200) {
         final ownerData = json.decode(response.body);
@@ -252,7 +251,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
   Future<void> _fetchTradeCount(String ownerId) async {
     try {
       final response = await http
-          .get(Uri.parse('https://readee-api.stthi.com/tradeCount/$ownerId'));
+          .get(Uri.parse('http://localhost:3000/tradeCount/$ownerId'));
 
       if (response.statusCode == 200) {
         final tradeCountData = json.decode(response.body);
@@ -269,8 +268,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
   Future<void> _fetchAverageRate(String ownerId) async {
     try {
-      final response = await http.get(
-          Uri.parse('https://readee-api.stthi.com/getAverageRate/$ownerId'));
+      final response = await http
+          .get(Uri.parse('http://localhost:3000/getAverageRate/$ownerId'));
 
       if (response.statusCode == 200) {
         final averageRateData = json.decode(response.body);
@@ -290,8 +289,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
   Future<void> _checkTradeRequestStatus() async {
     try {
       final response = await http.get(
-        Uri.parse(
-            'https://readee-api.stthi.com/getAllMatches/${widget.matchId}'),
+        Uri.parse('http://localhost:3000/getAllMatches/${widget.matchId}'),
       );
 
       if (response.statusCode == 200) {
@@ -385,8 +383,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
       'Confirm accept',
       'Are you sure to accept the request?',
       () async {
-        final url = Uri.parse(
-            'https://readee-api.stthi.com/trades/${widget.matchId}/accept');
+        final url =
+            Uri.parse('http://localhost:3000/trades/${widget.matchId}/accept');
 
         try {
           final response = await http.post(url);
@@ -424,8 +422,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
       'Confirm reject',
       'Are you sure to reject the request?',
       () async {
-        final url = Uri.parse(
-            'https://readee-api.stthi.com/trades/${widget.matchId}/reject');
+        final url =
+            Uri.parse('http://localhost:3000/trades/${widget.matchId}/reject');
 
         try {
           final response = await http.post(url);
@@ -445,7 +443,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
             );
 
             final unlikeUrl = Uri.parse(
-                'https://readee-api.stthi.com/unlikeLogs/${widget.bookId}/${widget.userId}');
+                'http://localhost:3000/unlikeLogs/${widget.bookId}/${widget.userId}');
             final unlikeResponse = await http.post(unlikeUrl);
             //print(widget.bookId);
             //print(widget.userId);
@@ -493,7 +491,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
   Future<void> _sendTradeRequest() async {
     final url = Uri.parse(
-        'https://readee-api.stthi.com/trades/${widget.matchId}/send-request/${widget.userId}');
+        'http://localhost:3000/trades/${widget.matchId}/send-request/${widget.userId}');
     try {
       final response = await http.post(url);
 
@@ -521,7 +519,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
   Future<void> cancelTradeRequest() async {
     final url = Uri.parse(
-        'https://readee-api.stthi.com/trades/${widget.matchId}/cancel-request');
+        'http://localhost:3000/trades/${widget.matchId}/cancel-request');
 
     try {
       final response = await http.post(
@@ -547,8 +545,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
   Future<void> _getRoomId(BuildContext context) async {
     final response = await http.get(
-      Uri.parse(
-          'https://readee-api.stthi.com/getRoomId/$secondUserId/$firstUserId'),
+      Uri.parse('http://localhost:3000/getRoomId/$secondUserId/$firstUserId'),
     );
     //print("secondUserId: $secondUserId, firstUserId: $firstUserId");
 
@@ -575,7 +572,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
       // Room does not exist, create a new room
       final createResponse = await http.post(
         Uri.parse(
-            'https://readee-api.stthi.com/createRoom/$firstUserId/$secondUserId'),
+            'http://localhost:3000/createRoom/$firstUserId/$secondUserId'),
       );
 
       if (createResponse.statusCode == 200) {

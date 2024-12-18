@@ -110,7 +110,7 @@ class _CreateBookPageState extends State<CreateBookPage> {
       } else {
         // Make the POST request
         final response = await http.post(
-          Uri.parse('https://readee-api.stthi.com/createBook'),
+          Uri.parse('http://localhost:3000/createBook'),
           headers: {
             'Content-Type': 'application/json',
           },

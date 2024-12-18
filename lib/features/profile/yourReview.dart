@@ -22,8 +22,8 @@ class _YourReviewPageState extends State<YourReviewPage> {
   }
 
   Future<List<Review>> fetchReviews() async {
-    final response = await http.get(Uri.parse(
-        'https://readee-api.stthi.com/reviews/given/${widget.userId}'));
+    final response = await http
+        .get(Uri.parse('http://localhost:3000/reviews/given/${widget.userId}'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body)['reviews'] ?? [];

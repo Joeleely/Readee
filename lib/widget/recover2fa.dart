@@ -23,7 +23,7 @@ class _Recover2FAPageState extends State<Recover2FAPage> {
   int? userId;
 
   Future<bool> _checkRecoveryPhrase(String phrase, String email) async {
-    const url = "https://readee-api.stthi.com/getUserInfoByEmail";
+    const url = "http://localhost:3000/getUserInfoByEmail";
 
     try {
       final response = await http.post(
@@ -90,7 +90,7 @@ class _Recover2FAPageState extends State<Recover2FAPage> {
       final recoverPhraseHash =
           sha256.convert(utf8.encode(recoverPhrase!)).toString();
 
-      final url = Uri.parse('https://readee-api.stthi.com/user/edit/$userId');
+      final url = Uri.parse('http://localhost:3000/user/edit/$userId');
       final response = await http.patch(
         url,
         headers: {

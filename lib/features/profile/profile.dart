@@ -57,8 +57,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> fetchUsername(int userId) async {
     try {
-      final response = await http
-          .get(Uri.parse('https://readee-api.stthi.com/users/$userId'));
+      final response =
+          await http.get(Uri.parse('http://localhost:3000/users/$userId'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

@@ -75,8 +75,7 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _fetchMessages() async {
     try {
       final response = await http.get(
-        Uri.parse(
-            'https://readee-api.stthi.com/getAllMessage/${widget.roomId}'),
+        Uri.parse('http://localhost:3000/getAllMessage/${widget.roomId}'),
       );
 
       if (response.statusCode == 200) {
@@ -108,8 +107,7 @@ class _ChatPageState extends State<ChatPage> {
     // Create a request to upload the image
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse(
-          'https://readee-api.stthi.com/uploadImage'), // Backend API endpoint
+      Uri.parse('http://localhost:3000/uploadImage'), // Backend API endpoint
     );
 
     request.files.add(
@@ -175,7 +173,7 @@ class _ChatPageState extends State<ChatPage> {
     // try {
     //   final response = await http.post(
     //     Uri.parse(
-    //         'https://readee-api.stthi.com/createMessage'), // Backend API endpoint
+    //         'http://localhost:3000/createMessage'), // Backend API endpoint
     //     headers: {'Content-Type': 'application/json'},
     //     body: json.encode(messageData), // JSON-encoded body
     //   );

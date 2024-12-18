@@ -10,8 +10,8 @@ class ChatListPage extends StatelessWidget {
   const ChatListPage({Key? key, required this.userId}) : super(key: key);
 
   Future<List<Map<String, dynamic>>> fetchChats() async {
-    final response = await http
-        .get(Uri.parse('https://readee-api.stthi.com/getAllChat/$userId'));
+    final response =
+        await http.get(Uri.parse('http://localhost:3000/getAllChat/$userId'));
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
@@ -42,7 +42,7 @@ class ChatListPage extends StatelessWidget {
 
   Future<Map<String, String>> fetchUserDetails(int userId) async {
     final response =
-        await http.get(Uri.parse('https://readee-api.stthi.com/users/$userId'));
+        await http.get(Uri.parse('http://localhost:3000/users/$userId'));
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
@@ -58,8 +58,8 @@ class ChatListPage extends StatelessWidget {
 
   Future<String> fetchUserRating(int userId) async {
     try {
-      final response = await http.get(
-          Uri.parse('https://readee-api.stthi.com/getAverageRate/$userId'));
+      final response = await http
+          .get(Uri.parse('http://localhost:3000/getAverageRate/$userId'));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);

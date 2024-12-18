@@ -40,7 +40,7 @@ class _MatchListPageState extends State<MatchListPage> {
   Future<void> fetchUserBooks() async {
     try {
       final matchesResponse = await http.get(
-        Uri.parse('https://readee-api.stthi.com/getMatches/$userID'),
+        Uri.parse('http://localhost:3000/getMatches/$userID'),
       );
 
       if (matchesResponse.statusCode == 200) {
@@ -55,8 +55,7 @@ class _MatchListPageState extends State<MatchListPage> {
           if (!isPageActive) return;
 
           final matchStatusResponse = await http.get(
-            Uri.parse(
-                'https://readee-api.stthi.com/getAllMatches/${match.matchId}'),
+            Uri.parse('http://localhost:3000/getAllMatches/${match.matchId}'),
           );
 
           if (matchStatusResponse.statusCode == 200) {
@@ -84,7 +83,7 @@ class _MatchListPageState extends State<MatchListPage> {
 
             // Fetch book details
             final bookResponse = await http.get(
-              Uri.parse('https://readee-api.stthi.com/getBook/$bookIdToFetch'),
+              Uri.parse('http://localhost:3000/getBook/$bookIdToFetch'),
             );
 
             if (bookResponse.statusCode == 200) {

@@ -52,8 +52,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     try {
       final response = await http.patch(
-        Uri.parse(
-            'https://readee-api.stthi.com/user/resetPassword/${widget.userId}'),
+        Uri.parse('http://localhost:3000/user/resetPassword/${widget.userId}'),
         headers: {
           'Content-Type': 'application/json',
         },

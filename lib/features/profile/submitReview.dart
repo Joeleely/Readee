@@ -37,7 +37,7 @@ class _RateAndReviewPageState extends State<RateAndReviewPage> {
 
   Future<void> fetchExistingReview() async {
     final url = Uri.parse(
-        "https://readee-api.stthi.com/get_review_rating/${widget.giverId}/${widget.receiverId}");
+        "http://localhost:3000/get_review_rating/${widget.giverId}/${widget.receiverId}");
 
     try {
       final response = await http.get(url, headers: {
@@ -79,7 +79,7 @@ class _RateAndReviewPageState extends State<RateAndReviewPage> {
       return;
     }
 
-    final url = Uri.parse("https://readee-api.stthi.com/review_rating");
+    final url = Uri.parse("http://localhost:3000/review_rating");
 
     final body = jsonEncode({
       "giver_id": widget.giverId,

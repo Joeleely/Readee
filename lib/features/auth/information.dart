@@ -29,7 +29,7 @@ class _InformationPageState extends State<InformationPage> {
   Future<void> _updateUserData() async {
     try {
       final response = await http.patch(
-        Uri.parse('https://readee-api.stthi.com/user/edit/${widget.userId}'),
+        Uri.parse('http://localhost:3000/user/edit/${widget.userId}'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'Firstname': _firstname,
