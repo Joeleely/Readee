@@ -43,7 +43,7 @@ Before you start, make sure you have the following installed:
    flutter pub get
    ```
 
-1.3 **Run the fronend** <br>
+1.3 **Run the frontend** <br>
    Run this command
    ```
     flutter run
