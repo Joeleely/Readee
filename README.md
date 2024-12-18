@@ -3,7 +3,7 @@ Readee is a mobile application for book swapping, allowing users to exchange boo
 
 ## Prerequisites
 Flutter 
-    - Install Flutter by following the official guide: https://docs.flutter.dev/
+    - Install Flutter by following the official guide: https://docs.flutter.dev/ <br>
 Dart version between 2.12.0 and 3.0.0.  <br>
 Go version 1.22.6
 
