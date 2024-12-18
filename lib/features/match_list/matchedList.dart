@@ -192,12 +192,12 @@ class _MatchedListState extends State<MatchedList> {
       // Case 2: Current user is the matched user
       else if (widget.userId == matchUserId) {
         // Fetch the owner's book (book belonging to the owner)
-        final ownerBookResponse = await http.get(
+        final matchBookResponse = await http.get(
           Uri.parse('https://readee-api.stthi.com/getBook/$ownerBookId'),
         );
 
-        if (ownerBookResponse.statusCode == 200) {
-          final bookJson = json.decode(ownerBookResponse.body);
+        if (matchBookResponse.statusCode == 200) {
+          final bookJson = json.decode(matchBookResponse.body);
 
           return BookDetails(
             bookId: bookJson['BookId'] ?? '',
