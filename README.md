@@ -13,6 +13,9 @@ Before you start, make sure you have the following installed:
 ### Go
 - Version **1.22.6** or higher.
 
+### MySQL
+- MySQL (v8.0 or higher).
+
 ### Configuration
 1. **Database Configuration**
    - Replace the **Database URL** in `database.go` (line 23):
