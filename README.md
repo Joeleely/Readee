@@ -71,6 +71,10 @@ go run main.go
 ```
 
 ### Members  
+1. Name: Varanyu Leelasopin  
+   Address: 343 Phraya Monthat, Bangbon, Bangbon 10150  
+   Email: Varanyu.leel@kmutt.ac.th, Varanyu50015@gmail.com  
+   Telephone Number: 083-076-2642  
 2. Name: Yanisa Jaroenjan  
    Address: THAMMARAKSA dormitory, 126 Pracha Uthit Rd., Bang Mod, Thung Khru, Bangkok 10140  
    Email: yanisa.jaro@kmutt.ac.th , yanisa0439@gmail.com  
