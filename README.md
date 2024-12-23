@@ -78,4 +78,8 @@ go run main.go
 2. Name: Yanisa Jaroenjan  
    Address: THAMMARAKSA dormitory, 126 Pracha Uthit Rd., Bang Mod, Thung Khru, Bangkok 10140  
    Email: yanisa.jaro@kmutt.ac.th , yanisa0439@gmail.com  
-   Telephone Number: 0917268516  
+   Telephone Number: 0917268516
+3. Name: Thanyakan Maneetool
+   Address: 181/23 Pracha Uthit, Bangmod, Thung Kru 10140
+   Email: thanyakanfs.33@gmail.com, thanyakan.mane@kmutt.ac.th  
+   Telephone Number: 0814245955
